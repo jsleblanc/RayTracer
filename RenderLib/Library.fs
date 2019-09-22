@@ -28,6 +28,18 @@ module Engine =
                 (this.w = other.w)
             | _ -> Object.Equals(this, other)
         override x.GetHashCode() = 0
+        static member (+) (a,b) = {
+            x = a.x + b.x;
+            y = a.y + b.y;
+            z = a.z + b.z;
+            w = a.w + b.w;
+        }
+        static member (-) (a,b) = {
+            x = a.x - b.x;
+            y = a.y - b.y;
+            z = a.z - b.z;
+            w = a.w - b.w;
+        }
 
     let point x y z = { x = x; y = y; z = z; w = 1; }
     let vector x y z = { x = x; y = y; z = z; w = 0; }

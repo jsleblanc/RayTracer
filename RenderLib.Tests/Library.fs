@@ -27,3 +27,43 @@ module TupleTests =
             let t = vector x y z
             t.w = 0
         Check.QuickThrowOnFailure tupleIsVector
+
+    [<Fact>]
+    let ``adding two tuples (point + vector = point)``() =
+        let addedCorrectly a b c x y z =
+            let s1 = (point a b c) + (vector x y z)
+            let s2 = point (a + x) (b + y) (c + z)
+            s1 = s2
+        Check.QuickThrowOnFailure addedCorrectly
+
+    [<Fact>]
+    let ``adding two tuples (vector + vector = vector)``() =
+        let addedCorrectly a b c x y z =
+            let s1 = (vector a b c) + (vector x y z)
+            let s2 = vector (a + x) (b + y) (c + z)
+            s1 = s2
+        Check.QuickThrowOnFailure addedCorrectly
+
+    [<Fact>]
+    let ``subtracting tuples (point - point = vector)``() =
+        let subtractedCorrectly a b c x y z =
+            let s1 = (point a b c) - (point x y z)
+            let s2 = vector (a - x) (b - y) (c - z)
+            s1 = s2
+        Check.QuickThrowOnFailure subtractedCorrectly
+
+    [<Fact>]
+    let ``subtracting tuples (point - vector = point)``() =
+        let subtractedCorrectly a b c x y z =
+            let s1 = (point a b c) - (vector x y z)
+            let s2 = point (a - x) (b - y) (c - z)
+            s1 = s2
+        Check.QuickThrowOnFailure subtractedCorrectly
+
+    [<Fact>]
+    let ``subtracting tuples (vector - vector = vector)``() =
+        let subtractedCorrectly a b c x y z =
+            let s1 = (vector a b c) - (vector x y z)
+            let s2 = vector (a - x) (b - y) (c - z)
+            s1 = s2
+        Check.QuickThrowOnFailure subtractedCorrectly
