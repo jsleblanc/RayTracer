@@ -3,14 +3,15 @@
 open System
 open Xunit
 open FsCheck
-open RenderLib.Engine
+open RenderLib.Common
+open RenderLib.Tuple
 
 module TupleTests = 
 
     type Overrides() =
         static member Float() =
             Arb.Default.Float()
-            |> Arb.filter (fun f -> not <| System.Double.IsNaN(f) && not <| System.Double.IsInfinity(f)) 
+            |> Arb.filter (fun f -> not <| System.Double.IsNaN(f) && not <| System.Double.IsInfinity(f) && f < System.Double.MaxValue && f > System.Double.MinValue) 
     
     [<Fact>]
     let ``tuple equality``() =
@@ -161,7 +162,8 @@ module TupleTests =
         Arb.register<Overrides>()    
         let f a b c = 
             let v = vector a b c
-            (v.normalize().magnitude() - 1.0) <= epsilon
+            let m = v.normalize().magnitude()
+            areEqualFloat 1.0 m
         Check.QuickThrowOnFailure f
 
     [<Fact>]
@@ -170,7 +172,7 @@ module TupleTests =
         let v2 = vector 2.0 3.0 4.0
         let d1 = v1.dotProduct(v2)
         let d2 = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w
-        Assert.True(Math.Abs(d1 - d2) <= epsilon)
+        Assert.True(areEqualFloat d1 d2)
 
     [<Fact>]
     let ``cross product of two vectors``() =

@@ -1,16 +1,9 @@
 ﻿namespace RenderLib
 
 open System
+open Common
 
-module Engine =
-
-    [<Literal>] 
-    let epsilon = 0.000001
-
-    let areEqualFloat (x:float) (y:float) =        
-        (Double.IsNaN(x) && Double.IsNaN(y)) ||
-        (Double.IsInfinity(x) && Double.IsInfinity(y)) ||
-        (Math.Abs(x - y) <= epsilon)
+module Tuple =
 
     [<CustomEquality; NoComparison>]
     type tuple = {
@@ -32,12 +25,14 @@ module Engine =
             this.w * v.w
         member this.magnitude() = 
             Math.Sqrt(this.x**2.0 + this.y**2.0 + this.z**2.0 + this.w**2.0)
-        member this.normalize() = {
-            x = this.x / this.magnitude();
-            y = this.y / this.magnitude();
-            z = this.z / this.magnitude();
-            w = this.w / this.magnitude();
-        }
+        member this.normalize() = 
+            let m = this.magnitude()
+            {
+                x = this.x / m;
+                y = this.y / m;
+                z = this.z / m;
+                w = this.w / m;
+            }
         override this.Equals(other) = 
             match other with 
             | :? tuple as other -> 
