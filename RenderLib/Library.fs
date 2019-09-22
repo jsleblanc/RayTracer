@@ -8,9 +8,9 @@ module Engine =
     let epsilon = 0.000001
 
     let areEqualFloat (x:float) (y:float) =        
-        (System.Double.IsNaN(x) && System.Double.IsNaN(y)) ||
-        (System.Double.IsInfinity(x) && System.Double.IsInfinity(y)) ||
-        (System.Math.Abs(x - y) <= epsilon)
+        (Double.IsNaN(x) && Double.IsNaN(y)) ||
+        (Double.IsInfinity(x) && Double.IsInfinity(y)) ||
+        (Math.Abs(x - y) <= epsilon)
 
     [<CustomEquality; NoComparison>]
     type tuple = {
