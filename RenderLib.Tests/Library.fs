@@ -4,8 +4,16 @@ open Xunit
 open FsCheck
 open RenderLib.Engine
 
-module EngineTests = 
+module TupleTests = 
     
+    [<Fact>]
+    let ``tuple equality``() =
+        let areEqual x y z w = 
+            let left = { x = x; y = y; z = z; w = w }
+            let right = { x = x; y = y; z = z; w = w }
+            left = right
+        Check.VerboseThrowOnFailure areEqual
+
     [<Fact>]
     let ``point() creates tuple with w = 1``() =
         let tupleIsPoint x y z = 
