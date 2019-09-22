@@ -114,21 +114,21 @@ module TupleTests =
     [<InlineData(0, 0, 1)>]
     let ``computing the magnitude of vector should be 1``(a, b, c) =
         let m = (vector a b c).magnitude()
-        Assert.Equal(m, 1.0)
+        Assert.Equal(1.0, m)
 
     [<Fact>]
     let ``computing the magnitude of vector(1,2,3) should be √14``() =
         let m = (vector 1.0 2.0 3.0).magnitude()
-        Assert.Equal(m, Math.Sqrt(14.0))
+        Assert.Equal(Math.Sqrt(14.0), m)
 
     [<Fact>]
     let ``computing the magnitude of vector(-1,-2,-3) should be √14``() =
         let m = (vector -1.0 -2.0 -3.0).magnitude()
-        Assert.Equal(m, Math.Sqrt(14.0))
+        Assert.Equal(Math.Sqrt(14.0), m)
 
     [<Fact>]
     let ``computing the magnitude of vector``() =
-        Arb.register<Overrides>()        
+        Arb.register<Overrides>()
         let magnitudeCorrectly a b c =
             let s1 = (vector a b c).magnitude()
             let s2 = Math.Sqrt(a**2.0 + b**2.0 + c**2.0)
@@ -140,7 +140,7 @@ module TupleTests =
         let v = vector 4.0 0.0 0.0
         let n = v.normalize()
         let expected = vector 1.0 0.0 0.0
-        Assert.Equal(n, expected)
+        Assert.Equal(expected, n)
 
     [<Fact>]
     let ``normalizing vector``() =  
@@ -157,11 +157,26 @@ module TupleTests =
         Check.QuickThrowOnFailure f
 
     [<Fact>]
-    let ``magnitude of a normalized vector should be 1.0``() =
+    let ``magnitude of a normalized vector should be 1``() =
         Arb.register<Overrides>()    
         let f a b c = 
             let v = vector a b c
-            (v.normalize().magnitude() - 1.0) <= 0.000000001
+            (v.normalize().magnitude() - 1.0) <= epsilon
         Check.QuickThrowOnFailure f
 
+    [<Fact>]
+    let ``dot product of two vectors``() =
+        let v1 = vector 1.0 2.0 3.0
+        let v2 = vector 2.0 3.0 4.0
+        let d1 = v1.dotProduct(v2)
+        let d2 = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w
+        Assert.True(Math.Abs(d1 - d2) <= epsilon)
 
+    [<Fact>]
+    let ``cross product of two vectors``() =
+        let v1 = vector 1.0 2.0 3.0
+        let v2 = vector 2.0 3.0 4.0
+        let c1 = v1.crossProduct(v2)
+        let c2 = v2.crossProduct(v1)
+        Assert.Equal((vector -1.0 2.0 -1.0), c1)
+        Assert.Equal((vector 1.0 -2.0 1.0), c2)

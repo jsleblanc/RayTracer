@@ -19,6 +19,17 @@ module Engine =
         z: float;
         w: float;
     } with
+        member a.crossProduct(b) = {
+            x = a.y * b.z - a.z * b.y;
+            y = a.z * b.x - a.x * b.z;
+            z = a.x * b.y - a.y * b.x;
+            w = 0.0;
+        }            
+        member this.dotProduct(v) = 
+            this.x * v.x + 
+            this.y * v.y + 
+            this.z * v.z + 
+            this.w * v.w
         member this.magnitude() = 
             Math.Sqrt(this.x**2.0 + this.y**2.0 + this.z**2.0 + this.w**2.0)
         member this.normalize() = {
