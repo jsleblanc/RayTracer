@@ -6,6 +6,11 @@ open FsCheck
 open RenderLib.Engine
 
 module TupleTests = 
+
+    type Overrides() =
+        static member Float() =
+            Arb.Default.Float()
+            |> Arb.filter (fun f -> not <| System.Double.IsNaN(f) && not <| System.Double.IsInfinity(f)) 
     
     [<Fact>]
     let ``tuple equality``() =
@@ -121,8 +126,9 @@ module TupleTests =
         let m = (vector -1.0 -2.0 -3.0).magnitude()
         Assert.Equal(m, Math.Sqrt(14.0))
 
-    [<Fact(Skip = "Doesn't handle Double.NaN or Infinity yet")>]
+    [<Fact>]
     let ``computing the magnitude of vector``() =
+        Arb.register<Overrides>()        
         let magnitudeCorrectly a b c =
             let s1 = (vector a b c).magnitude()
             let s2 = Math.Sqrt(a**2.0 + b**2.0 + c**2.0)
@@ -151,10 +157,11 @@ module TupleTests =
         Check.QuickThrowOnFailure f
 
     [<Fact>]
-    let ``magnitude of a normalized vector should be 1``() =
+    let ``magnitude of a normalized vector should be 1.0``() =
+        Arb.register<Overrides>()    
         let f a b c = 
             let v = vector a b c
-            v.normalize().magnitude() = 1.0
+            (v.normalize().magnitude() - 1.0) <= 0.000000001
         Check.QuickThrowOnFailure f
 
 
