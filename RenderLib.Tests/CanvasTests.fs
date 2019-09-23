@@ -29,13 +29,7 @@ module CanvasTests =
         Assert.True(result)
 
     [<Fact>]
-    let ``test``() =
-        let c = create_canvas 20 20
-        for y = 0 to 19 do
-            for x = 0 to 19 do 
-                write_pixel x y (color 1.0 0.8 0.6) c |> ignore
-        let x = canvas_to_ppm c
-
+    let ``write ppm format from canvas``() =
         let s = 
             create_canvas 20 20
             |> write_pixel 5 5 (color 1.0 0.0 0.0)
@@ -44,4 +38,4 @@ module CanvasTests =
             |> write_pixel 8 5 (color 1.0 0.0 0.0)
             |> write_pixel 9 5 (color 1.0 0.0 0.0)
             |> canvas_to_ppm        
-        Assert.True(true)
+        Assert.True(s.Contains "P3")
