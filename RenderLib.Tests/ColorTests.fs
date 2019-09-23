@@ -53,3 +53,10 @@ module ColorTests =
             s1 = s2
         Check.VerboseThrowOnFailure f
 
+    [<Fact>]
+    let ``scale color to integer 0..255``() =
+        let c = color 1.0 0.0 0.0
+        let r,g,b = color_int c
+        Assert.Equal(255, r)
+        Assert.Equal(0, g)
+        Assert.Equal(0, b)
