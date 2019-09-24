@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="CanvasTests.fs" />
-    <Compile Include="ColorTests.fs" />
     <Compile Include="TupleTests.fs" />
+    <Compile Include="ColorTests.fs" />
+    <Compile Include="CanvasTests.fs" />
+    <Compile Include="MatrixTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
