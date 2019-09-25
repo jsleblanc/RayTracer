@@ -41,7 +41,7 @@ module Tuple =
                 (areEqualFloat this.z other.z) &&
                 (areEqualFloat this.w other.w)
             | _ -> Object.Equals(this, other)
-        override x.GetHashCode() = 0
+        override _.GetHashCode() = 0
         static member (+) (a,b) = {
             x = a.x + b.x;
             y = a.y + b.y;
