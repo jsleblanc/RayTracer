@@ -2,6 +2,7 @@
 
 open System 
 open Common
+open Tuple
 
 module Matrix =
 
@@ -23,4 +24,31 @@ module Matrix =
                 }
                 |> Seq.forall id
             | _ -> Object.Equals(this, other)
-        static member (*) (a,b) = matrix(4)
+        static member (*) (a:matrix,b:matrix) =
+            assert (a.Size = b.Size)
+            let length = a.Size - 1
+            let calculateCell row col =
+                let mutable v = 0.0
+                for x in 0 .. length do
+                    v <- v + (a.[row, x] * b.[x, col])
+                v
+            let r = matrix(a.Size)
+            for row in 0 .. length do
+                for col in 0 .. length do
+                    r.[row,col] <- calculateCell row col
+            r
+        static member (*) (a:matrix,b:tuple) =
+            assert (a.Size = 4)
+            let ta = [| b.x; b.y; b.z; b.w; |]
+            let length = a.Size - 1
+            let calculateCell row =
+                let mutable v = 0.0
+                for x in 0 .. length do
+                    v <- v + (a.[row, x] * ta.[x])
+                v
+            {
+                x = calculateCell 0;
+                y = calculateCell 1;
+                z = calculateCell 2;
+                w = calculateCell 3;
+            }            

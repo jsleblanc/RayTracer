@@ -2,6 +2,7 @@
 
 open Xunit
 open FsCheck
+open RenderLib.Tuple
 open RenderLib.Matrix
 
 module MatrixTests =
@@ -92,3 +93,27 @@ module MatrixTests =
         let r = a * b
         Assert.True(r.Equals e)
 
+    [<Fact>]
+    let ``matrix multiplied by a tuple``() =
+        let a = matrix(4)
+        a.[0,0] <- 1.0
+        a.[0,1] <- 2.0
+        a.[0,2] <- 3.0
+        a.[0,3] <- 4.0
+        a.[1,0] <- 2.0
+        a.[1,1] <- 4.0
+        a.[1,2] <- 4.0
+        a.[1,3] <- 2.0
+        a.[2,0] <- 8.0
+        a.[2,1] <- 6.0
+        a.[2,2] <- 4.0
+        a.[2,3] <- 1.0
+        a.[3,0] <- 0.0
+        a.[3,1] <- 0.0
+        a.[3,2] <- 0.0
+        a.[3,3] <- 1.0
+        let t = { x = 1.0; y = 2.0; z = 3.0; w = 1.0; }
+        let e = { x = 18.0; y = 24.0; z = 33.0; w = 1.0; }
+        let r = a * t
+        Assert.True(r.Equals e)
+        
