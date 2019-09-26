@@ -12,6 +12,12 @@ module Matrix =
         member _.Item 
             with get(row,col) = m.[col,row] 
             and set (row,col) value = m.[col,row] <- value
+        member this.Transpose =
+            let t = matrix(this.Size)
+            for col in 0 .. m.GetLength(0) - 1 do
+                for row in 0 .. m.GetLength(1) - 1 do
+                    t.[col,row] <- this.[row,col]
+            t
         override _.GetHashCode() = 0
         override this.Equals(other) =
             match other with
@@ -51,4 +57,24 @@ module Matrix =
                 y = calculateCell 1;
                 z = calculateCell 2;
                 w = calculateCell 3;
-            }            
+            }
+
+    let identity_matrix = 
+        let a = matrix(4)
+        a.[0,0] <- 1.0
+        a.[0,1] <- 0.0
+        a.[0,2] <- 0.0
+        a.[0,3] <- 0.0
+        a.[1,0] <- 0.0
+        a.[1,1] <- 1.0
+        a.[1,2] <- 0.0
+        a.[1,3] <- 0.0
+        a.[2,0] <- 0.0
+        a.[2,1] <- 0.0
+        a.[2,2] <- 1.0
+        a.[2,3] <- 0.0
+        a.[3,0] <- 0.0
+        a.[3,1] <- 0.0
+        a.[3,2] <- 0.0
+        a.[3,3] <- 1.0
+        a
