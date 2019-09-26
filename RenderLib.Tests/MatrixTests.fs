@@ -2,6 +2,7 @@
 
 open Xunit
 open FsCheck
+open RenderLib.Common
 open RenderLib.Tuple
 open RenderLib.Matrix
 
@@ -185,3 +186,12 @@ module MatrixTests =
         let r = i.Transpose
         Assert.True(i.Equals r)
 
+    [<Fact>]
+    let ``calculating the determinant of a 2x2 matrix``() =
+        let a = matrix(2)
+        a.[0,0] <- 1.0
+        a.[0,1] <- 5.0
+        a.[1,0] <- -3.0
+        a.[1,1] <- 2.0
+        let r = determinant a
+        Assert.True(areEqualFloat r 17.0)

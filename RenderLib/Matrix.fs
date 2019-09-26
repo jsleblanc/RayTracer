@@ -78,3 +78,7 @@ module Matrix =
         a.[3,2] <- 0.0
         a.[3,3] <- 1.0
         a
+
+    let determinant (a:matrix) = 
+        assert (a.Size = 2)
+        (a.[0,0] * a.[1,1]) - (a.[0,1] * a.[1,0])
