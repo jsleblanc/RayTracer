@@ -1,6 +1,7 @@
 ﻿namespace RenderLib
 
 open System 
+open System.Collections.Generic
 open Common
 open Tuple
 
@@ -82,3 +83,16 @@ module Matrix =
     let determinant (a:matrix) = 
         assert (a.Size = 2)
         (a.[0,0] * a.[1,1]) - (a.[0,1] * a.[1,0])
+
+    let submatrix (a:matrix) (row:int) (col:int) =
+        let s = new Queue<float>()
+        let sm = matrix(a.Size - 1)
+        for r in 0 .. a.Size - 1 do
+            for c in 0 ..a.Size - 1 do
+                if not (r = row) && not (c = col) then
+                    s.Enqueue(a.[r,c])
+        for r in 0 .. sm.Size - 1 do
+            for c in 0 ..sm.Size - 1 do
+                let v = s.Dequeue()
+                sm.[r,c] <- v
+        sm

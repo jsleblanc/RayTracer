@@ -195,3 +195,55 @@ module MatrixTests =
         a.[1,1] <- 2.0
         let r = determinant a
         Assert.True(areEqualFloat r 17.0)
+
+    [<Fact>]
+    let ``a submatrix of a 3x3 matrix is a 2x2 matrix``() =
+        let a = matrix(3)
+        a.[0,0] <- 1.0
+        a.[0,1] <- 5.0
+        a.[0,2] <- 0.0
+        a.[1,0] <- -3.0
+        a.[1,1] <- 2.0
+        a.[1,2] <- 7.0
+        a.[2,0] <- 0.0
+        a.[2,1] <- 6.0
+        a.[2,2] <- -3.0
+        let e = matrix(2)
+        e.[0,0] <- -3.0
+        e.[0,1] <- 2.0
+        e.[1,0] <- 0.0
+        e.[1,1] <- 6.0
+        let r = submatrix a 0 2
+        Assert.True(r.Equals e)
+
+    [<Fact>]
+    let ``a submatrix of a 4x4 matrix is a 3x3 matrix``() =
+        let a = matrix(4)
+        a.[0,0] <- -6.0
+        a.[0,1] <- 1.0
+        a.[0,2] <- 1.0
+        a.[0,3] <- 6.0
+        a.[1,0] <- -8.0
+        a.[1,1] <- 5.0
+        a.[1,2] <- 8.0
+        a.[1,3] <- 6.0
+        a.[2,0] <- -1.0
+        a.[2,1] <- 0.0
+        a.[2,2] <- 8.0
+        a.[2,3] <- 2.0
+        a.[3,0] <- -7.0
+        a.[3,1] <- 1.0
+        a.[3,2] <- -1.0
+        a.[3,3] <- 1.0
+        let e = matrix(3)
+        e.[0,0] <- -6.0
+        e.[0,1] <- 1.0
+        e.[0,2] <- 6.0
+        e.[1,0] <- -8.0
+        e.[1,1] <- 8.0
+        e.[1,2] <- 6.0
+        e.[2,0] <- -7.0
+        e.[2,1] <- -1.0
+        e.[2,2] <- 1.0
+        let r = submatrix a 2 1
+        Assert.True(r.Equals e)
