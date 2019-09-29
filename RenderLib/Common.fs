@@ -24,3 +24,7 @@ module Common =
     let compareFloat (a:float) (b:float) = 
         if areEqualFloat a b then 0
         else if a < b then -1 else 1
+
+    let isEven x = (x % 2) = 0
+
+    let isOdd x = isEven x = false

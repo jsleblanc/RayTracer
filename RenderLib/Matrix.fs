@@ -97,3 +97,13 @@ module Matrix =
                 let v = s.Dequeue()
                 sm.[r,c] <- v
         sm
+
+    let minor (a:matrix) (row:int) (col:int) = 
+        let s = submatrix a row col
+        determinant s
+
+    let cofactor (a:matrix) (row:int) (col:int) = 
+        let m = minor a row col
+        if isOdd(row + col) then
+            m * -1.0
+        else m

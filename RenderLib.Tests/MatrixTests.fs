@@ -247,3 +247,37 @@ module MatrixTests =
         e.[2,2] <- 1.0
         let r = submatrix a 2 1
         Assert.True(r.Equals e)
+
+    [<Fact>]
+    let ``Calculating a minor of a 3x3 matrix``() =
+        let a = matrix(3)
+        a.[0,0] <- 3.0
+        a.[0,1] <- 5.0
+        a.[0,2] <- 0.0
+        a.[1,0] <- 2.0
+        a.[1,1] <- -1.0
+        a.[1,2] <- -7.0
+        a.[2,0] <- 6.0
+        a.[2,1] <- -1.0
+        a.[2,2] <- 5.0
+        let b = submatrix a 1 0
+        let d = determinant b
+        let m = minor a 1 0
+        Assert.True(areEqualFloat m d)
+
+    [<Fact>]
+    let ``Calculating a cofactor of a 3x3 matrix``() =
+        let a = matrix(3)
+        a.[0,0] <- 3.0
+        a.[0,1] <- 5.0
+        a.[0,2] <- 0.0
+        a.[1,0] <- 2.0
+        a.[1,1] <- -1.0
+        a.[1,2] <- -7.0
+        a.[2,0] <- 6.0
+        a.[2,1] <- -1.0
+        a.[2,2] <- 5.0
+        let c = cofactor a 0 0
+        Assert.True(areEqualFloat c -12.0)
+        let c = cofactor a 1 0
+        Assert.True(areEqualFloat c -25.0)
