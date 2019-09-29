@@ -281,3 +281,55 @@ module MatrixTests =
         Assert.True(areEqualFloat c -12.0)
         let c = cofactor a 1 0
         Assert.True(areEqualFloat c -25.0)
+
+    [<Fact>]
+    let ``Calculating the determinant of a 3x3 matrix``() =
+        let a = matrix(3)
+        a.[0,0] <- 1.0
+        a.[0,1] <- 2.0
+        a.[0,2] <- 6.0
+        a.[1,0] <- -5.0
+        a.[1,1] <- 8.0
+        a.[1,2] <- -4.0
+        a.[2,0] <- 2.0
+        a.[2,1] <- 6.0
+        a.[2,2] <- 4.0
+        let c = cofactor a 0 0
+        Assert.True(areEqualFloat c 56.0)
+        let c = cofactor a 0 1
+        Assert.True(areEqualFloat c 12.0)
+        let c = cofactor a 0 2
+        Assert.True(areEqualFloat c -46.0)
+        let d = determinant a
+        Assert.True(areEqualFloat d -196.0)
+
+    [<Fact>]
+    let ``Calculating the determinant of a 4x4 matrix``() =
+        let a = matrix(4)
+        a.[0,0] <- -2.0
+        a.[0,1] <- -8.0
+        a.[0,2] <- 3.0
+        a.[0,3] <- 5.0
+        a.[1,0] <- -3.0
+        a.[1,1] <- 1.0
+        a.[1,2] <- 7.0
+        a.[1,3] <- 3.0
+        a.[2,0] <- 1.0
+        a.[2,1] <- 2.0
+        a.[2,2] <- -9.0
+        a.[2,3] <- 6.0
+        a.[3,0] <- -6.0
+        a.[3,1] <- 7.0
+        a.[3,2] <- 7.0
+        a.[3,3] <- -9.0
+        let c = cofactor a 0 0
+        Assert.True(areEqualFloat c 690.0)
+        let c = cofactor a 0 1
+        Assert.True(areEqualFloat c 447.0)
+        let c = cofactor a 0 2
+        Assert.True(areEqualFloat c 210.0)
+        let c = cofactor a 0 3
+        Assert.True(areEqualFloat c 51.0)
+        let d = determinant a
+        Assert.True(areEqualFloat d -4071.0)
+

@@ -80,10 +80,6 @@ module Matrix =
         a.[3,3] <- 1.0
         a
 
-    let determinant (a:matrix) = 
-        assert (a.Size = 2)
-        (a.[0,0] * a.[1,1]) - (a.[0,1] * a.[1,0])
-
     let submatrix (a:matrix) (row:int) (col:int) =
         let newSize = a.Size - 1
         let s = new Queue<float>(newSize * newSize)
@@ -98,12 +94,21 @@ module Matrix =
                 sm.[r,c] <- v
         sm
 
-    let minor (a:matrix) (row:int) (col:int) = 
-        let s = submatrix a row col
-        determinant s
+    let rec determinant (a:matrix) = 
+        if a.Size = 2 then
+            (a.[0,0] * a.[1,1]) - (a.[0,1] * a.[1,0])
+        else 
+            let mutable d = 0.0
+            for col in 0 .. a.Size - 1 do
+                d <- d + a.[0,col] * cofactor a 0 col
+            d
 
-    let cofactor (a:matrix) (row:int) (col:int) = 
+    and cofactor (a:matrix) (row:int) (col:int) = 
         let m = minor a row col
         if isOdd(row + col) then
             m * -1.0
         else m
+
+    and minor (a:matrix) (row:int) (col:int) = 
+        let s = submatrix a row col
+        determinant s
