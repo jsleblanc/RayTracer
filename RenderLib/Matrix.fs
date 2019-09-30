@@ -1,6 +1,7 @@
 ﻿namespace RenderLib
 
 open System 
+open System.Text
 open System.Collections.Generic
 open Common
 open Tuple
@@ -19,6 +20,14 @@ module Matrix =
                 for row in 0 .. m.GetLength(1) - 1 do
                     t.[col,row] <- this.[row,col]
             t
+        member this.PrintAssignment(name) =
+            let size = this.Size - 1
+            let sb = new StringBuilder()
+            for row in 0 .. size do
+                for col in 0 .. size do
+                    let s = sprintf "%s.[%d,%d] <- %.18f" name row col this.[row,col]
+                    sb.AppendLine s |> ignore
+            sb.ToString()
         override _.GetHashCode() = 0
         override this.Equals(other) =
             match other with
@@ -112,3 +121,20 @@ module Matrix =
     and minor (a:matrix) (row:int) (col:int) = 
         let s = submatrix a row col
         determinant s
+
+    let invertible (a:matrix) = 
+        let d = determinant a
+        areEqualFloat d 0.0 |> not
+
+    let inverse (a:matrix) =
+        let i = invertible a
+        if i then        
+            let size = a.Size - 1
+            let da = determinant a
+            let r = matrix(a.Size)
+            for row in 0 .. size do
+                for col in 0 .. size do
+                    let c = cofactor a row col
+                    r.[col,row] <- c/da
+            Ok r
+        else Error "Non-invertible matrix"
