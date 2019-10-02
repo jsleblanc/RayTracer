@@ -8,9 +8,6 @@ open Tuple
 
 module Matrix =
 
-    let private round (x:float) =
-        Math.Round(x, 12, MidpointRounding.AwayFromZero)
-
     type matrix(size:int) =
         let m:float[,] = Array2D.zeroCreate size size
         member _.Size = size

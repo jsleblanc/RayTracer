@@ -28,3 +28,6 @@ module Common =
     let isEven x = (x % 2) = 0
 
     let isOdd x = isEven x = false
+
+    let round (x:float) =
+        Math.Round(x, 12, MidpointRounding.AwayFromZero)

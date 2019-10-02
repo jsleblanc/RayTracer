@@ -87,3 +87,42 @@ module TranslationTests =
         match inv with
         | Ok i -> Assert.Equal(point 0.0 v -v, i * p)
         | Error s -> Assert.True(false, s)
+
+    [<Fact>]
+    let ``Rotating a point around the y axix``() =
+        let v = (Math.Sqrt 2.0) / 2.0
+        let p = point 0.0 0.0 1.0
+        let half_quarter = rotation_y (Math.PI / 4.0)
+        let full_quarter = rotation_y (Math.PI / 2.0)
+        Assert.Equal(point v 0.0 v, half_quarter * p)
+        Assert.Equal(point 1.0 0.0 0.0, full_quarter * p)
+
+    [<Fact>]
+    let ``The inverse of an y-rotation rotates in the opposite direction``() =
+        let v = (Math.Sqrt 2.0) / 2.0
+        let p = point 0.0 0.0 1.0
+        let half_quarter = rotation_y (Math.PI / 4.0)
+        let inv = inverse half_quarter
+        match inv with
+        | Ok i -> Assert.Equal(point -v 0.0 v, i * p)
+        | Error s -> Assert.True(false, s)
+
+    [<Fact>]
+    let ``Rotating a point around the z axix``() =
+        let v = (Math.Sqrt 2.0) / 2.0
+        let p = point 0.0 1.0 0.0
+        let half_quarter = rotation_z (Math.PI / 4.0)
+        let full_quarter = rotation_z (Math.PI / 2.0)
+        Assert.Equal(point -v v 0.0, half_quarter * p)
+        Assert.Equal(point -1.0 0.0 0.0, full_quarter * p)
+
+    [<Fact>]
+    let ``The inverse of an z-rotation rotates in the opposite direction``() =
+        let v = (Math.Sqrt 2.0) / 2.0
+        let p = point 1.0 0.0 0.0
+        let half_quarter = rotation_z (Math.PI / 4.0)
+        let inv = inverse half_quarter
+        match inv with
+        | Ok i -> Assert.Equal(point v -v 0.0, i * p)
+        | Error s -> Assert.True(false, s)
+
