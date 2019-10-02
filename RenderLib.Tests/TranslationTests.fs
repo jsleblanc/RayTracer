@@ -2,6 +2,7 @@
 
 open Xunit
 open FsCheck
+open System
 open RenderLib.Common
 open RenderLib.Tuple
 open RenderLib.Matrix
@@ -67,3 +68,22 @@ module TranslationTests =
         let e = point -2.0 3.0 4.0
         let r = t * p
         Assert.Equal(e, r)
+
+    [<Fact>]
+    let ``Rotating a point around the x axis``() =
+        let p = point 0.0 1.0 0.0
+        let half_quarter = rotation_x (Math.PI / 4.0)
+        let full_quarter = rotation_x (Math.PI / 2.0)
+        let v = (Math.Sqrt 2.0) / 2.0
+        Assert.Equal(point 0.0 v v, half_quarter * p)
+        Assert.Equal(point 0.0 0.0 1.0, full_quarter * p)
+
+    [<Fact>]
+    let ``The inverse of an x-rotation rotates in the opposite direction``() =
+        let v = (Math.Sqrt 2.0) / 2.0
+        let p = point 0.0 1.0 0.0
+        let half_quarter = rotation_x (Math.PI / 4.0)
+        let inv = inverse half_quarter
+        match inv with
+        | Ok i -> Assert.Equal(point 0.0 v -v, i * p)
+        | Error s -> Assert.True(false, s)
