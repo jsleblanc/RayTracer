@@ -19,15 +19,12 @@ module Translations =
         i.[2,2] <- z
         i
 
-    [<Measure>]
-    type radians
-
-    let rotation_x (r:float) =
+    let rotation_x (radians:float) =
         let t = matrix(4)
         t.[0,0] <- 1.0
-        t.[1,1] <- Math.Cos r
-        t.[1,2] <- -(Math.Sin r)
-        t.[2,1] <- Math.Sin r
-        t.[2,2] <- Math.Cos r
+        t.[1,1] <- Math.Cos radians
+        t.[1,2] <- -(Math.Sin radians)
+        t.[2,1] <- Math.Sin radians
+        t.[2,2] <- Math.Cos radians
         t.[3,3] <- 1.0
         t
