@@ -8,6 +8,9 @@ open Tuple
 
 module Matrix =
 
+    let private round (x:float) =
+        Math.Round(x, 12, MidpointRounding.AwayFromZero)
+
     type matrix(size:int) =
         let m:float[,] = Array2D.zeroCreate size size
         member _.Size = size
@@ -47,7 +50,7 @@ module Matrix =
                 let mutable v = 0.0
                 for x in 0 .. length do
                     v <- v + (a.[row, x] * b.[x, col])
-                v
+                round v
             let r = matrix(a.Size)
             for row in 0 .. length do
                 for col in 0 .. length do
@@ -61,7 +64,7 @@ module Matrix =
                 let mutable v = 0.0
                 for x in 0 .. length do
                     v <- v + (a.[row, x] * ta.[x])
-                v
+                round v
             {
                 x = calculateCell 0;
                 y = calculateCell 1;
@@ -69,7 +72,7 @@ module Matrix =
                 w = calculateCell 3;
             }
 
-    let identity_matrix = 
+    let identity_matrix () = 
         let a = matrix(4)
         a.[0,0] <- 1.0
         a.[0,1] <- 0.0
@@ -105,17 +108,17 @@ module Matrix =
 
     let rec determinant (a:matrix) = 
         if a.Size = 2 then
-            (a.[0,0] * a.[1,1]) - (a.[0,1] * a.[1,0])
+            round (a.[0,0] * a.[1,1]) - (a.[0,1] * a.[1,0])
         else 
             let mutable d = 0.0
             for col in 0 .. a.Size - 1 do
                 d <- d + a.[0,col] * cofactor a 0 col
-            d
+            round d
 
     and cofactor (a:matrix) (row:int) (col:int) = 
         let m = minor a row col
         if isOdd(row + col) then
-            m * -1.0
+            round m * -1.0
         else m
 
     and minor (a:matrix) (row:int) (col:int) = 
@@ -135,6 +138,6 @@ module Matrix =
             for row in 0 .. size do
                 for col in 0 .. size do
                     let c = cofactor a row col
-                    r.[col,row] <- c/da
+                    r.[col,row] <- round c/da
             Ok r
         else Error "Non-invertible matrix"

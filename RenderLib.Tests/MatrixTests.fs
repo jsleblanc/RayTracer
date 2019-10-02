@@ -137,10 +137,35 @@ module MatrixTests =
         a.[3,1] <- 8.0
         a.[3,2] <- 6.0
         a.[3,3] <- 32.0
-        let i = identity_matrix
+        let i = identity_matrix ()
         let r = a * i
         Assert.True(r.Equals a)
         
+    [<Fact>]
+    let ``multiplying a matrix by its inverse``() =
+        let a = matrix(4)
+        a.[0,0] <- 0.0
+        a.[0,1] <- 9.0
+        a.[0,2] <- 3.0
+        a.[0,3] <- 0.0
+        a.[1,0] <- 9.0
+        a.[1,1] <- 8.0
+        a.[1,2] <- 0.0
+        a.[1,3] <- 8.0
+        a.[2,0] <- 1.0
+        a.[2,1] <- 8.0
+        a.[2,2] <- 5.0
+        a.[2,3] <- 3.0
+        a.[3,0] <- 0.0
+        a.[3,1] <- 0.0
+        a.[3,2] <- 5.0
+        a.[3,3] <- 8.0
+        let e = identity_matrix ()
+        let ir = inverse a
+        match ir with
+        | Ok i -> Assert.Equal(e, a * i)
+        | Error s -> Assert.True(false, s)
+
     [<Fact>]
     let ``transposing a matrix``() =
         let a = matrix(4)
@@ -182,7 +207,7 @@ module MatrixTests =
 
     [<Fact>]
     let ``transposing the identity matrix``() =
-        let i = identity_matrix
+        let i = identity_matrix ()
         let r = i.Transpose
         Assert.True(i.Equals r)
 
@@ -547,3 +572,9 @@ module MatrixTests =
         match r with
         | Ok ib -> Assert.True(a.Equals (c * ib))
         | Error s -> Assert.True(false, s)
+
+    [<Fact>]
+    let ``identity_matrix should return new copy every time``() =
+        let i1 = identity_matrix
+        let i2 = identity_matrix
+        Assert.NotSame(i1, i2)
