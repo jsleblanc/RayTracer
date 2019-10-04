@@ -126,3 +126,60 @@ module TranslationTests =
         | Ok i -> Assert.Equal(point v -v 0.0, i * p)
         | Error s -> Assert.True(false, s)
 
+    [<Fact>]
+    let ``A shearing transformation moves x in proportion to y``() =
+        let t = shearing 1.0 0.0 0.0 0.0 0.0 0.0
+        let p = point 2.0 3.0 4.0
+        Assert.Equal(point 5.0 3.0 4.0, t * p)
+
+    [<Fact>]
+    let ``A shearing transformation moves x in proportion to z``() =
+        let t = shearing 0.0 1.0 0.0 0.0 0.0 0.0
+        let p = point 2.0 3.0 4.0
+        Assert.Equal(point 6.0 3.0 4.0, t * p)
+
+    [<Fact>]
+    let ``A shearing transformation moves y in proportion to x``() =
+        let t = shearing 0.0 0.0 1.0 0.0 0.0 0.0
+        let p = point 2.0 3.0 4.0
+        Assert.Equal(point 2.0 5.0 4.0, t * p)
+
+    [<Fact>]
+    let ``A shearing transformation moves y in proportion to z``() =
+        let t = shearing 0.0 0.0 0.0 1.0 0.0 0.0
+        let p = point 2.0 3.0 4.0
+        Assert.Equal(point 2.0 7.0 4.0, t * p)
+
+    [<Fact>]
+    let ``A shearing transformation moves z in proportion to x``() =
+        let t = shearing 0.0 0.0 0.0 0.0 1.0 0.0
+        let p = point 2.0 3.0 4.0
+        Assert.Equal(point 2.0 3.0 6.0, t * p)
+
+    [<Fact>]
+    let ``A shearing transformation moves z in proportion to y``() =
+        let t = shearing 0.0 0.0 0.0 0.0 0.0 1.0
+        let p = point 2.0 3.0 4.0
+        Assert.Equal(point 2.0 3.0 7.0, t * p)
+
+    [<Fact>]
+    let ``Individual transformations are applied in sequence``() =
+        let p = point 1.0 0.0 1.0
+        let a = rotation_x (Math.PI / 2.0)
+        let b = scaling 5.0 5.0 5.0
+        let c = translation 10.0 5.0 7.0
+        let p2 = point 1.0 -1.0 0.0
+        Assert.Equal(p2, a * p)
+        let p3 = point 5.0 -5.0 0.0
+        Assert.Equal(p3, b * p2)
+        let p4 = point 15.0 0.0 7.0
+        Assert.Equal(p4, c * p3)
+
+    [<Fact>]
+    let ``Chained transformations must be applied in reverse order``() =
+        let p = point 1.0 0.0 1.0
+        let a = rotation_x (Math.PI / 2.0)
+        let b = scaling 5.0 5.0 5.0
+        let c = translation 10.0 5.0 7.0
+        let t = c * b * a
+        Assert.Equal(point 15.0 0.0 7.0, t * p)

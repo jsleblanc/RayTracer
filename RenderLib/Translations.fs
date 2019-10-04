@@ -48,3 +48,17 @@ module Translations =
         t.[2,2] <- 1.0
         t.[3,3] <- 1.0
         t
+
+    let shearing xy xz yx yz zx zy =
+        let t = matrix(4)
+        t.[0,0] <- 1.0
+        t.[0,1] <- xy
+        t.[0,2] <- xz
+        t.[1,0] <- yx
+        t.[1,1] <- 1.0
+        t.[1,2] <- yz
+        t.[2,0] <- zx
+        t.[2,1] <- zy
+        t.[2,2] <- 1.0
+        t.[3,3] <- 1.0
+        t
