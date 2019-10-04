@@ -41,8 +41,8 @@ module Color =
         }
 
     let color r g b = { red = r; green = g; blue = b; }
-    let color_int c = 
-        ((c.red * 255.0) |> int, 
-         (c.green * 255.0) |> int, 
-         (c.blue * 255.0) |> int)
+    let color_byte c = 
+        ((c.red * 255.0) |> byte, 
+         (c.green * 255.0) |> byte, 
+         (c.blue * 255.0) |> byte)
     

@@ -22,7 +22,7 @@ module Canvas =
             sb
         let toString sb = sb.ToString()
         let colorString c = 
-            let r,g,b = color_int c
+            let r,g,b = color_byte c
             sprintf "%d %d %d" r g b
         let allPixels = 
             seq {

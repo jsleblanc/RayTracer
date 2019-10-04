@@ -56,7 +56,7 @@ module ColorTests =
     [<Fact>]
     let ``scale color to integer 0..255``() =
         let c = color 1.0 0.0 0.0
-        let r,g,b = color_int c
-        Assert.Equal(255, r)
-        Assert.Equal(0, g)
-        Assert.Equal(0, b)
+        let r,g,b = color_byte c
+        Assert.Equal(255uy, r)
+        Assert.Equal(0uy, g)
+        Assert.Equal(0uy, b)
