@@ -11,6 +11,8 @@
     <Compile Include="Canvas.fs" />
     <Compile Include="Matrix.fs" />
     <Compile Include="Translations.fs" />
+    <Compile Include="Ray.fs" />
+    <Compile Include="Sphere.fs" />
   </ItemGroup>
 
   <ItemGroup>

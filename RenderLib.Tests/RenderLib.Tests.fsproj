@@ -5,11 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="TranslationTests.fs" />
     <Compile Include="TupleTests.fs" />
     <Compile Include="ColorTests.fs" />
     <Compile Include="CanvasTests.fs" />
     <Compile Include="MatrixTests.fs" />
+    <Compile Include="TranslationTests.fs" />
+    <Compile Include="RayTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
