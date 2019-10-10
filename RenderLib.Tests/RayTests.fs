@@ -6,6 +6,7 @@ open FsCheck
 open RenderLib.Common
 open RenderLib.Tuple
 open RenderLib.Ray
+open RenderLib.Translations
 open RenderLib.Shapes
 
 module RayTests = 
@@ -71,3 +72,19 @@ module RayTests =
         Assert.Equal(2, Seq.length xs)
         Assert.Equal(-6.0, (Seq.item 0 xs).t)
         Assert.Equal(-4.0, (Seq.item 1 xs).t)
+
+    [<Fact>]
+    let ``Translating a ray``() =
+        let r = { origin = point 1.0 2.0 3.0; direction = vector 0.0 1.0 0.0; }
+        let m = translation 3.0 4.0 5.0
+        let r2 = transform r m       
+        Assert.Equal(point 4.0 6.0 8.0, r2.origin)
+        Assert.Equal(vector 0.0 1.0 0.0, r2.direction)        
+
+    [<Fact>]
+    let ``Scaling a ray``() =
+        let r = { origin = point 1.0 2.0 3.0; direction = vector 0.0 1.0 0.0; }
+        let m = scaling 2.0 3.0 4.0
+        let r2 = transform r m
+        Assert.Equal(point 2.0 6.0 12.0, r2.origin)
+        Assert.Equal(vector 0.0 3.0 0.0, r2.direction)

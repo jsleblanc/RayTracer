@@ -9,7 +9,11 @@ open Ray
 module Shapes = 
 
     type sphere(id : Guid) = 
+        let mutable tm = identity_matrix ()
         member this.id = id
+        member this.default_transformation
+            with get() = tm
+            and set value = tm <- value
         new() = sphere(Guid.NewGuid())
 
     type shape =
