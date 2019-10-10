@@ -6,7 +6,7 @@ open FsCheck
 open RenderLib.Common
 open RenderLib.Tuple
 open RenderLib.Ray
-open RenderLib.Sphere
+open RenderLib.Shapes
 
 module RayTests = 
     
@@ -32,42 +32,42 @@ module RayTests =
     [<Fact>]
     let ``A ray intersects a sphere at two points``() =
         let r = { origin = point 0.0 0.0 -5.0; direction = vector 0.0 0.0 1.0; }
-        let s = sphere()
+        let s = Sphere (sphere())
         let xs = intersect s r
-        Assert.Equal(2, xs.Length)
-        Assert.Equal(4.0, xs.[0])
-        Assert.Equal(6.0, xs.[1])
+        Assert.Equal(2, Seq.length xs)
+        Assert.Equal(4.0, (Seq.item 0 xs).t)
+        Assert.Equal(6.0, (Seq.item 1 xs).t)
 
     [<Fact>]
     let ``A ray intersects a sphere at a tangent``() =
         let r = { origin = point 0.0 1.0 -5.0; direction = vector 0.0 0.0 1.0; }
-        let s = sphere()
+        let s = Sphere (sphere())
         let xs = intersect s r
-        Assert.Equal(2, xs.Length)
-        Assert.Equal(5.0, xs.[0])
-        Assert.Equal(5.0, xs.[1])
+        Assert.Equal(2, Seq.length xs)
+        Assert.Equal(5.0, (Seq.item 0 xs).t)
+        Assert.Equal(5.0, (Seq.item 1 xs).t)
 
     [<Fact>]
     let ``A ray misses a sphere``() =
         let r = { origin = point 0.0 2.0 -5.0; direction = vector 0.0 0.0 1.0; }
-        let s = sphere()
+        let s = Sphere (sphere())
         let xs = intersect s r
-        Assert.Equal(0, xs.Length)
+        Assert.Equal(0, Seq.length xs)
 
     [<Fact>]
     let ``A ray originates inside a sphere``() =
         let r = { origin = point 0.0 0.0 0.0; direction = vector 0.0 0.0 1.0; }
-        let s = sphere()
+        let s = Sphere (sphere())
         let xs = intersect s r
-        Assert.Equal(2, xs.Length)
-        Assert.Equal(-1.0, xs.[0])
-        Assert.Equal(1.0, xs.[1])
+        Assert.Equal(2, Seq.length xs)
+        Assert.Equal(-1.0, (Seq.item 0 xs).t)
+        Assert.Equal(1.0, (Seq.item 1 xs).t)
 
     [<Fact>]
     let ``A sphere is behind a ray``() =
         let r = { origin = point 0.0 0.0 5.0; direction = vector 0.0 0.0 1.0; }
-        let s = sphere()
+        let s = Sphere (sphere())
         let xs = intersect s r
-        Assert.Equal(2, xs.Length)
-        Assert.Equal(-6.0, xs.[0])
-        Assert.Equal(-4.0, xs.[1])
+        Assert.Equal(2, Seq.length xs)
+        Assert.Equal(-6.0, (Seq.item 0 xs).t)
+        Assert.Equal(-4.0, (Seq.item 1 xs).t)

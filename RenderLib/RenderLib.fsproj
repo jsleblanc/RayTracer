@@ -12,7 +12,7 @@
     <Compile Include="Matrix.fs" />
     <Compile Include="Translations.fs" />
     <Compile Include="Ray.fs" />
-    <Compile Include="Sphere.fs" />
+    <Compile Include="Shapes.fs" />
   </ItemGroup>
 
   <ItemGroup>
