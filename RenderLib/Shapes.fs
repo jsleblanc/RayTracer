@@ -35,3 +35,11 @@ module Shapes =
                 { t = t1; obj = s; }; 
                 { t = t2; obj = s; };
             }
+
+    let hit intersections : intersection option = 
+        let filtered = intersections |> Seq.filter (fun i -> i.t > 0.0)
+        if Seq.isEmpty filtered then
+            None
+        else 
+            let lowest = Seq.minBy (fun i -> i.t) filtered
+            Some lowest
