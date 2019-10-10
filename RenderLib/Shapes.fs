@@ -24,10 +24,16 @@ module Shapes =
         obj: shape;
     }
 
-    let intersect s r =
-        let sphereToRay = r.origin - point 0.0 0.0 0.0
-        let a = r.direction.dotProduct(r.direction)
-        let b = 2.0 * r.direction.dotProduct(sphereToRay)
+    let ray_from_inverse_default_transformation (s:sphere) r =
+        match inverse s.default_transformation with
+        | Ok idt -> transform r idt
+        | Error s -> raise (Exception(s)) //TODO - decide how I want this to propagate through the code; exception is temporary
+
+    let intersect (s:sphere) r =
+        let r2 = ray_from_inverse_default_transformation s r        
+        let sphereToRay = r2.origin - point 0.0 0.0 0.0
+        let a = r2.direction.dotProduct(r2.direction)
+        let b = 2.0 * r2.direction.dotProduct(sphereToRay)
         let c = sphereToRay.dotProduct(sphereToRay) - 1.0
         let discriminant = b**2.0 - 4.0 * a * c
         if discriminant < 0.0 then
@@ -36,8 +42,8 @@ module Shapes =
             let t1 = (-b - Math.Sqrt(discriminant)) / (2.0 * a)
             let t2 = (-b + Math.Sqrt(discriminant)) / (2.0 * a)
             seq {
-                { t = t1; obj = s; }; 
-                { t = t2; obj = s; };
+                { t = t1; obj = Sphere s; }; 
+                { t = t2; obj = Sphere s; };
             }
 
     let hit intersections : intersection option = 

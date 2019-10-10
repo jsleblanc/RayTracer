@@ -27,18 +27,18 @@ module ShapeTests =
     [<Fact>]
     let ``Intersecting a scaled sphere with a ray``() =
         let r = { origin = point 0.0 0.0 -5.0; direction = vector 0.0 0.0 1.0; }
-        let s = Sphere (sphere())
-        //s.default_transformation <- scaling 2.0 2.0 2.0
+        let s = sphere()
+        s.default_transformation <- scaling 2.0 2.0 2.0
         let xs = intersect s r
         Assert.Equal(2, Seq.length xs)
         Assert.Equal(3.0, (Seq.item 0 xs).t)
-        Assert.Equal(7.0, (Seq.item 0 xs).t)
+        Assert.Equal(7.0, (Seq.item 1 xs).t)
 
     [<Fact>]
     let ``Intersecting a translated sphere with a ray``() =
         let r = { origin = point 0.0 0.0 -5.0; direction = vector 0.0 0.0 1.0; }
-        let s = Sphere (sphere())
-        //s.default_transformation <- translation 5.0 0.0 0.0
+        let s = sphere()
+        s.default_transformation <- translation 5.0 0.0 0.0
         let xs = intersect s r
         Assert.True(Seq.isEmpty xs)
 
