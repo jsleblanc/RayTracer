@@ -54,5 +54,19 @@ module Shapes =
             let lowest = Seq.minBy (fun i -> i.t) filtered
             Some lowest
 
-    let normal_at (s:sphere) p =
-        (p - point 0.0 0.0 0.0).normalize()
+    let normal_at (s:sphere) world_point =
+        match inverse s.default_transformation with
+        | Ok im -> 
+            let object_point = im * world_point
+            let object_normal = object_point - (point 0.0 0.0 0.0)
+            let world_normal = im.Transpose * object_normal
+            let v = {
+                x = world_normal.x;
+                y = world_normal.y;
+                z = world_normal.z;
+                w = 0.0;
+            }
+            v.normalize()
+        | Error s -> raise (Exception(s))  //TODO - decide how I want this to propagate through the code; exception is temporary
+        
+        

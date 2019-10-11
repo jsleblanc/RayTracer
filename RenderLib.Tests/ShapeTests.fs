@@ -81,13 +81,11 @@ module ShapeTests =
             let s = sphere()
             s.default_transformation <- translation 0.0 1.0 0.0
             let n = normal_at s (point 0.0 1.70711 -0.70711)
-            Assert.Equal(vector 0.0 0.70711 -0.70711, n)
+            Assert.Equal(vector 0.0 0.7071067812 -0.7071067812, roundtuple n)
 
         [<Fact>]
         let ``Computing the normal on a transformed sphere``() =
             let s = sphere()
-            let m = (scaling 1.0 0.5 1.0) * rotation_z (Math.PI / 5.0)
-            s.default_transformation <- m
-            let v = Math.Sqrt(2.0)/2.0
-            let n = normal_at s (point 0.0 v -v)
-            Assert.Equal(vector 0.0 0.97014 -0.24254, n)
+            s.default_transformation <- (scaling 1.0 0.5 1.0) * rotation_z (Math.PI / 5.0)
+            let n = normal_at s (point 0.0 (Math.Sqrt(2.0)/2.0) (-Math.Sqrt(2.0)/2.0))
+            Assert.Equal(vector 0.0 0.9701425001 -0.242535625, roundtuple n)

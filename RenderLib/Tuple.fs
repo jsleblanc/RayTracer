@@ -75,3 +75,10 @@ module Tuple =
 
     let point x y z = { x = x; y = y; z = z; w = 1.0; }
     let vector x y z = { x = x; y = y; z = z; w = 0.0; }
+    let roundtuple v = 
+        {
+            x = round v.x;
+            y = round v.y;
+            z = round v.z;
+            w = round v.w;
+        }
