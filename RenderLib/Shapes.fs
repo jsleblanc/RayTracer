@@ -53,3 +53,6 @@ module Shapes =
         else 
             let lowest = Seq.minBy (fun i -> i.t) filtered
             Some lowest
+
+    let normal_at (s:sphere) p =
+        (p - point 0.0 0.0 0.0).normalize()
