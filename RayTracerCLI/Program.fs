@@ -7,6 +7,7 @@ open RenderLib.Tuple
 open RenderLib.Color
 open RenderLib.Shapes
 open RenderLib.Ray
+open RenderLib.Translations
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 open SixLabors.ImageSharp.Formats.Jpeg
@@ -36,6 +37,7 @@ let main argv =
     let canvas = Canvas.create_canvas canvas_pixels canvas_pixels
     let color = color 1.0 0.0 0.0
     let shape = sphere()
+    //shape.default_transformation <- rotation_z (Math.PI / 4.0) * scaling 0.5 1.0 1.0
 
     for y in 0 .. canvas_pixels - 1 do
         let world_y = half - pixel_size * float y
