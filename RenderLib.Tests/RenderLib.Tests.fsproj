@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="MaterialsTests.fs" />
     <Compile Include="TupleTests.fs" />
     <Compile Include="ColorTests.fs" />
     <Compile Include="CanvasTests.fs" />

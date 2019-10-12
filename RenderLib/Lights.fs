@@ -25,3 +25,6 @@ module Lights =
             specular = 0.9;
             shininess = 200.0;
         }
+
+    let lighting m light position eyev normalv =
+        color 1.0 1.0 1.0
