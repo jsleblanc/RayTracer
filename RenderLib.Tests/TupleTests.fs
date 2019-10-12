@@ -182,3 +182,17 @@ module TupleTests =
         let c2 = v2.crossProduct(v1)
         Assert.Equal((vector -1.0 2.0 -1.0), c1)
         Assert.Equal((vector 1.0 -2.0 1.0), c2)
+
+    [<Fact>]
+    let ``Reflecting a vector approaching at 45 degrees``() =
+        let v = vector 1.0 -1.0 0.0
+        let n = vector 0.0 1.0 0.0
+        let r = reflect v n
+        Assert.Equal(vector 1.0 1.0 0.0, r)
+
+    [<Fact>]
+    let ``Reflecting a vector off a slanted surface``() =
+        let v = vector 0.0 -1.0 0.0
+        let n = vector (Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0) 0.0
+        let r = reflect v n
+        Assert.Equal(vector 1.0 0.0 0.0, r)

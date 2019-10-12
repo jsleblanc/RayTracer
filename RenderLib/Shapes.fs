@@ -5,11 +5,13 @@ open Common
 open Tuple
 open Matrix
 open Ray
+open Lights
 
 module Shapes = 
 
     type sphere(id : Guid) = 
         let mutable tm = identity_matrix ()
+        member this.material = material.Default
         member this.id = id
         member this.default_transformation
             with get() = tm
