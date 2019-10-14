@@ -10,8 +10,11 @@ open Lights
 module Shapes = 
 
     type sphere(id : Guid) = 
+        let mutable m = material.Default
         let mutable tm = identity_matrix ()
-        member this.material = material.Default
+        member this.material
+            with get() = m
+            and set value = m <- value
         member this.id = id
         member this.default_transformation
             with get() = tm

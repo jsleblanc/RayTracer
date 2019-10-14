@@ -8,12 +8,17 @@ open RenderLib.Color
 open RenderLib.Shapes
 open RenderLib.Ray
 open RenderLib.Translations
+open RenderLib.Lights
+open RenderLib.Ray
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 open SixLabors.ImageSharp.Formats.Jpeg
 
 [<EntryPoint>]
 let main argv =
+
+    let white = color 1.0 1.0 1.0
+    let black = color 0.0 0.0 0.0
 
     let canvas_to_jpg (c:Canvas.canvas) =
         let encoder = new JpegEncoder()
@@ -35,19 +40,31 @@ let main argv =
     let half = wall_size / 2.0
 
     let canvas = Canvas.create_canvas canvas_pixels canvas_pixels
-    let color = color 1.0 0.0 0.0
     let shape = sphere()
+    shape.material <- { shape.material with color = color 1.0 0.2 1.0; }
+    let light_position = point -10.0 10.0 -10.0
+    let light_color = white
+    let light = {
+        position = light_position;
+        intensity = light_color;
+    }
+
     //shape.default_transformation <- rotation_z (Math.PI / 4.0) * scaling 0.5 1.0 1.0
 
     for y in 0 .. canvas_pixels - 1 do
         let world_y = half - pixel_size * float y
         for x in 0 .. canvas_pixels - 1 do
             let world_x = -half + pixel_size * float x
-            let position = point world_x world_y wall_z
-            let r = { origin = ray_origin; direction = (position - ray_origin).normalize(); }
+            let pos = point world_x world_y wall_z
+            let r = { origin = ray_origin; direction = (pos - ray_origin).normalize(); }
             let xs = intersect shape r
             match hit xs with
-            | Some i -> Canvas.write_pixel x y color canvas
+            | Some i -> 
+                let p = position r i.t
+                let normal = normal_at shape p
+                let eye = -r.direction
+                let color = lighting shape.material light p eye normal
+                Canvas.write_pixel x y color canvas
             | None -> canvas
             |> ignore
 
