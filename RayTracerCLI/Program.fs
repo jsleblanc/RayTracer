@@ -14,6 +14,7 @@ open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 open SixLabors.ImageSharp.Formats.Jpeg
 open System.Diagnostics
+open FSharp.Collections.ParallelSeq
 
 [<EntryPoint>]
 let main argv =
@@ -32,6 +33,11 @@ let main argv =
                 image.[x,y] <- pixel
         image.Save("output.jpg", encoder)
 
+    let coords size = seq {
+        for y in 0 .. size - 1 do
+            for x in 0 .. size - 1 do
+                yield (x,y)
+    }
 
     let ray_origin = point 0.0 0.0 -5.0
     let wall_z = 10.0
@@ -50,10 +56,37 @@ let main argv =
         intensity = light_color;
     }
 
+    let calculate_pixel x y =
+        let world_y = half - pixel_size * float y
+        let world_x = -half + pixel_size * float x
+        let pos = point world_x world_y wall_z
+        let r = { origin = ray_origin; direction = (pos - ray_origin).normalize(); }
+        let xs = intersect shape r
+        match hit xs with
+        | Some i -> 
+            let p = position r i.t
+            let normal = normal_at shape p
+            let eye = -r.direction
+            let c = lighting shape.material light p eye normal
+            Some (x,y,c)
+        | None -> None
+
     //shape.default_transformation <- rotation_z (Math.PI / 4.0) * scaling 0.5 1.0 1.0
 
     printfn "Calculating..."
     let sw = Stopwatch.StartNew()
+
+    let pixels = 
+        coords(1000)
+            |> Seq.toList
+            |> PSeq.map (fun (x,y) -> calculate_pixel x y)
+            |> PSeq.choose id
+            |> PSeq.toArray
+
+    pixels 
+    |> Seq.iter (fun (x,y,c) -> (Canvas.write_pixel x y c canvas) |> ignore)
+
+    (*
     for y in 0 .. canvas_pixels - 1 do
         let world_y = half - pixel_size * float y
         for x in 0 .. canvas_pixels - 1 do
@@ -70,7 +103,7 @@ let main argv =
                 Canvas.write_pixel x y color canvas
             | None -> canvas
             |> ignore
-
+    *)
     printfn "Calculations completed in %s" (sw.Elapsed.ToString())
     
     canvas_to_jpg canvas
