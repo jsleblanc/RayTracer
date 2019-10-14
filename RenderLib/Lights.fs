@@ -26,5 +26,24 @@ module Lights =
             shininess = 200.0;
         }
 
-    let lighting m light position eyev normalv =
-        color 1.0 1.0 1.0
+    let lighting m light point eyev normalv =
+        let black = color 0.0 0.0 0.0
+        let effective_color = m.color * light.intensity
+        let lightv = (light.position - point).normalize()
+        let ambient = effective_color * m.ambient
+        let light_dot_normal = lightv.dotProduct(normalv)
+        let mutable diffuse = black
+        let mutable specular = black
+        if light_dot_normal < 0.0 then
+            diffuse <- black
+            specular <- black
+        else
+            diffuse <- effective_color * m.diffuse * light_dot_normal
+            let reflectv = reflect -lightv normalv
+            let reflect_dot_eye = reflectv.dotProduct(eyev)
+            if reflect_dot_eye <= 0.0 then
+                specular <- black
+            else 
+                let factor = Math.Pow(reflect_dot_eye, m.shininess)
+                specular <- light.intensity * m.specular * factor
+        ambient + diffuse + specular
