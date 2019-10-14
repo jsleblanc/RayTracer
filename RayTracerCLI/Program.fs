@@ -13,6 +13,7 @@ open RenderLib.Ray
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 open SixLabors.ImageSharp.Formats.Jpeg
+open System.Diagnostics
 
 [<EntryPoint>]
 let main argv =
@@ -35,7 +36,7 @@ let main argv =
     let ray_origin = point 0.0 0.0 -5.0
     let wall_z = 10.0
     let wall_size = 7.0
-    let canvas_pixels = 100
+    let canvas_pixels = 1000
     let pixel_size = wall_size / float canvas_pixels
     let half = wall_size / 2.0
 
@@ -51,6 +52,8 @@ let main argv =
 
     //shape.default_transformation <- rotation_z (Math.PI / 4.0) * scaling 0.5 1.0 1.0
 
+    printfn "Calculating..."
+    let sw = Stopwatch.StartNew()
     for y in 0 .. canvas_pixels - 1 do
         let world_y = half - pixel_size * float y
         for x in 0 .. canvas_pixels - 1 do
@@ -68,8 +71,10 @@ let main argv =
             | None -> canvas
             |> ignore
 
-    canvas_to_jpg canvas
+    printfn "Calculations completed in %s" (sw.Elapsed.ToString())
     
+    canvas_to_jpg canvas
+    printfn "Written to canvas"
 
     
     0 // return an integer exit code
