@@ -47,7 +47,8 @@ let main argv =
     let half = wall_size / 2.0
 
     let canvas = Canvas.create_canvas canvas_pixels canvas_pixels
-    let shape = Sphere({ shapeProperties.Default with material = { material.Default with color = color 1.0 0.2 1.0; } })
+    let shape = shapeWithColor (Sphere(shapeProperties.Default)) (color 1.0 0.2 1.0)
+    //let shape = Sphere({ shapeProperties.Default with material = { material.Default with color = color 1.0 0.2 1.0; } })
     
     //shape.material <- { shape.material with color = color 1.0 0.2 1.0; }
     let light_position = point -10.0 10.0 -10.0
