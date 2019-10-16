@@ -22,6 +22,16 @@ module Shapes =
     type shape =
     | Sphere of shapeProperties
 
+    let shapeWithColor shape color = 
+        match shape with
+        | Sphere s ->
+            let m = { s.material with color = color; }
+            Sphere({ s with material = m})
+
+    let shapeWithTransformation shape matrix =
+        match shape with
+        | Sphere s -> Sphere({ s with default_transformation = matrix; })            
+
     type intersection = {
         t: float;
         obj: shape;
