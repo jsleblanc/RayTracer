@@ -47,8 +47,8 @@ let main argv =
     let half = wall_size / 2.0
 
     let canvas = Canvas.create_canvas canvas_pixels canvas_pixels
-    let shape = sphere()
-    shape.material <- { shape.material with color = color 1.0 0.2 1.0; }
+    let shape = Sphere(shapeProperties.Default)    
+    //shape.material <- { shape.material with color = color 1.0 0.2 1.0; }
     let light_position = point -10.0 10.0 -10.0
     let light_color = white
     let light = {
@@ -67,8 +67,10 @@ let main argv =
             let p = position r i.t
             let normal = normal_at shape p
             let eye = -r.direction
-            let c = lighting shape.material light p eye normal
-            Some (x,y,c)
+            match shape with
+            | Sphere s ->
+                let c = lighting s.material light p eye normal
+                Some (x,y,c)
         | None -> None
 
     //shape.default_transformation <- rotation_z (Math.PI / 4.0) * scaling 0.5 1.0 1.0

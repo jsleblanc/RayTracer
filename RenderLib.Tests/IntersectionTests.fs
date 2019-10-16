@@ -12,23 +12,23 @@ module IntersectionTests =
     
     [<Fact>]
     let ``An intersection encapsulates t and object``() =
-        let s = sphere()
+        let s = Sphere(shapeProperties.Default)
         let i = {
             t = 3.5;
-            obj = Sphere s;
+            obj = s;
         }
-        Assert.Equal(Sphere s, i.obj)
+        Assert.Equal(s, i.obj)
 
     [<Fact>]
     let ``The hit, when all intersections have positive t``() =
-        let s = sphere()
+        let s = Sphere(shapeProperties.Default)
         let i1 = {
             t = 1.0;
-            obj = Sphere s;
+            obj = s;
         }
         let i2 = {
             t = 2.0;
-            obj = Sphere s;
+            obj = s;
         }
         let xs = seq { i1; i2; }
         match hit xs with
@@ -37,14 +37,14 @@ module IntersectionTests =
 
     [<Fact>]
     let ``The hit, when some intersections have negative t``() =
-        let s = sphere()
+        let s = Sphere(shapeProperties.Default)
         let i1 = {
             t = -1.0;
-            obj = Sphere s;
+            obj = s;
         }
         let i2 = {
             t = 1.0;
-            obj = Sphere s;
+            obj = s;
         }
         let xs = seq { i1; i2; }
         match hit xs with
@@ -53,14 +53,14 @@ module IntersectionTests =
 
     [<Fact>]
     let ``The hit, when all intersections have negative t``() =
-        let s = sphere()
+        let s = Sphere(shapeProperties.Default)
         let i1 = {
             t = -1.0;
-            obj = Sphere s;
+            obj = s;
         }
         let i2 = {
             t = -2.0;
-            obj = Sphere s;
+            obj = s;
         }
         let xs = seq { i1; i2; }
         match hit xs with
@@ -69,22 +69,22 @@ module IntersectionTests =
 
     [<Fact>]
     let ``The hit is always the lowest non-negative intersection``() =
-        let s = sphere()
+        let s = Sphere(shapeProperties.Default)
         let i1 = {
             t = 5.0;
-            obj = Sphere s;
+            obj = s;
         }
         let i2 = {
             t = 7.0;
-            obj = Sphere s;
+            obj = s;
         }
         let i3 = {
             t = -3.0;
-            obj = Sphere s;
+            obj = s;
         }
         let i4 = {
             t = 2.0;
-            obj = Sphere s;
+            obj = s;
         }
         let xs = seq { i1; i2; i3; i4; }
         match hit xs with

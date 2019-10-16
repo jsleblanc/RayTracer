@@ -9,32 +9,32 @@ open Lights
 
 module Shapes = 
 
-    type sphere(id : Guid) = 
-        let mutable m = material.Default
-        let mutable tm = identity_matrix ()
-        member this.material
-            with get() = m
-            and set value = m <- value
-        member this.id = id
-        member this.default_transformation
-            with get() = tm
-            and set value = tm <- value
-        new() = sphere(Guid.NewGuid())
+    type shapeProperties = {
+        identity: Guid;
+        material: material;
+        default_transformation: matrix;
+    } with static member Default = {
+            identity = Guid.NewGuid ();
+            material = material.Default;
+            default_transformation = identity_matrix ();
+        }
 
     type shape =
-    | Sphere of sphere
+    | Sphere of shapeProperties
 
     type intersection = {
         t: float;
         obj: shape;
     }
 
-    let ray_from_inverse_default_transformation (s:sphere) r =
-        match inverse s.default_transformation with
-        | Ok idt -> transform r idt
-        | Error s -> raise (Exception(s)) //TODO - decide how I want this to propagate through the code; exception is temporary
+    let ray_from_inverse_default_transformation (s:shape) r =
+        match s with
+        | Sphere sp ->
+            match inverse sp.default_transformation with
+            | Ok idt -> transform r idt
+            | Error s -> raise (Exception(s)) //TODO - decide how I want this to propagate through the code; exception is temporary
 
-    let intersect (s:sphere) r =
+    let intersect (s:shape) r =
         let r2 = ray_from_inverse_default_transformation s r        
         let sphereToRay = r2.origin - point 0.0 0.0 0.0
         let a = r2.direction.dotProduct(r2.direction)
@@ -47,8 +47,8 @@ module Shapes =
             let t1 = (-b - Math.Sqrt(discriminant)) / (2.0 * a)
             let t2 = (-b + Math.Sqrt(discriminant)) / (2.0 * a)
             seq {
-                { t = t1; obj = Sphere s; }; 
-                { t = t2; obj = Sphere s; };
+                { t = t1; obj = s; }; 
+                { t = t2; obj = s; };
             }
 
     let hit intersections : intersection option = 
@@ -59,19 +59,21 @@ module Shapes =
             let lowest = Seq.minBy (fun i -> i.t) filtered
             Some lowest
 
-    let normal_at (s:sphere) world_point =
-        match inverse s.default_transformation with
-        | Ok im -> 
-            let object_point = im * world_point
-            let object_normal = object_point - (point 0.0 0.0 0.0)
-            let world_normal = im.Transpose * object_normal
-            let v = {
-                x = world_normal.x;
-                y = world_normal.y;
-                z = world_normal.z;
-                w = 0.0;
-            }
-            v.normalize()
-        | Error s -> raise (Exception(s))  //TODO - decide how I want this to propagate through the code; exception is temporary
+    let normal_at (s:shape) world_point =
+        match s with 
+        | Sphere sp ->
+            match inverse sp.default_transformation with
+            | Ok im -> 
+                let object_point = im * world_point
+                let object_normal = object_point - (point 0.0 0.0 0.0)
+                let world_normal = im.Transpose * object_normal
+                let v = {
+                    x = world_normal.x;
+                    y = world_normal.y;
+                    z = world_normal.z;
+                    w = 0.0;
+                }
+                v.normalize()
+            | Error s -> raise (Exception(s))  //TODO - decide how I want this to propagate through the code; exception is temporary
         
         
