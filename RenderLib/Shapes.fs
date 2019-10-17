@@ -85,5 +85,28 @@ module Shapes =
                 }
                 v.normalize()
             | Error s -> raise (Exception(s))  //TODO - decide how I want this to propagate through the code; exception is temporary
-        
-        
+       
+    type precomputed = {
+        t: float;
+        obj: shape;
+        point: tuple;
+        eyev: tuple;
+        normalv: tuple;
+        inside: bool;
+    }
+
+    let prepare_computations (i:intersection) ray = 
+        let p = position ray i.t
+        let comps = {
+            t = i.t;
+            obj = i.obj;
+            point = p;
+            eyev = -ray.direction;
+            normalv = normal_at i.obj p;
+            inside = false;
+        }
+        if comps.normalv.dotProduct comps.eyev < 0.0 then
+            { comps with inside = true; normalv = -comps.normalv; }
+        else
+            comps
+       

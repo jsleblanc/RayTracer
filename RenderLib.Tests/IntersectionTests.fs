@@ -90,3 +90,52 @@ module IntersectionTests =
         match hit xs with
         | Some i -> Assert.Equal(i4, i)
         | None -> Assert.True(false, "Should have returned a value")
+
+    [<Fact>]
+    let ``Precomputing the state of an intersection``() =
+        let r = {
+            origin = point 0.0 0.0 -5.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let s = Sphere(shapeProperties.Default)
+        let i = {
+            t = 4.0;
+            obj = s;
+        } 
+        let comps = prepare_computations i r
+        Assert.Equal(i.t, comps.t)
+        Assert.Equal(point 0.0 0.0 -1.0, comps.point)
+        Assert.Equal(vector 0.0 0.0 -1.0, comps.eyev)
+        Assert.Equal(vector 0.0 0.0 -1.0, comps.normalv)
+
+    [<Fact>]
+    let ``The hit, when an intersection occurs on the outside``() =
+        let r = {
+            origin = point 0.0 0.0 -5.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let s = Sphere(shapeProperties.Default)
+        let i = {
+            t = 4.0;
+            obj = s;
+        } 
+        let comps = prepare_computations i r
+        Assert.False(comps.inside)
+
+    [<Fact>]
+    let ``The hit, when an intersection occurs on the inside``() =
+        let r = {
+            origin = point 0.0 0.0 0.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let s = Sphere(shapeProperties.Default)
+        let i = {
+            t = 1.0;
+            obj = s;
+        } 
+        let comps = prepare_computations i r
+        Assert.Equal(point 0.0 0.0 1.0, comps.point)
+        Assert.Equal(vector 0.0 0.0 -1.0, comps.eyev)
+        Assert.Equal(vector 0.0 0.0 -1.0, comps.normalv)
+        Assert.True(comps.inside)
+

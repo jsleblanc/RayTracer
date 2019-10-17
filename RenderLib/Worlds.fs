@@ -31,3 +31,6 @@ module Worlds =
         |> Seq.map (fun (shape) -> intersect shape ray)
         |> Seq.collect (fun c -> c)
         |> Seq.sortBy (fun i -> i.t)
+
+    let shade_hit world comps = 
+        color 1.0 1.0 1.0
