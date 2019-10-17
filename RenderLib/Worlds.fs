@@ -35,3 +35,11 @@ module Worlds =
     let shade_hit world comps = 
         match comps.obj with
         | Sphere s -> lighting s.material world.light comps.point comps.eyev comps.normalv        
+
+    let color_at world ray =
+        let i = intersect_world world ray
+        match hit i with 
+        | Some hit -> 
+            let comp = prepare_computations hit ray
+            shade_hit world comp
+        | None -> color 0.0 0.0 0.0

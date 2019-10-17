@@ -15,6 +15,8 @@ open RenderLib.Worlds
 
 module WorldTests = 
 
+    let default_world = { world.Default with objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; })]; }
+
     [<Fact>]
     let ``The default world``() =
         let s1 = Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }})
@@ -30,7 +32,7 @@ module WorldTests =
 
     [<Fact>]
     let ``Intersect a world with a ray``() =
-        let w = { world.Default with objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; })]; }
+        let w = default_world
         let r = {
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
@@ -44,7 +46,7 @@ module WorldTests =
 
     [<Fact>]
     let ``Shading an intersection``() =
-        let w = { world.Default with objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; })]; }
+        let w = default_world
         let r = {
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
@@ -60,10 +62,7 @@ module WorldTests =
 
     [<Fact>]
     let ``Shading an intersection from the inside``() =
-        let w = { 
-            world.Default with 
-                light = { position = point 0.0 0.25 0.0; intensity = color 1.0 1.0 1.0; }
-                objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; })]; }
+        let w = { default_world with light = { position = point 0.0 0.25 0.0; intensity = color 1.0 1.0 1.0; } }
         let r = {
             origin = point 0.0 0.0 0.0;
             direction = vector 0.0 0.0 1.0;
@@ -76,3 +75,35 @@ module WorldTests =
         let comps = prepare_computations i r
         let c = shade_hit w comps
         Assert.Equal(color 0.9049844721 0.9049844721 0.9049844721, c)
+
+    [<Fact>]
+    let ``The color when a ray misses``() =
+        let w = default_world
+        let r = {
+            origin = point 0.0 0.0 -5.0;
+            direction = vector 0.0 1.0 0.0;
+        }
+        let c = color_at w r
+        Assert.Equal(color 0.0 0.0 0.0, c)
+
+    [<Fact>]
+    let ``The color when a ray hits``() =
+        let w = default_world
+        let r = {
+            origin = point 0.0 0.0 -5.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let c = color_at w r
+        Assert.Equal(color 0.3806611931 0.4758264914 0.2854958948, c)
+
+    [<Fact>]
+    let ``The color with an intersection behind the ray``() =
+        let w = { default_world with objs = [Sphere({ shapeProperties.Default with material = { material.Default with ambient = 1.0; }}); Sphere({ shapeProperties.Default with material = { material.Default with ambient = 1.0; }; })]; }
+        let inner = Seq.item(1) w.objs
+        let r = {
+            origin = point 0.0 0.0 0.75;
+            direction = vector 0.0 0.0 -1.0;
+        }
+        let c = color_at w r
+        match inner with
+        | Sphere s -> Assert.Equal(s.material.color, c)
