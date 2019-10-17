@@ -183,3 +183,52 @@ module TranslationTests =
         let c = translation 10.0 5.0 7.0
         let t = c * b * a
         Assert.Equal(point 15.0 0.0 7.0, t * p)
+
+    [<Fact>]
+    let ``The transformation matrix for the default orientation``() =
+        let from = point 0.0 0.0 0.0
+        let to_point = point 0.0 0.0 -1.0
+        let up = vector 0.0 1.0 0.0
+        let t = view_transform from to_point up
+        Assert.Equal(identity_matrix (), t)
+
+    [<Fact>]
+    let ``A view transformation matrix looking in the positive z direction``() =
+        let from = point 0.0 0.0 0.0
+        let to_point = point 0.0 0.0 1.0
+        let up = vector 0.0 1.0 0.0
+        let t = view_transform from to_point up
+        Assert.Equal(scaling -1.0 1.0 -1.0, t)
+
+    [<Fact>]
+    let ``The view transformation moves the world``() =
+        let from = point 0.0 0.0 8.0
+        let to_point = point 0.0 0.0 0.0
+        let up = vector 0.0 1.0 0.0
+        let t = view_transform from to_point up
+        Assert.Equal(translation 0.0 0.0 -8.0, t)
+
+    [<Fact>]
+    let ``An arbitrary view transformation``() = 
+        let from = point 1.0 3.0 2.0
+        let to_point = point 4.0 -2.0 8.0
+        let up = vector 1.0 1.0 0.0
+        let t = view_transform from to_point up
+        let a = matrix(4)
+        a.[0,0] <- -0.507092552837000055
+        a.[0,1] <- 0.507092552837000055
+        a.[0,2] <- 0.676123403782999954
+        a.[0,3] <- -2.366431913240000018
+        a.[1,0] <- 0.767715933860000033
+        a.[1,1] <- 0.606091526730999974
+        a.[1,2] <- 0.121218305346000005
+        a.[1,3] <- -2.828427124746000221
+        a.[2,0] <- -0.358568582799999980
+        a.[2,1] <- 0.597614304667000051
+        a.[2,2] <- -0.717137165601000048
+        a.[2,3] <- 0.0
+        a.[3,0] <- 0.0
+        a.[3,1] <- 0.0
+        a.[3,2] <- 0.0
+        a.[3,3] <- 1.0
+        Assert.True(a.Equals t)

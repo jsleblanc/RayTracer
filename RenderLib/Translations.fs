@@ -2,6 +2,7 @@
 
 open System
 open Matrix
+open Tuple
 
 module Translations =
 
@@ -62,3 +63,28 @@ module Translations =
         t.[2,2] <- 1.0
         t.[3,3] <- 1.0
         t
+
+    let view_transform (from_point:tuple) (to_point:tuple) (up_direction:tuple) =
+        let forward = (to_point - from_point).normalize()
+        let upn = up_direction.normalize()
+        let left = forward.crossProduct upn
+        let true_up = left.crossProduct forward
+        let orientation = matrix(4)
+        orientation.[0,0] <- left.x;
+        orientation.[0,1] <- left.y;
+        orientation.[0,2] <- left.z;
+        orientation.[0,3] <- 0.0;
+        orientation.[1,0] <- true_up.x;
+        orientation.[1,1] <- true_up.y;
+        orientation.[1,2] <- true_up.z;
+        orientation.[1,3] <- 0.0;
+        orientation.[2,0] <- -forward.x;
+        orientation.[2,1] <- -forward.y;
+        orientation.[2,2] <- -forward.z;
+        orientation.[2,3] <- 0.0;
+        orientation.[3,0] <- 0.0;
+        orientation.[3,1] <- 0.0;
+        orientation.[3,2] <- 0.0;
+        orientation.[3,3] <- 1.0;
+        orientation * translation -from_point.x -from_point.y -from_point.z
+       
