@@ -56,7 +56,7 @@ module WorldTests =
         }
         let comps = prepare_computations i r
         let c = shade_hit w comps
-        Assert.Equal(color 0.38066 0.47583 0.2855, c)
+        Assert.Equal(color 0.3806611931 0.4758264914 0.2854958948, c)
 
     [<Fact>]
     let ``Shading an intersection from the inside``() =
@@ -75,4 +75,4 @@ module WorldTests =
         }
         let comps = prepare_computations i r
         let c = shade_hit w comps
-        Assert.Equal(color 0.90498 0.90498 0.90498, c)
+        Assert.Equal(color 0.9049844721 0.9049844721 0.9049844721, c)

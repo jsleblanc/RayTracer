@@ -12,7 +12,7 @@ open Shapes
 module Worlds = 
 
     type world = {
-        light: point_light;
+        light: point_light; //TODO - support multiple lights
         objs: shape list
     } with static member Default = {
             light = {
@@ -33,4 +33,5 @@ module Worlds =
         |> Seq.sortBy (fun i -> i.t)
 
     let shade_hit world comps = 
-        color 1.0 1.0 1.0
+        match comps.obj with
+        | Sphere s -> lighting s.material world.light comps.point comps.eyev comps.normalv        
