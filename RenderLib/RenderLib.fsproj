@@ -15,6 +15,7 @@
     <Compile Include="Lights.fs" />
     <Compile Include="Shapes.fs" />
     <Compile Include="Worlds.fs" />
+    <Compile Include="Camera.fs" />
   </ItemGroup>
 
   <ItemGroup>
