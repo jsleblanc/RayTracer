@@ -6,6 +6,7 @@ open Matrix
 open Tuple
 open Ray
 open Worlds
+open FSharp.Collections.ParallelSeq
 
 module Camera = 
 
@@ -19,7 +20,7 @@ module Camera =
         half_height: float;
     } 
 
-    let private calculate hsize vsize field_of_view =
+    let private calculate_camera_fields hsize vsize field_of_view =
         let half_view = Math.Tan (field_of_view / 2.0)
         let aspect = (float) hsize / (float) vsize
         let mutable half_width = 0.0
@@ -35,7 +36,7 @@ module Camera =
 
     
     let create_camera hsize vsize field_of_view =
-        let (hw, hh, ps) = calculate hsize vsize field_of_view
+        let (hw, hh, ps) = calculate_camera_fields hsize vsize field_of_view
         {
             hsize = hsize;
             vsize = vsize;
@@ -74,4 +75,10 @@ module Camera =
             }
         coords
         |> Seq.toList
-        |> PSeq.map
+        |> PSeq.map (fun (x,y) -> 
+                let ray = ray_for_pixel camera x y
+                let color = color_at world ray
+                (color, x, y)
+            )
+        |> Seq.iter (fun (c, x, y) -> write_pixel x y c image |> ignore)
+        image

@@ -64,4 +64,4 @@ module CameraTests =
         let up = vector 0.0 1.0 0.0
         let c = { create_default_camera 11 11 with transform = view_transform from_point to_point up; }
         let image = render c w
-        Assert.Equal(image.[5,5], color 0.38066 0.47583 0.2855)
+        Assert.Equal(color 0.3806611931 0.4758264914 0.2854958948, image.[5,5])
