@@ -26,6 +26,11 @@ module Lights =
             shininess = 200.0;
         }
 
+    let point_light p i = {
+        position = p;
+        intensity = i;
+    }
+
     let lighting m light point eyev normalv =
         let black = color 0.0 0.0 0.0
         let effective_color = m.color * light.intensity

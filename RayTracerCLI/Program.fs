@@ -1,113 +1,75 @@
 ﻿// Learn more about F# at http://fsharp.org
 
 open System
-open System.IO
 open RenderLib
 open RenderLib.Tuple
 open RenderLib.Color
 open RenderLib.Shapes
-open RenderLib.Ray
 open RenderLib.Translations
 open RenderLib.Lights
-open RenderLib.Ray
+open RenderLib.Worlds
+open RenderLib.Camera
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 open SixLabors.ImageSharp.Formats.Jpeg
 open System.Diagnostics
-open FSharp.Collections.ParallelSeq
 
 [<EntryPoint>]
 let main argv =
 
-    let white = color 1.0 1.0 1.0
-    let black = color 0.0 0.0 0.0
-
     let canvas_to_jpg (c:Canvas.canvas) =
         let encoder = new JpegEncoder()
         encoder.Quality <- new Nullable<int>(100)
-        let image = new Image<Rgb24>(c.GetLength(1), c.GetLength(0))
-        for y in 0 .. c.GetLength(0) - 1 do
-            for x in 0 .. c.GetLength(1) - 1 do
+        let image = new Image<Rgb24>(c.GetLength(0), c.GetLength(1))
+        for x in 0 .. c.GetLength(0) - 1 do
+            for y in 0 .. c.GetLength(1) - 1 do
                 let (r,g,b) = Color.color_byte c.[x,y]
                 let pixel = new Rgb24(r,g,b)
                 image.[x,y] <- pixel
         image.Save("output.jpg", encoder)
 
-    let coords size = seq {
-        for y in 0 .. size - 1 do
-            for x in 0 .. size - 1 do
-                yield (x,y)
-    }
+    let floorMaterial = 
+        { material.Default with color = color 1.0 0.9 0.9; specular = 0.0; }
 
-    let ray_origin = point 0.0 0.0 -5.0
-    let wall_z = 10.0
-    let wall_size = 7.0
-    let canvas_pixels = 1000
-    let pixel_size = wall_size / float canvas_pixels
-    let half = wall_size / 2.0
-
-    let canvas = Canvas.create_canvas canvas_pixels canvas_pixels
-    let shape = shapeWithColor (Sphere(shapeProperties.Default)) (color 1.0 0.2 1.0)
-    //let shape = Sphere({ shapeProperties.Default with material = { material.Default with color = color 1.0 0.2 1.0; } })
+    let floor = 
+        Sphere({ shapeProperties.Default with material = floorMaterial; default_transformation = scaling 10.0 0.01 10.0; })
     
-    //shape.material <- { shape.material with color = color 1.0 0.2 1.0; }
-    let light_position = point -10.0 10.0 -10.0
-    let light_color = white
-    let light = {
-        position = light_position;
-        intensity = light_color;
-    }
+    let leftWallTransformation = 
+        (translation 0.0 0.0 5.0) * 
+        (rotation_y (-Math.PI/4.0)) * 
+        (rotation_x (Math.PI/2.0)) * 
+        (scaling 10.0 0.01 10.0)
+    let leftWall = Sphere({ shapeProperties.Default with default_transformation = leftWallTransformation; material = floorMaterial; })
 
-    let calculate_pixel x y =
-        let world_y = half - pixel_size * float y
-        let world_x = -half + pixel_size * float x
-        let pos = point world_x world_y wall_z
-        let r = { origin = ray_origin; direction = (pos - ray_origin).normalize(); }
-        let xs = intersect shape r
-        match hit xs with
-        | Some i -> 
-            let p = position r i.t
-            let normal = normal_at shape p
-            let eye = -r.direction
-            match shape with
-            | Sphere s ->
-                let c = lighting s.material light p eye normal
-                Some (x,y,c)
-        | None -> None
+    let rightWallTransformation = 
+        (translation 0.0 0.0 5.0) * 
+        (rotation_y (Math.PI/4.0)) * 
+        (rotation_x (Math.PI/2.0)) * 
+        (scaling 10.0 0.01 10.0)
+    let rightWall = Sphere({ shapeProperties.Default with default_transformation = rightWallTransformation; material = floorMaterial; })
 
-    //shape.default_transformation <- rotation_z (Math.PI / 4.0) * scaling 0.5 1.0 1.0
+    let middle = 
+        let m = { material.Default with color = color 0.1 1.0 0.5; diffuse = 0.7; specular = 0.3; }
+        Sphere({ shapeProperties.Default with material = m; default_transformation = translation -0.5 1.0 0.5; })
+
+    let right =
+        let m = { material.Default with color = color 0.5 1.0 0.1; diffuse = 0.7; specular = 0.3; }
+        Sphere({ shapeProperties.Default with material = m; default_transformation = (translation 1.5 0.5 -0.5) * (scaling 0.5 0.5 0.5); })
+
+    let left = 
+        let m = { material.Default with color = color 1.0 0.8 0.1; diffuse = 0.7; specular = 0.3; }
+        Sphere({ shapeProperties.Default with material = m; default_transformation = (translation -1.5 0.33 -0.75) * (scaling 0.33 0.33 0.33); })
+
+    let world = { world.Default with objs = [ floor; leftWall; rightWall; middle; right; left; ]; }
+
+    let vt = view_transform (point 0.0 1.5 -5.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
+    let camera = { create_default_camera 1600 1200 with transform = vt; }
 
     printfn "Calculating..."
     let sw = Stopwatch.StartNew()
 
-    let pixels = 
-        coords(1000)
-            |> Seq.toList
-            |> PSeq.map (fun (x,y) -> calculate_pixel x y)
-            |> PSeq.choose id
-            |> PSeq.toArray
+    let canvas = render camera world
 
-    pixels 
-    |> Seq.iter (fun (x,y,c) -> (Canvas.write_pixel x y c canvas) |> ignore)
-
-    (*
-    for y in 0 .. canvas_pixels - 1 do
-        let world_y = half - pixel_size * float y
-        for x in 0 .. canvas_pixels - 1 do
-            let world_x = -half + pixel_size * float x
-            let pos = point world_x world_y wall_z
-            let r = { origin = ray_origin; direction = (pos - ray_origin).normalize(); }
-            let xs = intersect shape r
-            match hit xs with
-            | Some i -> 
-                let p = position r i.t
-                let normal = normal_at shape p
-                let eye = -r.direction
-                let color = lighting shape.material light p eye normal
-                Canvas.write_pixel x y color canvas
-            | None -> canvas
-            |> ignore
-    *)
     printfn "Calculations completed in %s" (sw.Elapsed.ToString())
     
     canvas_to_jpg canvas
