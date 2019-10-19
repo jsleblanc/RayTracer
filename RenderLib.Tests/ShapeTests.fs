@@ -100,3 +100,60 @@ module ShapeTests =
                 let x = Sphere { sp with default_transformation = (scaling 1.0 0.5 1.0) * rotation_z (Math.PI / 5.0); }
                 let n = normal_at x (point 0.0 (Math.Sqrt(2.0)/2.0) (-Math.Sqrt(2.0)/2.0))
                 Assert.Equal(vector 0.0 0.9701425001 -0.242535625, roundtuple n)
+
+    module PlanesTests =
+
+        [<Fact>]
+        let ``The normal of a plane is a constant everywhere``() =
+            let p = Plane(shapeProperties.Default)
+            let n1 = normal_at p (point 0.0 0.0 0.0)
+            let n2 = normal_at p (point 10.0 0.0 -10.0)
+            let n3 = normal_at p (point -5.0 0.0 150.0)
+            let v = vector 0.0 1.0 0.0
+            Assert.Equal(v, n1)
+            Assert.Equal(v, n2)
+            Assert.Equal(v, n3)
+    
+        [<Fact>]
+        let ``Intersect with a ray parallel to the plane``() =
+            let p = Plane(shapeProperties.Default)
+            let r = {
+                origin = point 0.0 10.0 0.0;
+                direction = vector 0.0 0.0 1.0;
+            }
+            let xs = intersect p r
+            Assert.True(Seq.isEmpty xs)
+
+        [<Fact>]
+        let ``Intersect with a coplanar ray``() =
+            let p = Plane(shapeProperties.Default)
+            let r = {
+                origin = point 0.0 0.0 0.0;
+                direction = vector 0.0 0.0 1.0;
+            }
+            let xs = intersect p r
+            Assert.True(Seq.isEmpty xs)
+
+        [<Fact>]
+        let ``A ray intersecting a plane from above``() =
+            let p = Plane(shapeProperties.Default)
+            let r = {
+                origin = point 0.0 1.0 0.0;
+                direction = vector 0.0 -1.0 0.0;
+            }
+            let xs = intersect p r
+            Assert.Equal(1, Seq.length xs)
+            Assert.Equal(1.0, (Seq.item 0 xs).t)
+            Assert.Equal(p, (Seq.item 0 xs).obj)
+
+        [<Fact>]
+        let ``A ray intersecting a plane from below``() =
+            let p = Plane(shapeProperties.Default)
+            let r = {
+                origin = point 0.0 -1.0 0.0;
+                direction = vector 0.0 1.0 0.0;
+            }
+            let xs = intersect p r
+            Assert.Equal(1, Seq.length xs)
+            Assert.Equal(1.0, (Seq.item 0 xs).t)
+            Assert.Equal(p, (Seq.item 0 xs).obj)
