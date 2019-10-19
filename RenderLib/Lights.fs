@@ -31,7 +31,7 @@ module Lights =
         intensity = i;
     }
 
-    let lighting m light point eyev normalv =
+    let lighting m light point eyev normalv inShadow =
         let black = color 0.0 0.0 0.0
         let effective_color = m.color * light.intensity
         let lightv = (light.position - point).normalize()
@@ -42,7 +42,7 @@ module Lights =
         if light_dot_normal < 0.0 then
             diffuse <- black
             specular <- black
-        else
+        else if not <| inShadow then
             diffuse <- effective_color * m.diffuse * light_dot_normal
             let reflectv = reflect -lightv normalv
             let reflect_dot_eye = reflectv.dotProduct(eyev)

@@ -93,6 +93,7 @@ module Shapes =
         eyev: tuple;
         normalv: tuple;
         inside: bool;
+        over_point: tuple;
     }
 
     let prepare_computations (i:intersection) ray = 
@@ -104,9 +105,12 @@ module Shapes =
             eyev = -ray.direction;
             normalv = normal_at i.obj p;
             inside = false;
+            over_point = point 0.0 0.0 0.0;
         }
-        if comps.normalv.dotProduct comps.eyev < 0.0 then
-            { comps with inside = true; normalv = -comps.normalv; }
-        else
-            comps
+        let newComps =
+            if comps.normalv.dotProduct comps.eyev < 0.0 then
+                { comps with inside = true; normalv = -comps.normalv; }
+            else
+                comps
+        { newComps with over_point = newComps.point + newComps.normalv * epsilon;}
        

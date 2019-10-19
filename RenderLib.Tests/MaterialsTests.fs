@@ -22,7 +22,7 @@ module MaterialsTests =
             position = point 0.0 0.0 -10.0;
             intensity = color 1.0 1.0 1.0;
         } 
-        let r = lighting m light position eyev normalv
+        let r = lighting m light position eyev normalv false
         Assert.Equal(color 1.9 1.9 1.9, r)
 
     [<Fact>]
@@ -35,7 +35,7 @@ module MaterialsTests =
             position = point 0.0 0.0 -10.0;
             intensity = color 1.0 1.0 1.0;
         } 
-        let r = lighting m light position eyev normalv
+        let r = lighting m light position eyev normalv false
         Assert.Equal(color 1.0 1.0 1.0, r)
 
     [<Fact>]
@@ -48,7 +48,7 @@ module MaterialsTests =
             position = point 0.0 10.0 -10.0;
             intensity = color 1.0 1.0 1.0;
         } 
-        let r = lighting m light position eyev normalv
+        let r = lighting m light position eyev normalv false
         Assert.Equal(color 0.7363961031 0.7363961031 0.7363961031, r)
 
     [<Fact>]
@@ -62,7 +62,7 @@ module MaterialsTests =
             position = point 0.0 10.0 -10.0;
             intensity = color 1.0 1.0 1.0;
         } 
-        let r = lighting m light position eyev normalv
+        let r = lighting m light position eyev normalv false
         Assert.Equal(color 1.636396103 1.636396103 1.636396103, r)
 
     [<Fact>]
@@ -75,6 +75,19 @@ module MaterialsTests =
             position = point 0.0 0.0 10.0;
             intensity = color 1.0 1.0 1.0;
         } 
-        let r = lighting m light position eyev normalv
+        let r = lighting m light position eyev normalv false
         Assert.Equal(color 0.1 0.1 0.1, r)
 
+    [<Fact>]
+    let ``Lighting with the surface in shadow``() =
+        let m = material.Default
+        let position = point 0.0 0.0 0.0
+        let eyev = vector 0.0 0.0 -1.0
+        let normalv = vector 0.0 0.0 -1.0
+        let light = {
+            position = point 0.0 0.0 -10.0;
+            intensity = color 1.0 1.0 1.0;
+        } 
+        let in_shadow = true
+        let result = lighting m light position eyev normalv in_shadow
+        Assert.Equal(color 0.1 0.1 0.1, result)

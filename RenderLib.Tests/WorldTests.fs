@@ -76,6 +76,26 @@ module WorldTests =
         Assert.Equal(color 0.9049844721 0.9049844721 0.9049844721, c)
 
     [<Fact>]
+    let ``shade_hit() is given an intersection in shadow``() =
+        let s1 = Sphere(shapeProperties.Default)
+        let s2 = Sphere({shapeProperties.Default with default_transformation = translation 0.0 0.0 10.0; })       
+        let w = {
+            light = point_light (point 0.0 0.0 -10.0) (color 1.0 1.0 1.0);
+            objs = [ s1; s2; ]
+        }
+        let i = {
+            t = 4.0;
+            obj = s2;
+        }
+        let r = {
+            origin = point 0.0 0.0 5.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let comps = prepare_computations i r
+        let c = shade_hit w comps
+        Assert.Equal(color 0.1 0.1 0.1, c)
+
+    [<Fact>]
     let ``The color when a ray misses``() =
         let w = { world.Default with objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; })]; }
         let r = {
@@ -107,3 +127,31 @@ module WorldTests =
         let c = color_at w r
         match inner with
         | Sphere s -> Assert.Equal(s.material.color, c)
+
+    [<Fact>]
+    let ``There is no shadow when nothing is collinear with point and light``() =
+        let default_world = { world.Default with objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; })]; }
+        let p = point 0.0 10.0 0.0
+        let result = is_shadowed default_world p
+        Assert.False(result)
+
+    [<Fact>]
+    let ``The shadow when an object is between the point and the light``() =
+        let default_world = { world.Default with objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; })]; }
+        let p = point 10.0 -10.0 10.0
+        let result = is_shadowed default_world p
+        Assert.True(result)
+        
+    [<Fact>]
+    let ``There is no shadow when an object is behind the light``() =
+        let default_world = { world.Default with objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; })]; }
+        let p = point -20.0 20.0 -20.0
+        let result = is_shadowed default_world p
+        Assert.False(result)
+
+    [<Fact>]
+    let ``There is no shadow when an object is behind the point``() =
+        let default_world = { world.Default with objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; })]; }
+        let p = point -2.0 2.0 -2.0
+        let result = is_shadowed default_world p
+        Assert.False(result)

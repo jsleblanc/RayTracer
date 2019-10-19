@@ -7,6 +7,7 @@ open RenderLib.Common
 open RenderLib.Tuple
 open RenderLib.Ray
 open RenderLib.Shapes
+open RenderLib.Translations
 
 module IntersectionTests = 
     
@@ -139,3 +140,17 @@ module IntersectionTests =
         Assert.Equal(vector 0.0 0.0 -1.0, comps.normalv)
         Assert.True(comps.inside)
 
+    [<Fact>]
+    let ``The hit should offset the point``() =
+        let r = {
+            origin = point 0.0 0.0 -5.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let s = Sphere({shapeProperties.Default with default_transformation = translation 0.0 0.0 1.0; })
+        let i = {
+            t = 5.0;
+            obj = s;
+        } 
+        let comps = prepare_computations i r
+        Assert.True(comps.over_point.z < -epsilon/2.0)
+        Assert.True(comps.point.z > comps.over_point.z)

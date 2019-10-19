@@ -32,9 +32,23 @@ module Worlds =
         |> Seq.collect (fun c -> c)
         |> Seq.sortBy (fun i -> i.t)
 
+    let is_shadowed (w:world) (p:tuple) =
+        let v = w.light.position - p
+        let distance = v.magnitude()
+        let direction = v.normalize()
+        let ray = {
+            origin = p;
+            direction = direction;
+        }
+        let intersections = intersect_world w ray
+        match hit intersections with
+        | Some i -> i.t < distance
+        | None -> false
+
     let shade_hit world comps = 
+        let shadowed = is_shadowed world comps.over_point
         match comps.obj with
-        | Sphere s -> lighting s.material world.light comps.point comps.eyev comps.normalv        
+        | Sphere s -> lighting s.material world.light comps.point comps.eyev comps.normalv shadowed
 
     let color_at world ray =
         let i = intersect_world world ray
