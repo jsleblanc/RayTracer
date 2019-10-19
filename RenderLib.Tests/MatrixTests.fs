@@ -161,10 +161,8 @@ module MatrixTests =
         a.[3,2] <- 5.0
         a.[3,3] <- 8.0
         let e = identity_matrix ()
-        let ir = inverse a
-        match ir with
-        | Ok i -> Assert.Equal(e, a * i)
-        | Error s -> Assert.True(false, s)
+        let ir = inverse a        
+        Assert.Equal(e, a * ir)        
 
     [<Fact>]
     let ``transposing a matrix``() =
@@ -444,10 +442,8 @@ module MatrixTests =
         e.[3,1] <- -0.813909774436090250
         e.[3,2] <- -0.300751879699248104
         e.[3,3] <- 0.306390977443609047        
-        let r = inverse a
-        match r with
-        | Ok m -> Assert.True(m.Equals e)
-        | Error s -> Assert.True(false, s)
+        let r = inverse a        
+        Assert.Equal(e, r)        
 
     [<Fact>]
     let ``Calculating the inverse of another matrix``() =
@@ -486,9 +482,7 @@ module MatrixTests =
         e.[3,2] <- -0.769230769230769273
         e.[3,3] <- -1.923076923076923128
         let r = inverse a
-        match r with
-        | Ok m -> Assert.True(m.Equals e)
-        | Error s -> Assert.True(false, s)
+        Assert.Equal(e, r)
 
     [<Fact>]
     let ``Calculating the inverse of a third matrix``() =
@@ -527,9 +521,7 @@ module MatrixTests =
         e.[3,2] <- -0.266666666666666663
         e.[3,3] <- 0.333333333333333315
         let r = inverse a
-        match r with
-        | Ok m -> Assert.True(m.Equals e)
-        | Error s -> Assert.True(false, s)
+        Assert.Equal(e, r)
         
     [<Fact>]
     let ``Multiplying a product by its inverse``() =
@@ -569,9 +561,7 @@ module MatrixTests =
         b.[3,3] <- 5.0
         let c = a * b
         let r = inverse b
-        match r with
-        | Ok ib -> Assert.True(a.Equals (c * ib))
-        | Error s -> Assert.True(false, s)
+        Assert.True(a.Equals (c * r))
 
     [<Fact>]
     let ``identity_matrix should return new copy every time``() =

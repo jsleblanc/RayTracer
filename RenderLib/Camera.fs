@@ -55,16 +55,14 @@ module Camera =
         let yoffset = ((float)py + 0.5) * camera.pixel_size
         let world_x = camera.half_width - xoffset
         let world_y = camera.half_height - yoffset
-        match inverse camera.transform with
-        | Ok ict -> 
-            let pixel = ict * (point world_x world_y -1.0)
-            let origin = ict * (point 0.0 0.0 0.0)
-            let direction = (pixel - origin).normalize()
-            {
-                origin = origin;
-                direction = direction;
-            }
-        | Error s -> raise (Exception(s)) //TODO - decide how I want this to propagate through the code; exception is temporary
+        let ict = inverse camera.transform
+        let pixel = ict * (point world_x world_y -1.0)
+        let origin = ict * (point 0.0 0.0 0.0)
+        let direction = (pixel - origin).normalize()
+        {
+            origin = origin;
+            direction = direction;
+        }
 
     let render camera world =
         let image = create_canvas camera.hsize camera.vsize

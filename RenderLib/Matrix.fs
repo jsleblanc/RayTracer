@@ -136,5 +136,5 @@ module Matrix =
                 for col in 0 .. size do
                     let c = cofactor a row col
                     r.[col,row] <- round c/da
-            Ok r
-        else Error "Non-invertible matrix"
+            r
+        else raise (Exception("Non-invertible matrix"))

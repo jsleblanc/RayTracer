@@ -21,12 +21,10 @@ module TranslationTests =
     [<Fact>]
     let ``Multiplying by the inverse of a transformation matrix``() =
         let t = translation 5.0 -3.0 2.0
-        let ir = inverse t
+        let i = inverse t
         let p = point -3.0 4.0 5.0
         let e = point -8.0 7.0 3.0
-        match ir with
-        | Ok i -> Assert.Equal(e, i * p)
-        | Error s -> Assert.True(false, s)
+        Assert.Equal(e, i * p)
 
     [<Fact>]
     let ``Translation does not affect vectors``() =
@@ -56,10 +54,8 @@ module TranslationTests =
         let t = scaling 2.0 3.0 4.0
         let v = vector -4.0 6.0 8.0
         let e = vector -2.0 2.0 2.0
-        let invTr = inverse t
-        match invTr with
-        | Ok invT -> Assert.Equal(e, invT * v)
-        | Error s -> Assert.True(false, s)
+        let invT = inverse t
+        Assert.Equal(e, invT * v)
 
     [<Fact>]
     let ``Reflection is scaling by a negative value``() =
@@ -84,9 +80,7 @@ module TranslationTests =
         let p = point 0.0 1.0 0.0
         let half_quarter = rotation_x (Math.PI / 4.0)
         let inv = inverse half_quarter
-        match inv with
-        | Ok i -> Assert.Equal(point 0.0 v -v, i * p)
-        | Error s -> Assert.True(false, s)
+        Assert.Equal(point 0.0 v -v, inv * p)
 
     [<Fact>]
     let ``Rotating a point around the y axix``() =
@@ -103,9 +97,7 @@ module TranslationTests =
         let p = point 0.0 0.0 1.0
         let half_quarter = rotation_y (Math.PI / 4.0)
         let inv = inverse half_quarter
-        match inv with
-        | Ok i -> Assert.Equal(point -v 0.0 v, i * p)
-        | Error s -> Assert.True(false, s)
+        Assert.Equal(point -v 0.0 v, inv * p)
 
     [<Fact>]
     let ``Rotating a point around the z axix``() =
@@ -122,9 +114,7 @@ module TranslationTests =
         let p = point 1.0 0.0 0.0
         let half_quarter = rotation_z (Math.PI / 4.0)
         let inv = inverse half_quarter
-        match inv with
-        | Ok i -> Assert.Equal(point v -v 0.0, i * p)
-        | Error s -> Assert.True(false, s)
+        Assert.Equal(point v -v 0.0, inv * p)
 
     [<Fact>]
     let ``A shearing transformation moves x in proportion to y``() =
