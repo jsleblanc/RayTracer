@@ -21,6 +21,12 @@ module Shapes =
 
     type shape =
     | Sphere of shapeProperties
+    | Plane of shapeProperties
+
+    let private shapeToProperties shape =
+        match shape with
+        | Sphere s -> s
+        | Plane p -> p
 
     let shapeWithColor shape color = 
         match shape with
@@ -37,14 +43,10 @@ module Shapes =
         obj: shape;
     }
 
-    let ray_from_inverse_default_transformation (s:shape) r =
-        match s with
-        | Sphere sp ->
-            let idt = inverse sp.default_transformation
-            transform r idt           
-
     let intersect (s:shape) r =
-        let r2 = ray_from_inverse_default_transformation s r        
+        let sp = shapeToProperties s
+        let idt = inverse sp.default_transformation
+        let r2 = transform r idt
         let sphereToRay = r2.origin - point 0.0 0.0 0.0
         let a = r2.direction.dotProduct(r2.direction)
         let b = 2.0 * r2.direction.dotProduct(sphereToRay)
@@ -69,19 +71,18 @@ module Shapes =
             Some lowest
 
     let normal_at (s:shape) world_point =
-        match s with 
-        | Sphere sp ->
-            let im = inverse sp.default_transformation            
-            let object_point = im * world_point
-            let object_normal = object_point - (point 0.0 0.0 0.0)
-            let world_normal = im.Transpose * object_normal
-            let v = {
-                x = world_normal.x;
-                y = world_normal.y;
-                z = world_normal.z;
-                w = 0.0;
-            }
-            v.normalize()            
+        let sp = shapeToProperties s
+        let im = inverse sp.default_transformation            
+        let object_point = im * world_point
+        let object_normal = object_point - (point 0.0 0.0 0.0)
+        let world_normal = im.Transpose * object_normal
+        let v = {
+            x = world_normal.x;
+            y = world_normal.y;
+            z = world_normal.z;
+            w = 0.0;
+        }
+        v.normalize()            
        
     type precomputed = {
         t: float;
