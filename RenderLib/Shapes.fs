@@ -23,6 +23,21 @@ module Shapes =
     | Sphere of shapeProperties
     | Plane of shapeProperties
 
+    type intersection = {
+        t: float;
+        obj: shape;
+    }
+
+    type precomputed = {
+        t: float;
+        obj: shape;
+        point: tuple;
+        eyev: tuple;
+        normalv: tuple;
+        inside: bool;
+        over_point: tuple;
+    }
+
     let private shapeToProperties shape =
         match shape with
         | Sphere s -> s
@@ -30,52 +45,46 @@ module Shapes =
 
     let private local_normal_at shape pt =
         match shape with
-        | Sphere s -> pt - (point 0.0 0.0 0.0)
-        | Plane p -> vector 0.0 1.0 0.0
+        | Sphere _ -> pt - (point 0.0 0.0 0.0)
+        | Plane _ -> vector 0.0 1.0 0.0
 
-    let shapeWithColor shape color = 
+    let private local_intersect shape local_ray =
+        let normal = local_normal_at shape local_ray.origin
         match shape with
-        | Sphere s ->
-            let m = { s.material with color = color; }
-            Sphere({ s with material = m})
+        | Sphere _ ->
+            let a = local_ray.direction.dotProduct(local_ray.direction)
+            let b = 2.0 * local_ray.direction.dotProduct(normal)
+            let c = normal.dotProduct(normal) - 1.0
+            let discriminant = b**2.0 - 4.0 * a * c
+            if discriminant < 0.0 then
+                Seq.empty<intersection>
+            else 
+                let t1 = (-b - Math.Sqrt(discriminant)) / (2.0 * a)
+                let t2 = (-b + Math.Sqrt(discriminant)) / (2.0 * a)
+                seq {
+                    { t = t1; obj = shape; }; 
+                    { t = t2; obj = shape; };
+                }
+        | Plane p -> 
+            if Math.Abs(local_ray.direction.y) < epsilon then
+                Seq.empty<intersection>
+            else
+                seq [{ t = -local_ray.origin.y / local_ray.direction.y; obj = Plane p; }]
 
-    let shapeWithTransformation shape matrix =
-        match shape with
-        | Sphere s -> Sphere({ s with default_transformation = matrix; })            
+    let intersect shape ray =
+        let sp = shapeToProperties shape
+        let local_ray = transform ray (inverse sp.default_transformation)
+        local_intersect shape local_ray
 
-    type intersection = {
-        t: float;
-        obj: shape;
-    }
-
-    let intersect (s:shape) r =
-        let sp = shapeToProperties s
-        let idt = inverse sp.default_transformation
-        let r2 = transform r idt
-        let sphereToRay = r2.origin - point 0.0 0.0 0.0
-        let a = r2.direction.dotProduct(r2.direction)
-        let b = 2.0 * r2.direction.dotProduct(sphereToRay)
-        let c = sphereToRay.dotProduct(sphereToRay) - 1.0
-        let discriminant = b**2.0 - 4.0 * a * c
-        if discriminant < 0.0 then
-            Seq.empty<intersection>
-        else 
-            let t1 = (-b - Math.Sqrt(discriminant)) / (2.0 * a)
-            let t2 = (-b + Math.Sqrt(discriminant)) / (2.0 * a)
-            seq {
-                { t = t1; obj = s; }; 
-                { t = t2; obj = s; };
-            }
-
-    let hit intersections : intersection option = 
+    let hit (intersections:seq<intersection>) : intersection option = 
         let filtered = intersections |> Seq.filter (fun i -> i.t > 0.0)
         if Seq.isEmpty filtered then
             None
         else 
-            let lowest = Seq.minBy (fun i -> i.t) filtered
+            let lowest = Seq.minBy (fun (i:intersection) -> i.t) filtered
             Some lowest
 
-    let normal_at (shape:shape) pt =
+    let normal_at shape pt =
         let sp = shapeToProperties shape
         let i = inverse sp.default_transformation
         let local_point = i * pt
@@ -88,16 +97,6 @@ module Shapes =
             w = 0.0;
         }
         v.normalize()
-       
-    type precomputed = {
-        t: float;
-        obj: shape;
-        point: tuple;
-        eyev: tuple;
-        normalv: tuple;
-        inside: bool;
-        over_point: tuple;
-    }
 
     let prepare_computations (i:intersection) ray = 
         let p = position ray i.t
@@ -117,3 +116,10 @@ module Shapes =
                 comps
         { newComps with over_point = newComps.point + newComps.normalv * epsilon;}
        
+    let shapeWithColor shape color = 
+        let sp = shapeToProperties shape
+        { sp with material = { sp.material with color = color; }}
+
+    let shapeWithTransformation shape matrix =
+        let sp = shapeToProperties shape
+        { sp with default_transformation = matrix; }
