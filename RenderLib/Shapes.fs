@@ -21,31 +21,28 @@ module Shapes =
 
     type shape =
     | Sphere of shapeProperties
-    | Plane of shapeProperties
 
     let shapeWithColor shape color = 
         match shape with
-        | Sphere s -> Sphere({ s with material = { s.material with color = color; } })
-        | Plane p -> Plane({ p with material = { p.material with color = color; } })
+        | Sphere s ->
+            let m = { s.material with color = color; }
+            Sphere({ s with material = m})
 
     let shapeWithTransformation shape matrix =
         match shape with
         | Sphere s -> Sphere({ s with default_transformation = matrix; })            
-        | Plane p -> Plane({ p with default_transformation = matrix; })
 
     type intersection = {
         t: float;
         obj: shape;
     }
 
-    let ray_from_inverse_default_transformation shape ray =
-        let local_transform sp = 
+    let ray_from_inverse_default_transformation (s:shape) r =
+        match s with
+        | Sphere sp ->
             match inverse sp.default_transformation with
-            | Ok idt -> transform ray idt
-            | Error s -> raise (Exception(s)) //TODO - decide how I want this to propagate through the code; exception is temporary        
-        match shape with
-        | Sphere sp -> local_transform sp
-        | Plane p -> local_transform p
+            | Ok idt -> transform r idt
+            | Error s -> raise (Exception(s)) //TODO - decide how I want this to propagate through the code; exception is temporary
 
     let intersect (s:shape) r =
         let r2 = ray_from_inverse_default_transformation s r        
