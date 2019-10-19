@@ -28,26 +28,13 @@ let main argv =
                 image.[x,y] <- pixel
         image.Save("output.jpg", encoder)
 
-    let floorMaterial = 
+    let planeMaterial = 
         { material.Default with color = color 1.0 0.9 0.9; specular = 0.0; }
 
-    let floor = 
-        Sphere({ shapeProperties.Default with material = floorMaterial; default_transformation = scaling 10.0 0.01 10.0; })
+    let plane = 
+        Plane({ shapeProperties.Default with material = planeMaterial;} )
+        //Plane({ shapeProperties.Default with material = planeMaterial; default_transformation = (translation 0.0 0.0 10.0) * (rotation_x (Math.PI/2.0)); })
     
-    let leftWallTransformation = 
-        (translation 0.0 0.0 5.0) * 
-        (rotation_y (-Math.PI/4.0)) * 
-        (rotation_x (Math.PI/2.0)) * 
-        (scaling 10.0 0.01 10.0)
-    let leftWall = Sphere({ shapeProperties.Default with default_transformation = leftWallTransformation; material = floorMaterial; })
-
-    let rightWallTransformation = 
-        (translation 0.0 0.0 5.0) * 
-        (rotation_y (Math.PI/4.0)) * 
-        (rotation_x (Math.PI/2.0)) * 
-        (scaling 10.0 0.01 10.0)
-    let rightWall = Sphere({ shapeProperties.Default with default_transformation = rightWallTransformation; material = floorMaterial; })
-
     let middle = 
         let m = { material.Default with color = color 0.1 1.0 0.5; diffuse = 0.7; specular = 0.3; }
         Sphere({ shapeProperties.Default with material = m; default_transformation = translation -0.5 1.0 0.5; })
@@ -60,10 +47,11 @@ let main argv =
         let m = { material.Default with color = color 1.0 0.8 0.1; diffuse = 0.7; specular = 0.3; }
         Sphere({ shapeProperties.Default with material = m; default_transformation = (translation -1.5 0.33 -0.75) * (scaling 0.33 0.33 0.33); })
 
-    let world = { world.Default with objs = [ floor; leftWall; rightWall; middle; right; left; ]; }
+    //let light = { position = point 0.0 10.0 -10.0; intensity = color 1.0 1.0 1.0; }
+    let world = { world.Default with objs = [ plane; middle; right; left; ]; }
 
     let vt = view_transform (point 0.0 1.5 -5.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
-    let camera = { create_default_camera 1600 1200 with transform = vt; }
+    let camera = { create_default_camera 640 480 with transform = vt; }
 
     printfn "Calculating..."
     let sw = Stopwatch.StartNew()

@@ -42,13 +42,16 @@ module Lights =
         if light_dot_normal < 0.0 then
             diffuse <- black
             specular <- black
-        else if not <| inShadow then
+        else 
             diffuse <- effective_color * m.diffuse * light_dot_normal
             let reflectv = reflect -lightv normalv
             let reflect_dot_eye = reflectv.dotProduct(eyev)
-            if reflect_dot_eye <= 0.0 then
+            if reflect_dot_eye < 0.0 || areEqualFloat reflect_dot_eye 0.0 then
                 specular <- black
             else 
                 let factor = Math.Pow(reflect_dot_eye, m.shininess)
                 specular <- light.intensity * m.specular * factor
-        ambient + diffuse + specular
+        if inShadow then
+            ambient
+        else
+            ambient + diffuse + specular

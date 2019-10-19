@@ -38,7 +38,7 @@ module Shapes =
         over_point: tuple;
     }
 
-    let private shapeToProperties shape =
+    let shapeToProperties shape =
         match shape with
         | Sphere s -> s
         | Plane p -> p
