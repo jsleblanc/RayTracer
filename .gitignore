@@ -341,3 +341,7 @@ healthchecksdb
 
 # Ionide
 symbolCache.db
+
+# Misc
+*.jpg
+*.png
