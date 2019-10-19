@@ -28,6 +28,11 @@ module Shapes =
         | Sphere s -> s
         | Plane p -> p
 
+    let private local_normal_at shape pt =
+        match shape with
+        | Sphere s -> pt - (point 0.0 0.0 0.0)
+        | Plane p -> vector 0.0 1.0 0.0
+
     let shapeWithColor shape color = 
         match shape with
         | Sphere s ->
@@ -70,19 +75,19 @@ module Shapes =
             let lowest = Seq.minBy (fun i -> i.t) filtered
             Some lowest
 
-    let normal_at (s:shape) world_point =
-        let sp = shapeToProperties s
-        let im = inverse sp.default_transformation            
-        let object_point = im * world_point
-        let object_normal = object_point - (point 0.0 0.0 0.0)
-        let world_normal = im.Transpose * object_normal
+    let normal_at (shape:shape) pt =
+        let sp = shapeToProperties shape
+        let i = inverse sp.default_transformation
+        let local_point = i * pt
+        let local_normal = local_normal_at shape local_point
+        let world_normal = i.Transpose * local_normal
         let v = {
             x = world_normal.x;
             y = world_normal.y;
             z = world_normal.z;
             w = 0.0;
         }
-        v.normalize()            
+        v.normalize()
        
     type precomputed = {
         t: float;
