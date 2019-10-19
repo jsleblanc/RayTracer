@@ -49,6 +49,7 @@ module Worlds =
         let shadowed = is_shadowed world comps.over_point
         match comps.obj with
         | Sphere s -> lighting s.material world.light comps.point comps.eyev comps.normalv shadowed
+        | Plane p -> lighting p.material world.light comps.point comps.eyev comps.normalv shadowed
 
     let color_at world ray =
         let i = intersect_world world ray
