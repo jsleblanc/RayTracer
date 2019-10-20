@@ -91,3 +91,14 @@ module MaterialsTests =
         let in_shadow = true
         let result = lighting m light position eyev normalv in_shadow
         Assert.Equal(color 0.1 0.1 0.1, result)
+
+    [<Fact>]
+    let ``Lighting with a pattern applied``() =
+        let m = { material.Default with pattern = Some (stripe_pattern white black); ambient = 1.0; diffuse = 0.0; specular = 0.0; }
+        let eyev = vector 0.0 0.0 -1.0
+        let normalv = vector 0.0 0.0 -1.0
+        let light = point_light (point 0.0 0.0 -10.0) white
+        let c1 = lighting m light (point 0.9 0.0 0.0) eyev normalv false
+        let c2 = lighting m light (point 1.1 0.0 0.0) eyev normalv false
+        Assert.Equal(white, c1)
+        Assert.Equal(black, c2)

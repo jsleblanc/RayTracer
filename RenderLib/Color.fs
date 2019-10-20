@@ -45,4 +45,6 @@ module Color =
         ((c.red * 255.0) |> byte, 
          (c.green * 255.0) |> byte, 
          (c.blue * 255.0) |> byte)
-    
+       
+    let black = color 0.0 0.0 0.0
+    let white = color 1.0 1.0 1.0

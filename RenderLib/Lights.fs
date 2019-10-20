@@ -12,18 +12,25 @@ module Lights =
         intensity: color;
     }
 
+    type pattern = {
+        a: color;
+        b: color;
+    }
+
     type material = {
         color: color;
         ambient: float;
         diffuse: float;
         specular: float;
         shininess: float;
+        pattern: pattern option;
     } with static member Default = {
-            color = color 1.0 1.0 1.0;
+            color = white;
             ambient = 0.1;
             diffuse = 0.9;
             specular = 0.9;
             shininess = 200.0;
+            pattern = None;
         }
 
     let point_light p i = {
@@ -31,9 +38,23 @@ module Lights =
         intensity = i;
     }
 
+    let stripe_pattern a b =
+        {
+            a = a;
+            b = b;
+        }
+
+    let stripe_at pattern pt =
+        if Math.Floor(pt.x) % 2.0 = 0.0 then
+            pattern.a
+        else 
+            pattern.b
+
     let lighting m light point eyev normalv inShadow =
-        let black = color 0.0 0.0 0.0
-        let effective_color = m.color * light.intensity
+        let c = match m.pattern with
+                | Some p -> stripe_at p point
+                | None -> m.color
+        let effective_color = c * light.intensity
         let lightv = (light.position - point).normalize()
         let ambient = effective_color * m.ambient
         let light_dot_normal = lightv.dotProduct(normalv)
