@@ -76,21 +76,24 @@ module Patterns =
         else
             b
 
-    //DOESN'T WORK
+    let private blended_at (a:color) (b:color) =
+        (a + b) / 2.0 //average
+
     let blendedStripesAtRightAngle a b =
-        let s1 = stripe_pattern ((scaling 0.25 0.25 0.25) * rotation_y(Math.PI/2.0)) a b
-        let s2 = stripe_pattern ((scaling 0.25 0.25 0.25) * rotation_y(Math.PI/4.0)) a b
+        let s1 = stripe_pattern_default a b
+        let s2 = stripe_pattern (rotation_y(-Math.PI/2.0)) a b
         Blended(s1,s2)
 
-    let rec pattern_at pattern point =
+    let rec pattern_at pattern object_point =
+        let pattern_transform = patternTransform pattern
+        let pattern_point = inverse pattern_transform * object_point
         match pattern with
         | Solid (a) -> a
-        | Stripe (_,a,b) -> stripe_at a b point
-        | Gradient (_,a,b) -> gradient_at a b point
-        | Ring (_,a,b) -> ring_at a b point
-        | Checkers (_,a,b) -> checkers_at a b point
+        | Stripe (_,a,b) -> stripe_at a b pattern_point
+        | Gradient (_,a,b) -> gradient_at a b pattern_point
+        | Ring (_,a,b) -> ring_at a b pattern_point
+        | Checkers (_,a,b) -> checkers_at a b pattern_point
         | Blended (a,b) -> 
-            //DOESN't WORK YET
-            let ca = pattern_at a point
-            let cb = pattern_at b point
-            (ca + cb) / 2.0
+            let ca = pattern_at a pattern_point
+            let cb = pattern_at b pattern_point
+            blended_at ca cb

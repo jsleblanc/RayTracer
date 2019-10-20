@@ -129,6 +129,4 @@ module Shapes =
     let pattern_at_object (pattern:pattern) object (pt:tuple) =
         let sp = shapeToProperties object
         let object_point = inverse sp.default_transformation * pt
-        let pattern_transform = patternTransform pattern
-        let pattern_point = inverse pattern_transform * object_point
-        pattern_at pattern pattern_point
+        pattern_at pattern object_point
