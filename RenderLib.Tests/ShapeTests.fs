@@ -99,7 +99,7 @@ module ShapeTests =
             | Sphere sp ->
                 let x = Sphere { sp with default_transformation = (scaling 1.0 0.5 1.0) * rotation_z (Math.PI / 5.0); }
                 let n = normal_at x (point 0.0 (Math.Sqrt(2.0)/2.0) (-Math.Sqrt(2.0)/2.0))
-                Assert.Equal(vector 0.0 0.9701425001 -0.242535625, roundtuple n)
+                Assert.Equal(vector 0.0 0.97014250014533188 -0.24253562503633294, n)
     
     module PlanesTests =
 

@@ -39,15 +39,15 @@ module CameraTests =
     let ``Constructing a ray through the center of the canvas``() =
         let c = create_default_camera 201 101
         let r = ray_for_pixel c 100 50
-        Assert.Equal(point 0.0 0.0 0.0, r.origin)
-        Assert.Equal(vector 0.0 0.0 -1.0, r.direction)
+        Assert.Equal(point 0.0 0.0 0.0, roundtuple r.origin)
+        Assert.Equal(vector 0.0 0.0 -1.0, roundtuple r.direction)
 
     [<Fact>]
     let ``Constructing a ray through a corner of the canvas``() =
         let c = create_default_camera 201 101
         let r = ray_for_pixel c 0 0
         Assert.Equal(point 0.0 0.0 0.0, r.origin)
-        Assert.Equal(vector 0.6651864261 0.3325932131 -0.6685123583, r.direction)
+        Assert.Equal(vector 0.66518642611945078 0.33259321305972539 -0.66851235825004807, r.direction)
 
     [<Fact>]
     let ``Constructing a ray when the camera is transformed``() =
@@ -64,4 +64,4 @@ module CameraTests =
         let up = vector 0.0 1.0 0.0
         let c = { create_default_camera 11 11 with transform = view_transform from_point to_point up; }
         let image = render c w
-        Assert.Equal(color 0.3806611931 0.4758264914 0.2854958948, image.[5,5])
+        Assert.Equal(color 0.38066119308103435 0.47582649135129296 0.28549589481077575, image.[5,5])

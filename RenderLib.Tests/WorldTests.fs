@@ -56,7 +56,7 @@ module WorldTests =
         }
         let comps = prepare_computations i r
         let c = shade_hit w comps
-        Assert.Equal(color 0.3806611931 0.4758264914 0.2854958948, c)
+        Assert.Equal(color 0.38066119308103435 0.47582649135129296 0.28549589481077575, c)
 
     [<Fact>]
     let ``Shading an intersection from the inside``() =
@@ -113,7 +113,7 @@ module WorldTests =
             direction = vector 0.0 0.0 1.0;
         }
         let c = color_at w r
-        Assert.Equal(color 0.3806611931 0.4758264914 0.2854958948, c)
+        Assert.Equal(color 0.38066119308103435 0.47582649135129296 0.28549589481077575, c)
 
     [<Fact>]
     let ``The color with an intersection behind the ray``() =

@@ -195,4 +195,4 @@ module TupleTests =
         let v = vector 0.0 -1.0 0.0
         let n = vector (Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0) 0.0
         let r = reflect v n
-        Assert.Equal(vector 1.0 0.0 0.0, r)
+        Assert.Equal(vector 1.0 0.0 0.0, roundtuple r)

@@ -160,9 +160,10 @@ module MatrixTests =
         a.[3,1] <- 0.0
         a.[3,2] <- 5.0
         a.[3,3] <- 8.0
-        let e = identity_matrix ()
-        let ir = inverse a        
-        Assert.Equal(e, a * ir)        
+        let expected = identity_matrix ()
+        let ir = inverse a
+        let actual = a * ir
+        Assert.Equal(expected, actual)
 
     [<Fact>]
     let ``transposing a matrix``() =

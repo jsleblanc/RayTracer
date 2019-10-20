@@ -53,7 +53,7 @@ module MaterialsTests =
             intensity = color 1.0 1.0 1.0;
         } 
         let r = lighting m s light position eyev normalv false
-        Assert.Equal(color 0.7363961031 0.7363961031 0.7363961031, r)
+        Assert.Equal(color 0.73639610306789272 0.73639610306789272 0.73639610306789272, r)
 
     [<Fact>]
     let ``Lighting with eye in the path of the reflection vector``() =
@@ -68,7 +68,7 @@ module MaterialsTests =
             intensity = color 1.0 1.0 1.0;
         } 
         let r = lighting m s light position eyev normalv false
-        Assert.Equal(color 1.636396103 1.636396103 1.636396103, r)
+        Assert.Equal(color 1.6363961030678928 1.6363961030678928 1.6363961030678928, r)
 
     [<Fact>]
     let ``Lighting with the light behind the surface``() =

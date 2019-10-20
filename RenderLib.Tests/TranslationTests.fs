@@ -71,8 +71,8 @@ module TranslationTests =
         let half_quarter = rotation_x (Math.PI / 4.0)
         let full_quarter = rotation_x (Math.PI / 2.0)
         let v = (Math.Sqrt 2.0) / 2.0
-        Assert.Equal(point 0.0 v v, half_quarter * p)
-        Assert.Equal(point 0.0 0.0 1.0, full_quarter * p)
+        Assert.Equal(point 0.0 v v, roundtuple(half_quarter * p))
+        Assert.Equal(point 0.0 0.0 1.0, roundtuple(full_quarter * p))
 
     [<Fact>]
     let ``The inverse of an x-rotation rotates in the opposite direction``() =
@@ -88,8 +88,8 @@ module TranslationTests =
         let p = point 0.0 0.0 1.0
         let half_quarter = rotation_y (Math.PI / 4.0)
         let full_quarter = rotation_y (Math.PI / 2.0)
-        Assert.Equal(point v 0.0 v, half_quarter * p)
-        Assert.Equal(point 1.0 0.0 0.0, full_quarter * p)
+        Assert.Equal(point v 0.0 v, roundtuple(half_quarter * p))
+        Assert.Equal(point 1.0 0.0 0.0, roundtuple(full_quarter * p))
 
     [<Fact>]
     let ``The inverse of an y-rotation rotates in the opposite direction``() =
@@ -105,8 +105,8 @@ module TranslationTests =
         let p = point 0.0 1.0 0.0
         let half_quarter = rotation_z (Math.PI / 4.0)
         let full_quarter = rotation_z (Math.PI / 2.0)
-        Assert.Equal(point -v v 0.0, half_quarter * p)
-        Assert.Equal(point -1.0 0.0 0.0, full_quarter * p)
+        Assert.Equal(point -v v 0.0, roundtuple(half_quarter * p))
+        Assert.Equal(point -1.0 0.0 0.0, roundtuple(full_quarter * p))
 
     [<Fact>]
     let ``The inverse of an z-rotation rotates in the opposite direction``() =
@@ -159,11 +159,11 @@ module TranslationTests =
         let b = scaling 5.0 5.0 5.0
         let c = translation 10.0 5.0 7.0
         let p2 = point 1.0 -1.0 0.0
-        Assert.Equal(p2, a * p)
+        Assert.Equal(p2, roundtuple (a * p))
         let p3 = point 5.0 -5.0 0.0
-        Assert.Equal(p3, b * p2)
+        Assert.Equal(p3, roundtuple(b * p2))
         let p4 = point 15.0 0.0 7.0
-        Assert.Equal(p4, c * p3)
+        Assert.Equal(p4, roundtuple(c * p3))
 
     [<Fact>]
     let ``Chained transformations must be applied in reverse order``() =

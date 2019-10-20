@@ -20,6 +20,7 @@ let main argv =
 
     let red = color 1.0 0.0 0.0
     let blue = color 0.0 0.0 1.0
+    let green = color 0.0 1.0 0.0
 
     let canvas_to_jpg (c:Canvas.canvas) =
         let encoder = new JpegEncoder()
@@ -32,16 +33,16 @@ let main argv =
                 image.[x,y] <- pixel
         image.Save("output.jpg", encoder)
 
-    let p = Solid(red)// blue
-    //let p = checkers_pattern (scaling 0.5 0.5 0.5) red blue
-    //let p = blendedStripesAtRightAngle white black
+    //let p = Solid(red)// blue
+    let p = checkers_pattern (scaling 0.5 0.5 0.5) red blue
+    //let p = Blended(stripe_pattern_default red blue, stripe_pattern (rotation_y(-Math.PI/2.0)) red blue)
     let planeMaterial = 
         { material.Default with color = color 1.0 0.9 0.9; specular = 0.0; pattern = Some p; }
 
     let plane = 
         Plane({ shapeProperties.Default with material = planeMaterial;} )
         //Plane({ shapeProperties.Default with material = planeMaterial; default_transformation = (translation 0.0 0.0 10.0) * (rotation_x (Math.PI/2.0)); })
-        
+
     let middle = 
         let m = { material.Default with color = color 0.1 1.0 0.5; diffuse = 0.7; specular = 0.3; }
         Sphere({ shapeProperties.Default with material = m; default_transformation = translation -0.5 1.0 0.5; })

@@ -35,7 +35,9 @@ module Matrix =
                 seq { 
                     for col in 0 .. m.GetLength(0) - 1 do 
                         for row in 0 .. m.GetLength(1) - 1 do
-                            if not (areEqualFloat m.[col,row] (other.[row,col])) then 
+                            let a = round m.[col,row]
+                            let b = round other.[row,col]
+                            if not (areEqualFloat a b) then 
                                 yield false
                 }
                 |> Seq.forall id
