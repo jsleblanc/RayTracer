@@ -6,7 +6,7 @@ open System
 open RenderLib.Common
 open RenderLib.Tuple
 open RenderLib.Color
-open RenderLib.Matrix
+open RenderLib.Material
 open RenderLib.Shapes
 open RenderLib.Translations
 open RenderLib.Ray

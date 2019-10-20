@@ -4,6 +4,8 @@ open System
 open Common
 open Tuple
 open Color
+open Material
+open Patterns
 
 module Lights =
 
@@ -12,43 +14,10 @@ module Lights =
         intensity: color;
     }
 
-    type pattern = {
-        a: color;
-        b: color;
-    }
-
-    type material = {
-        color: color;
-        ambient: float;
-        diffuse: float;
-        specular: float;
-        shininess: float;
-        pattern: pattern option;
-    } with static member Default = {
-            color = white;
-            ambient = 0.1;
-            diffuse = 0.9;
-            specular = 0.9;
-            shininess = 200.0;
-            pattern = None;
-        }
-
     let point_light p i = {
         position = p;
         intensity = i;
     }
-
-    let stripe_pattern a b =
-        {
-            a = a;
-            b = b;
-        }
-
-    let stripe_at pattern pt =
-        if Math.Floor(pt.x) % 2.0 = 0.0 then
-            pattern.a
-        else 
-            pattern.b
 
     let lighting m light point eyev normalv inShadow =
         let c = match m.pattern with

@@ -5,8 +5,8 @@ open FsCheck
 open System
 open RenderLib.Common
 open RenderLib.Tuple
-open RenderLib.Matrix
-open RenderLib.Translations
+open RenderLib.Material
+open RenderLib.Patterns
 open RenderLib.Color
 open RenderLib.Lights
 

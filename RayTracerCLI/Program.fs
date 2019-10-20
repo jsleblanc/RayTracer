@@ -6,7 +6,8 @@ open RenderLib.Tuple
 open RenderLib.Color
 open RenderLib.Shapes
 open RenderLib.Translations
-open RenderLib.Lights
+open RenderLib.Material
+open RenderLib.Patterns
 open RenderLib.Worlds
 open RenderLib.Camera
 open SixLabors.ImageSharp

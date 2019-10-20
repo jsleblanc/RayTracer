@@ -8,7 +8,7 @@ open RenderLib.Tuple
 open RenderLib.Matrix
 open RenderLib.Color
 open RenderLib.Translations
-open RenderLib.Lights
+open RenderLib.Material
 open RenderLib.Shapes
 open RenderLib.Worlds
 open RenderLib.Camera

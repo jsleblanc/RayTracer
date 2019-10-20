@@ -12,8 +12,10 @@
     <Compile Include="Matrix.fs" />
     <Compile Include="Translations.fs" />
     <Compile Include="Ray.fs" />
-    <Compile Include="Lights.fs" />
+    <Compile Include="Material.fs" />
+    <Compile Include="Patterns.fs" />
     <Compile Include="Shapes.fs" />
+    <Compile Include="Lights.fs" />
     <Compile Include="Worlds.fs" />
     <Compile Include="Camera.fs" />
   </ItemGroup>
