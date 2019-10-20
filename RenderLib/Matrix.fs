@@ -47,7 +47,7 @@ module Matrix =
                 let mutable v = 0.0
                 for x in 0 .. length do
                     v <- v + (a.[row, x] * b.[x, col])
-                round v
+                v
             let r = matrix(a.Size)
             for row in 0 .. length do
                 for col in 0 .. length do
@@ -61,7 +61,7 @@ module Matrix =
                 let mutable v = 0.0
                 for x in 0 .. length do
                     v <- v + (a.[row, x] * ta.[x])
-                round v
+                v
             {
                 x = calculateCell 0;
                 y = calculateCell 1;
@@ -105,17 +105,17 @@ module Matrix =
 
     let rec determinant (a:matrix) = 
         if a.Size = 2 then
-            round (a.[0,0] * a.[1,1]) - (a.[0,1] * a.[1,0])
+            (a.[0,0] * a.[1,1]) - (a.[0,1] * a.[1,0])
         else 
             let mutable d = 0.0
             for col in 0 .. a.Size - 1 do
                 d <- d + a.[0,col] * cofactor a 0 col
-            round d
+            d
 
     and cofactor (a:matrix) (row:int) (col:int) = 
         let m = minor a row col
         if isOdd(row + col) then
-            round m * -1.0
+            m * -1.0
         else m
 
     and minor (a:matrix) (row:int) (col:int) = 
@@ -135,6 +135,6 @@ module Matrix =
             for row in 0 .. size do
                 for col in 0 .. size do
                     let c = cofactor a row col
-                    r.[col,row] <- round c/da
+                    r.[col,row] <- c/da
             r
         else raise (Exception("Non-invertible matrix"))

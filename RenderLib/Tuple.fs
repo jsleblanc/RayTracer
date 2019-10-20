@@ -83,4 +83,4 @@ module Tuple =
             w = round v.w;
         }
     let reflect (inputVector:tuple) (normalVector:tuple) =
-         roundtuple <| inputVector - normalVector * 2.0 * inputVector.dotProduct(normalVector)
+         inputVector - normalVector * 2.0 * inputVector.dotProduct(normalVector)
