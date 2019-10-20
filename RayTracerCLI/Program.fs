@@ -35,10 +35,10 @@ let main argv =
     let plane = 
         Plane({ shapeProperties.Default with material = planeMaterial;} )
         //Plane({ shapeProperties.Default with material = planeMaterial; default_transformation = (translation 0.0 0.0 10.0) * (rotation_x (Math.PI/2.0)); })
-    
+        
     let middle = 
         let m = { material.Default with pattern = Some (stripe_pattern white black); color = color 0.1 1.0 0.5; diffuse = 0.7; specular = 0.3; }
-        Sphere({ shapeProperties.Default with material = m; default_transformation = translation -0.5 1.0 0.5; })
+        Sphere({ shapeProperties.Default with material = m; default_transformation = translation -0.5 1.0 0.5; pattern_transformation = scaling 0.25 0.25 0.25;  })
 
     let right =
         let m = { material.Default with color = color 0.5 1.0 0.1; diffuse = 0.7; specular = 0.3; }
