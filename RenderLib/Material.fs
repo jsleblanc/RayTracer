@@ -3,13 +3,9 @@
 open System
 open Tuple
 open Color
+open Patterns
 
 module Material =
-
-    type pattern = {
-        a: color;
-        b: color;
-    }
 
     type material = {
         color: color;

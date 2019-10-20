@@ -102,7 +102,7 @@ module MaterialsTests =
     [<Fact>]
     let ``Lighting with a pattern applied``() =
         let s = Sphere(shapeProperties.Default)
-        let m = { material.Default with pattern = Some (stripe_pattern white black); ambient = 1.0; diffuse = 0.0; specular = 0.0; }
+        let m = { material.Default with pattern = Some (stripe_pattern_default white black); ambient = 1.0; diffuse = 0.0; specular = 0.0; }
         let eyev = vector 0.0 0.0 -1.0
         let normalv = vector 0.0 0.0 -1.0
         let light = point_light (point 0.0 0.0 -10.0) white

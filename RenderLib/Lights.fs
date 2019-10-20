@@ -22,7 +22,7 @@ module Lights =
 
     let lighting m obj light point eyev normalv inShadow =
         let c = match m.pattern with
-                | Some p -> stripe_at_object p obj point
+                | Some p -> pattern_at_object p obj point
                 | None -> m.color
         let effective_color = c * light.intensity
         let lightv = (light.position - point).normalize()

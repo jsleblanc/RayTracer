@@ -3,18 +3,37 @@
 open System
 open Tuple
 open Color
-open Material
+open Matrix
 
 module Patterns =
 
-    let stripe_pattern a b =
-        {
-            a = a;
-            b = b;
-        }
+    type pattern = 
+    | Stripe of transform:matrix * a:color * b:color
+    | Gradient of transform:matrix * a:color * b:color
+    | Ring of transform:matrix * a:color * b:color
+    | Checker of transform:matrix * a:color * b:color
+    | Blended of transform:matrix * a:pattern * b:pattern
 
-    let stripe_at pattern pt =
+    let patternTransform pattern =
+        match pattern with
+        | Stripe (t,_,_) -> t
+        | Gradient (t,_,_) -> t
+        | Ring (t,_,_) -> t
+        | Checker (t,_,_) -> t
+        | Blended (t,_,_) -> t
+        
+    let stripe_pattern transform a b =
+        Stripe(transform, a, b)
+
+    let stripe_pattern_default a b =
+        stripe_pattern (identity_matrix()) a b
+
+    let private stripe_at a b pt =
         if Math.Floor(pt.x) % 2.0 = 0.0 then
-            pattern.a
+            a
         else 
-            pattern.b
+            b
+
+    let pattern_at pattern point =
+        match pattern with
+        | Stripe (t,a,b) -> stripe_at a b point

@@ -15,12 +15,10 @@ module Shapes =
         identity: Guid;
         material: material;
         default_transformation: matrix;
-        pattern_transformation: matrix;
     } with static member Default = {
             identity = Guid.NewGuid ();
             material = material.Default;
             default_transformation = identity_matrix ();
-            pattern_transformation = identity_matrix ();
         }
 
     type shape =
@@ -128,8 +126,9 @@ module Shapes =
         let sp = shapeToProperties shape
         { sp with default_transformation = matrix; }
 
-    let stripe_at_object pattern object (pt:tuple) =
+    let pattern_at_object (pattern:pattern) object (pt:tuple) =
         let sp = shapeToProperties object
         let object_point = inverse sp.default_transformation * pt
-        let pattern_point = inverse sp.pattern_transformation * object_point
-        stripe_at pattern pattern_point
+        let pattern_transform = patternTransform pattern
+        let pattern_point = inverse pattern_transform * object_point
+        pattern_at pattern pattern_point
