@@ -39,6 +39,8 @@ module Shapes =
         reflectv: tuple;
         inside: bool;
         over_point: tuple;
+        n1: float;
+        n2: float;
     }
 
     let shapeToProperties shape =
@@ -101,17 +103,26 @@ module Shapes =
         }
         v.normalize()
 
-    let prepare_computations (i:intersection) ray = 
-        let p = position ray i.t
+
+        (*
+    let pc (hit:intersection) (xs:seq<intersection>) =
+        let containers = []
+        xs
+        |> List.map (fun (i) -> )
+        *)
+    let prepare_computations2 (hit:intersection) ray (xs:seq<intersection>) = 
+        let p = position ray hit.t
         let comps = {
-            t = i.t;
-            obj = i.obj;
+            t = hit.t;
+            obj = hit.obj;
             point = p;
             eyev = -ray.direction;
-            normalv = normal_at i.obj p;
+            normalv = normal_at hit.obj p;
             reflectv = vector 0.0 0.0 0.0;
             inside = false;
             over_point = point 0.0 0.0 0.0;
+            n1 = 0.0;
+            n2 = 0.0;
         }
         let newComps =
             if comps.normalv.dotProduct comps.eyev < 0.0 then
@@ -121,7 +132,10 @@ module Shapes =
         let over_point = newComps.point + newComps.normalv * epsilon
         let reflectv = reflect ray.direction newComps.normalv
         { newComps with over_point = over_point; reflectv = reflectv; }
-       
+    
+    let prepare_computations (hit:intersection) ray = 
+        prepare_computations2 hit ray (seq {hit})
+
     let shapeWithColor shape color = 
         let sp = shapeToProperties shape
         { sp with material = { sp.material with color = color; }}

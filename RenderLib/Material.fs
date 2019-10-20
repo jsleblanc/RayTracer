@@ -14,6 +14,8 @@ module Material =
         specular: float;
         shininess: float;
         reflective: float;
+        transparency: float;
+        refractive_index: float;
         pattern: pattern option;
     } with static member Default = {
             color = white;
@@ -22,6 +24,10 @@ module Material =
             specular = 0.9;
             shininess = 200.0;
             reflective = 0.0;
+            transparency = 0.0;
+            refractive_index = 1.0;
             pattern = None;
         }
 
+    let glass = 
+        { material.Default with transparency = 1.0; refractive_index = 1.5; }

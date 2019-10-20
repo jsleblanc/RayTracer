@@ -8,6 +8,7 @@ open RenderLib.Tuple
 open RenderLib.Ray
 open RenderLib.Shapes
 open RenderLib.Translations
+open RenderLib.Material
 
 module IntersectionTests = 
     
@@ -168,3 +169,30 @@ module IntersectionTests =
         }
         let comps = prepare_computations i r
         Assert.Equal(vector 0.0 (Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0), comps.reflectv)
+
+    [<Theory>]
+    [<InlineData(0, 1.0, 1.5)>]
+    [<InlineData(1, 1.5, 2.0)>]
+    [<InlineData(2, 2.0, 2.5)>]
+    [<InlineData(3, 2.5, 2.5)>]
+    [<InlineData(4, 2.5, 1.5)>]
+    [<InlineData(5, 1.5, 1.0)>]
+    let ``Finding n1 and n2 at various intersections``(index, n1, n2) =
+        let a = Sphere({ shapeProperties.Default with material = glass; default_transformation = scaling 2.0 2.0 2.0; })
+        let b = Sphere({ shapeProperties.Default with material = { glass with refractive_index = 2.0; }; default_transformation = translation 0.0 0.0 -0.25; })
+        let c = Sphere({ shapeProperties.Default with material = { glass with refractive_index = 2.5; }; default_transformation = translation 0.0 0.0 0.25; })
+        let r = {
+            origin = point 0.0 0.0 -4.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let xs = seq {
+            { t = 2.0; obj = a; };
+            { t = 2.75; obj = b; };
+            { t = 3.25; obj = c; };
+            { t = 4.75; obj = b; };
+            { t = 5.25; obj = c; };
+            { t = 6.0; obj = a; };
+        }
+        let comps = prepare_computations2 (Seq.item(index) xs) r xs
+        Assert.Equal(n1, comps.n1)
+        Assert.Equal(n2, comps.n2)
