@@ -48,7 +48,7 @@ module Worlds =
     let shade_hit world comps = 
         let shadowed = is_shadowed world comps.over_point
         let sp = shapeToProperties comps.obj
-        lighting sp.material world.light comps.point comps.eyev comps.normalv shadowed
+        lighting sp.material comps.obj world.light comps.point comps.eyev comps.normalv shadowed
 
     let color_at world ray =
         let i = intersect_world world ray

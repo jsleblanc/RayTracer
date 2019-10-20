@@ -6,6 +6,7 @@ open Tuple
 open Color
 open Material
 open Patterns
+open Shapes
 
 module Lights =
 
@@ -19,9 +20,9 @@ module Lights =
         intensity = i;
     }
 
-    let lighting m light point eyev normalv inShadow =
+    let lighting m obj light point eyev normalv inShadow =
         let c = match m.pattern with
-                | Some p -> stripe_at p point
+                | Some p -> stripe_at_object p obj point
                 | None -> m.color
         let effective_color = c * light.intensity
         let lightv = (light.position - point).normalize()
