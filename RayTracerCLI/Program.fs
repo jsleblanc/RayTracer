@@ -25,11 +25,14 @@ let main argv =
     let canvas_to_jpg (c:Canvas.canvas) =
         let encoder = new JpegEncoder()
         encoder.Quality <- new Nullable<int>(100)
-        let image = new Image<Rgb24>(c.GetLength(0), c.GetLength(1))
+        let image = new Image<Argb32>(c.GetLength(0), c.GetLength(1))
         for x in 0 .. c.GetLength(0) - 1 do
             for y in 0 .. c.GetLength(1) - 1 do
-                let (r,g,b) = Color.color_byte c.[x,y]
-                let pixel = new Rgb24(r,g,b)
+                let c = c.[x,y]
+                let r = single c.red
+                let g = single c.green
+                let b = single c.blue
+                let pixel = new Argb32(r,g,b,0.0f)
                 image.[x,y] <- pixel
         image.Save("output.jpg", encoder)
 
