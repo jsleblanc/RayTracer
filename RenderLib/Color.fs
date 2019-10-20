@@ -39,6 +39,11 @@ module Color =
             green = cl.green * cr.green;
             blue = cl.blue * cr.blue;
         }
+        static member (/) (c,s) = {
+            red = c.red / s;
+            green = c.green / s;
+            blue = c.blue / s;
+        }
 
     let color r g b = { red = r; green = g; blue = b; }
     let color_byte c = 

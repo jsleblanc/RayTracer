@@ -4,6 +4,7 @@ open System
 open Tuple
 open Color
 open Matrix
+open Translations
 
 module Patterns =
 
@@ -34,6 +35,17 @@ module Patterns =
         else 
             b
 
-    let pattern_at pattern point =
+    //DOESN'T WORK
+    let blendedStripesAtRightAngle t a b =
+        let s1 = stripe_pattern (t * rotation_y(Math.PI/2.0)) a b
+        let s2 = stripe_pattern t a b
+        Blended(identity_matrix (),s1,s2)
+
+    let rec pattern_at pattern point =
         match pattern with
         | Stripe (t,a,b) -> stripe_at a b point
+        | Blended (t,a,b) -> 
+            //DOESN't WORK YET
+            let ca = pattern_at a point
+            let cb = pattern_at b point
+            (ca + cb) / 2.0
