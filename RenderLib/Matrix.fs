@@ -70,26 +70,28 @@ module Matrix =
                 z = calculateCell 2;
                 w = calculateCell 3;
             }
+        static member identity_matrix =
+            let a = matrix(4)
+            a.[0,0] <- 1.0
+            a.[0,1] <- 0.0
+            a.[0,2] <- 0.0
+            a.[0,3] <- 0.0
+            a.[1,0] <- 0.0
+            a.[1,1] <- 1.0
+            a.[1,2] <- 0.0
+            a.[1,3] <- 0.0
+            a.[2,0] <- 0.0
+            a.[2,1] <- 0.0
+            a.[2,2] <- 1.0
+            a.[2,3] <- 0.0
+            a.[3,0] <- 0.0
+            a.[3,1] <- 0.0
+            a.[3,2] <- 0.0
+            a.[3,3] <- 1.0
+            a
 
     let identity_matrix () = 
-        let a = matrix(4)
-        a.[0,0] <- 1.0
-        a.[0,1] <- 0.0
-        a.[0,2] <- 0.0
-        a.[0,3] <- 0.0
-        a.[1,0] <- 0.0
-        a.[1,1] <- 1.0
-        a.[1,2] <- 0.0
-        a.[1,3] <- 0.0
-        a.[2,0] <- 0.0
-        a.[2,1] <- 0.0
-        a.[2,2] <- 1.0
-        a.[2,3] <- 0.0
-        a.[3,0] <- 0.0
-        a.[3,1] <- 0.0
-        a.[3,2] <- 0.0
-        a.[3,3] <- 1.0
-        a
+        matrix.identity_matrix
 
     let submatrix (a:matrix) (row:int) (col:int) =
         let newSize = a.Size - 1
@@ -128,15 +130,18 @@ module Matrix =
         let d = determinant a
         areEqualFloat d 0.0 |> not
 
-    let inverse (a:matrix) =
-        let i = invertible a
-        if i then        
-            let size = a.Size - 1
-            let da = determinant a
-            let r = matrix(a.Size)
-            for row in 0 .. size do
-                for col in 0 .. size do
-                    let c = cofactor a row col
-                    r.[col,row] <- c/da
-            r
-        else raise (Exception("Non-invertible matrix"))
+    let inverse (a:matrix) =        
+        if a = matrix.identity_matrix then 
+            matrix.identity_matrix
+        else
+            let i = invertible a
+            if i then        
+                let size = a.Size - 1
+                let da = determinant a
+                let r = matrix(a.Size)
+                for row in 0 .. size do
+                    for col in 0 .. size do
+                        let c = cofactor a row col
+                        r.[col,row] <- c/da
+                r
+            else raise (Exception("Non-invertible matrix"))
