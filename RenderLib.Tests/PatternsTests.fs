@@ -67,3 +67,42 @@ module PatternsTests =
         let pattern = stripe_pattern (translation 0.5 0.0 0.0) white black
         let c = pattern_at_object pattern obj (point 2.5 0.0 0.0)
         Assert.Equal(white, c)
+
+    [<Fact>]
+    let ``A gradient linearly interpolates between colors``() =
+        let pattern = gradient_pattern_default white black
+        Assert.Equal(white, pattern_at pattern (point 0.0 0.0 0.0))
+        Assert.Equal(color 0.75 0.75 0.75, pattern_at pattern (point 0.25 0.0 0.0))
+        Assert.Equal(color 0.5 0.5 0.5, pattern_at pattern (point 0.50 0.0 0.0))
+        Assert.Equal(color 0.25 0.25 0.25, pattern_at pattern (point 0.75 0.0 0.0))
+        Assert.Equal(color 0.1 0.1 0.1, pattern_at pattern (point 0.9 0.0 0.0))
+
+    [<Fact>]
+    let ``A ring should extend in both x and z``() =
+        let pattern = ring_pattern_default white black
+        Assert.Equal(white, pattern_at pattern (point 0.0 0.0 0.0))
+        Assert.Equal(black, pattern_at pattern (point 1.0 0.0 0.0))
+        Assert.Equal(black, pattern_at pattern (point 0.0 0.0 1.0))
+        Assert.Equal(black, pattern_at pattern (point 0.708 0.0 0.708))
+
+    [<Fact>]
+    let ``Checkers should repeat in x``() =
+        let pattern = checkers_pattern_default white black
+        Assert.Equal(white, pattern_at pattern (point 0.0 0.0 0.0))
+        Assert.Equal(white, pattern_at pattern (point 0.99 0.0 0.0))
+        Assert.Equal(black, pattern_at pattern (point 1.01 0.0 0.0))
+
+    [<Fact>]
+    let ``Checkers should repeat in y``() =
+        let pattern = checkers_pattern_default white black
+        Assert.Equal(white, pattern_at pattern (point 0.0 0.0 0.0))
+        Assert.Equal(white, pattern_at pattern (point 0.0 0.99 0.0))
+        Assert.Equal(black, pattern_at pattern (point 0.0 1.01 0.0))
+
+    [<Fact>]
+    let ``Checkers should repeat in z``() =
+        let pattern = checkers_pattern_default white black
+        Assert.Equal(white, pattern_at pattern (point 0.0 0.0 0.0))
+        Assert.Equal(white, pattern_at pattern (point 0.0 0.0 0.99))
+        Assert.Equal(black, pattern_at pattern (point 0.0 0.0 1.01))
+

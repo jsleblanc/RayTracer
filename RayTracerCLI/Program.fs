@@ -18,6 +18,9 @@ open System.Diagnostics
 [<EntryPoint>]
 let main argv =
 
+    let red = color 1.0 0.0 0.0
+    let blue = color 0.0 0.0 1.0
+
     let canvas_to_jpg (c:Canvas.canvas) =
         let encoder = new JpegEncoder()
         encoder.Quality <- new Nullable<int>(100)
@@ -29,8 +32,9 @@ let main argv =
                 image.[x,y] <- pixel
         image.Save("output.jpg", encoder)
 
-    let p = stripe_pattern ((scaling 0.25 0.25 0.25) * rotation_y(Math.PI/4.0)) white black
-    //let p = blendedStripesAtRightAngle (scaling 0.25 0.25 0.25) white black
+    let p = Solid(red)// blue
+    //let p = checkers_pattern (scaling 0.5 0.5 0.5) red blue
+    //let p = blendedStripesAtRightAngle white black
     let planeMaterial = 
         { material.Default with color = color 1.0 0.9 0.9; specular = 0.0; pattern = Some p; }
 
