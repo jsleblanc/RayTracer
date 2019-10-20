@@ -566,6 +566,6 @@ module MatrixTests =
 
     [<Fact>]
     let ``identity_matrix should return new copy every time``() =
-        let i1 = identity_matrix
-        let i2 = identity_matrix
+        let i1 = identity_matrix ()
+        let i2 = identity_matrix ()
         Assert.NotSame(i1, i2)
