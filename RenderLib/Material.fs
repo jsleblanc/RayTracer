@@ -13,6 +13,7 @@ module Material =
         diffuse: float;
         specular: float;
         shininess: float;
+        reflective: float;
         pattern: pattern option;
     } with static member Default = {
             color = white;
@@ -20,6 +21,7 @@ module Material =
             diffuse = 0.9;
             specular = 0.9;
             shininess = 200.0;
+            reflective = 0.0;
             pattern = None;
         }
 

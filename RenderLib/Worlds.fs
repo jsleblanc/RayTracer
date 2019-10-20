@@ -45,15 +45,34 @@ module Worlds =
         | Some i -> i.t < distance
         | None -> false
 
-    let shade_hit world comps = 
+    let rec reflected_color world comps remaining =
+        if remaining < 1 then
+            black
+        else
+            let sp = shapeToProperties comps.obj
+            if sp.material.reflective = 0.0 then
+                black
+            else
+                let reflect_ray = {
+                    origin = comps.over_point;
+                    direction = comps.reflectv;
+                }
+                let c = color_at world reflect_ray (remaining - 1)
+                c * sp.material.reflective
+
+    and shade_hit world comps remaining = 
         let shadowed = is_shadowed world comps.over_point
         let sp = shapeToProperties comps.obj
-        lighting sp.material comps.obj world.light comps.point comps.eyev comps.normalv shadowed
+        let surface = lighting sp.material comps.obj world.light comps.point comps.eyev comps.normalv shadowed
+        let reflected = reflected_color world comps remaining
+        surface + reflected
 
-    let color_at world ray =
+    and color_at world ray remaining =
         let i = intersect_world world ray
         match hit i with 
         | Some hit -> 
             let comp = prepare_computations hit ray
-            shade_hit world comp
-        | None -> color 0.0 0.0 0.0
+            shade_hit world comp remaining
+        | None -> black
+
+

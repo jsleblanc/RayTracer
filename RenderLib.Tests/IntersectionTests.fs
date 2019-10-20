@@ -154,3 +154,17 @@ module IntersectionTests =
         let comps = prepare_computations i r
         Assert.True(comps.over_point.z < -epsilon/2.0)
         Assert.True(comps.point.z > comps.over_point.z)
+
+    [<Fact>]
+    let ``Precomputing the reflection vector``() =
+        let p = Plane(shapeProperties.Default)
+        let r = {
+            origin = point 0.0 1.0 -1.0;
+            direction = vector 0.0 (-Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0);
+        }
+        let i = {
+            t = Math.Sqrt(2.0);
+            obj = p;
+        }
+        let comps = prepare_computations i r
+        Assert.Equal(vector 0.0 (Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0), comps.reflectv)

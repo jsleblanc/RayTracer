@@ -55,7 +55,7 @@ module WorldTests =
             obj = s;
         }
         let comps = prepare_computations i r
-        let c = shade_hit w comps
+        let c = shade_hit w comps 5
         Assert.Equal(color 0.38066119308103435 0.47582649135129296 0.28549589481077575, c)
 
     [<Fact>]
@@ -72,7 +72,7 @@ module WorldTests =
             obj = s;
         }
         let comps = prepare_computations i r
-        let c = shade_hit w comps
+        let c = shade_hit w comps 5
         Assert.Equal(color 0.9049844721 0.9049844721 0.9049844721, c)
 
     [<Fact>]
@@ -92,7 +92,7 @@ module WorldTests =
             direction = vector 0.0 0.0 1.0;
         }
         let comps = prepare_computations i r
-        let c = shade_hit w comps
+        let c = shade_hit w comps 5
         Assert.Equal(color 0.1 0.1 0.1, c)
 
     [<Fact>]
@@ -102,7 +102,7 @@ module WorldTests =
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 1.0 0.0;
         }
-        let c = color_at w r
+        let c = color_at w r 5
         Assert.Equal(color 0.0 0.0 0.0, c)
 
     [<Fact>]
@@ -112,7 +112,7 @@ module WorldTests =
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
         }
-        let c = color_at w r
+        let c = color_at w r 5
         Assert.Equal(color 0.38066119308103435 0.47582649135129296 0.28549589481077575, c)
 
     [<Fact>]
@@ -124,7 +124,7 @@ module WorldTests =
             origin = point 0.0 0.0 0.75;
             direction = vector 0.0 0.0 -1.0;
         }
-        let c = color_at w r
+        let c = color_at w r 5
         match inner with
         | Sphere s -> Assert.Equal(s.material.color, c)
 
@@ -155,3 +155,79 @@ module WorldTests =
         let p = point -2.0 2.0 -2.0
         let result = is_shadowed default_world p
         Assert.False(result)
+
+    [<Fact>]
+    let ``The reflected color for a nonreflective material``() =
+        let s2 = Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; material = { material.Default with ambient = 1.0; }})
+        let default_world = { world.Default with objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); s2]; }
+        let r = {
+            origin = point 0.0 0.0 0.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let i = {
+            t = 1.0;
+            obj = s2;
+        }
+        let comps = prepare_computations i r
+        let color = reflected_color default_world comps 5
+        Assert.Equal(black, color)
+
+    [<Fact>]
+    let ``The reflected color for a reflective material``() = 
+        let p = Plane({ shapeProperties.Default with material = { material.Default with reflective = 0.5; }; default_transformation = translation 0.0 -1.0 0.0; })
+        let w = { world.Default with objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; }); p; ]; }
+        let r = {
+            origin = point 0.0 0.0 -3.0;
+            direction = vector 0.0 (-Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0);
+        }
+        let i = {
+            t = Math.Sqrt(2.0);
+            obj = p;
+        }
+        let comps = prepare_computations i r
+        let actual = reflected_color w comps 5
+        Assert.Equal(color 0.1903305967 0.2379132459 0.1427479475, actual)
+
+    [<Fact>]
+    let ``shade_hit() with a reflective material``() =
+        let p = Plane({ shapeProperties.Default with material = { material.Default with reflective = 0.5; }; default_transformation = translation 0.0 -1.0 0.0; })
+        let w = { world.Default with objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); p; ]; }
+        let r = {
+            origin = point 0.0 0.0 -3.0;
+            direction = vector 0.0 (-Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0);
+        }
+        let i = {
+            t = Math.Sqrt(2.0);
+            obj = p;
+        }
+        let comps = prepare_computations i r
+        let c = shade_hit w comps 5
+        Assert.Equal(color 0.8767559857 0.9243386349 0.8291733365, c)
+
+    [<Fact>]
+    let ``color_at() with mutually reflective surfaces``() =
+        let lower = Plane({ shapeProperties.Default with material = { material.Default with reflective = 1.0; }; default_transformation = translation 0.0 -1.0 0.0; })
+        let upper = Plane({ shapeProperties.Default with material = { material.Default with reflective = 1.0; }; default_transformation = translation 0.0 1.0 0.0; })
+        let w = { world.Default with objs = [ lower; upper; ] }
+        let r = {
+            origin = point 0.0 0.0 0.0;
+            direction = vector 0.0 1.0 0.0;
+        }
+        let c = color_at w r 500
+        Assert.NotEqual(black, c)
+
+    [<Fact>]
+    let ``The reflected color at the maximum recursive depth``() =
+        let p = Plane({ shapeProperties.Default with material = { material.Default with reflective = 0.5; }; default_transformation = translation 0.0 -1.0 0.0; })
+        let w = { world.Default with objs = [Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); p; ]; }
+        let r = {
+            origin = point 0.0 0.0 -3.0;
+            direction = vector 0.0 (-Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0);
+        }
+        let i = {
+            t = Math.Sqrt(2.0);
+            obj = p;
+        }
+        let comps = prepare_computations i r
+        let c = reflected_color w comps 0
+        Assert.Equal(black, c)

@@ -74,7 +74,7 @@ module Camera =
         coords
         |> PSeq.map (fun (x,y) -> 
                 let ray = ray_for_pixel camera x y
-                let color = color_at world ray
+                let color = color_at world ray 5
                 (color, x, y)
             )
         |> Seq.iter (fun (c, x, y) -> write_pixel x y c image |> ignore)

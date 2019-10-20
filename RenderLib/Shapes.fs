@@ -36,6 +36,7 @@ module Shapes =
         point: tuple;
         eyev: tuple;
         normalv: tuple;
+        reflectv: tuple;
         inside: bool;
         over_point: tuple;
     }
@@ -108,6 +109,7 @@ module Shapes =
             point = p;
             eyev = -ray.direction;
             normalv = normal_at i.obj p;
+            reflectv = vector 0.0 0.0 0.0;
             inside = false;
             over_point = point 0.0 0.0 0.0;
         }
@@ -116,7 +118,9 @@ module Shapes =
                 { comps with inside = true; normalv = -comps.normalv; }
             else
                 comps
-        { newComps with over_point = newComps.point + newComps.normalv * epsilon;}
+        let over_point = newComps.point + newComps.normalv * epsilon
+        let reflectv = reflect ray.direction newComps.normalv
+        { newComps with over_point = over_point; reflectv = reflectv; }
        
     let shapeWithColor shape color = 
         let sp = shapeToProperties shape
