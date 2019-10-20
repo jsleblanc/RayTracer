@@ -79,11 +79,6 @@ module Patterns =
     let private blended_at (a:color) (b:color) =
         (a + b) / 2.0 //average
 
-    let blendedStripesAtRightAngle a b =
-        let s1 = stripe_pattern_default a b
-        let s2 = stripe_pattern (rotation_y(-Math.PI/2.0)) a b
-        Blended(s1,s2)
-
     let rec pattern_at pattern object_point =
         let pattern_transform = patternTransform pattern
         let pattern_point = inverse pattern_transform * object_point
