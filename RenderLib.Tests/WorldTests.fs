@@ -12,6 +12,7 @@ open RenderLib.Translations
 open RenderLib.Ray
 open RenderLib.Lights
 open RenderLib.Worlds
+open RenderLib.Patterns
 
 module WorldTests = 
 
@@ -282,3 +283,38 @@ module WorldTests =
         let comps = prepare_computations (Seq.item(1) xs) r xs
         let c = refracted_color w comps 5
         Assert.Equal(black, c)
+
+    [<Fact>]
+    let ``The refracted color with a refracted ray``() =
+        let s1 = Sphere({ shapeProperties.Default with material = { material.Default with ambient = 1.0; pattern = Some pattern.Test; }})
+        let s2 = Sphere({ shapeProperties.Default with material = glass; default_transformation = scaling 0.5 0.5 0.5; })
+        let w = { world.Default with objs = [s1; s2]; }
+        let r = {
+            origin = point 0.0 0.0 0.1;
+            direction = vector 0.0 1.0 0.0;
+        }
+        let xs = seq {
+            { t = -0.9899; obj = s1; }
+            { t = -0.4899; obj = s2; }
+            { t = 0.4899; obj = s2; }
+            { t = 0.9899; obj = s1; }
+        }
+        let comps = prepare_computations (Seq.item(2) xs) r xs
+        let c = refracted_color w comps 5
+        Assert.Equal(color 0.0 0.9988846828 0.04721642191, c)
+
+    [<Fact>]
+    let ``shade_hit() with a transparent material``() =
+        let floor = Plane({shapeProperties.Default with material = glass; default_transformation = translation 0.0 -1.0 0.0;})
+        let ball = Sphere({shapeProperties.Default with material = { material.Default with color = color 1.0 0.0 0.0; ambient = 0.5;}; default_transformation = translation 0.0 -3.5 -0.5;})
+        let w = { world.Default with objs = [ Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; }); floor; ball; ]; }
+        let r = {
+            origin = point 0.0 0.0 -3.0;
+            direction = vector 0.0 (-Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0);
+        }
+        let xs = seq {
+            { t = Math.Sqrt(2.0); obj = floor; }
+        }
+        let comps = prepare_computations (Seq.item(0) xs) r xs
+        let c = shade_hit w comps 5
+        Assert.Equal(color 0.93642 0.68642 0.68642, c)

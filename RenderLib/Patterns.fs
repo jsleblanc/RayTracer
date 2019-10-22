@@ -10,6 +10,7 @@ open Translations
 module Patterns =
 
     type pattern = 
+    | Test
     | Solid of a:color
     | Stripe of transform:matrix * a:color * b:color
     | Gradient of transform:matrix * a:color * b:color
@@ -19,6 +20,7 @@ module Patterns =
 
     let rec patternTransform pattern =
         match pattern with
+        | Test -> identity_matrix()
         | Solid (_) -> identity_matrix()
         | Stripe (t,_,_) -> t
         | Gradient (t,_,_) -> t
@@ -91,6 +93,7 @@ module Patterns =
         let pattern_transform = patternTransform pattern
         let pattern_point = inverse pattern_transform * object_point
         match pattern with
+        | Test -> color pattern_point.x pattern_point.y pattern_point.z
         | Solid (a) -> a
         | Stripe (_,a,b) -> stripe_at a b pattern_point
         | Gradient (_,a,b) -> gradient_at a b pattern_point

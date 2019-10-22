@@ -65,7 +65,8 @@ module Worlds =
         let sp = shapeToProperties comps.obj
         let surface = lighting sp.material comps.obj world.light comps.point comps.eyev comps.normalv shadowed
         let reflected = reflected_color world comps remaining
-        surface + reflected
+        let refracted = refracted_color world comps remaining
+        surface + reflected + refracted
 
     and color_at world ray remaining =
         let i = intersect_world world ray
@@ -75,7 +76,7 @@ module Worlds =
             shade_hit world comp remaining
         | None -> black
 
-    let rec refracted_color world comps remaining =
+    and refracted_color world comps remaining =
         let sp = shapeToProperties comps.obj
         if remaining = 0 || sp.material.transparency = 0.0 then
             black
@@ -86,4 +87,11 @@ module Worlds =
             if sin2_t > 1.0 then
                 black
             else
-                white
+                let cos_t = Math.Sqrt(1.0 - sin2_t)
+                let direction = comps.normalv * (n_ratio * cos_i - cos_t) - comps.eyev * n_ratio
+                let refract_ray = {
+                    origin = comps.under_point;
+                    direction = direction;
+                }
+                let c = color_at world refract_ray (remaining - 1)
+                c * sp.material.transparency
