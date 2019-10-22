@@ -306,7 +306,7 @@ module WorldTests =
     [<Fact>]
     let ``shade_hit() with a transparent material``() =
         let floor = Plane({shapeProperties.Default with material = glass; default_transformation = translation 0.0 -1.0 0.0;})
-        let ball = Sphere({shapeProperties.Default with material = { material.Default with color = color 1.0 0.0 0.0; ambient = 0.5;}; default_transformation = translation 0.0 -3.5 -0.5;})
+        let ball = Sphere({shapeProperties.Default with material = { material.Default with color = color 1.0 0.0 0.0; ambient = 0.25;}; default_transformation = translation 0.0 -3.5 -0.5;})
         let w = { world.Default with objs = [ Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }}); Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; }); floor; ball; ]; }
         let r = {
             origin = point 0.0 0.0 -3.0;
@@ -317,4 +317,4 @@ module WorldTests =
         }
         let comps = prepare_computations (Seq.item(0) xs) r xs
         let c = shade_hit w comps 5
-        Assert.Equal(color 0.93642 0.68642 0.68642, c)
+        Assert.Equal(color 0.936425389 0.686425389 0.686425389, c)
