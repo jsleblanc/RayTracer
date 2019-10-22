@@ -54,7 +54,7 @@ module WorldTests =
             t = 4.0;
             obj = s;
         }
-        let comps = prepare_computations i r
+        let comps = prepare_computations i r (seq {i})
         let c = shade_hit w comps 5
         Assert.Equal(color 0.38066119308103435 0.47582649135129296 0.28549589481077575, c)
 
@@ -71,7 +71,7 @@ module WorldTests =
             t = 0.5;
             obj = s;
         }
-        let comps = prepare_computations i r
+        let comps = prepare_computations i r (seq {i})
         let c = shade_hit w comps 5
         Assert.Equal(color 0.9049844721 0.9049844721 0.9049844721, c)
 
@@ -91,7 +91,7 @@ module WorldTests =
             origin = point 0.0 0.0 5.0;
             direction = vector 0.0 0.0 1.0;
         }
-        let comps = prepare_computations i r
+        let comps = prepare_computations i r (seq {i})
         let c = shade_hit w comps 5
         Assert.Equal(color 0.1 0.1 0.1, c)
 
@@ -168,7 +168,7 @@ module WorldTests =
             t = 1.0;
             obj = s2;
         }
-        let comps = prepare_computations i r
+        let comps = prepare_computations i r (seq {i})
         let color = reflected_color default_world comps 5
         Assert.Equal(black, color)
 
@@ -184,7 +184,7 @@ module WorldTests =
             t = Math.Sqrt(2.0);
             obj = p;
         }
-        let comps = prepare_computations i r
+        let comps = prepare_computations i r (seq {i})
         let actual = reflected_color w comps 5
         Assert.Equal(color 0.1903305967 0.2379132459 0.1427479475, actual)
 
@@ -200,7 +200,7 @@ module WorldTests =
             t = Math.Sqrt(2.0);
             obj = p;
         }
-        let comps = prepare_computations i r
+        let comps = prepare_computations i r (seq {i})
         let c = shade_hit w comps 5
         Assert.Equal(color 0.8767559857 0.9243386349 0.8291733365, c)
 
@@ -228,6 +228,57 @@ module WorldTests =
             t = Math.Sqrt(2.0);
             obj = p;
         }
-        let comps = prepare_computations i r
+        let comps = prepare_computations i r (seq {i})
         let c = reflected_color w comps 0
+        Assert.Equal(black, c)
+
+    [<Fact>]
+    let ``The refracted color with an opaque surface``() =
+        let s1 = Sphere({ shapeProperties.Default with material = { material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }})
+        let s2 = Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; })
+        let w = { world.Default with objs = [s1; s2]; }
+        let r = {
+            origin = point 0.0 0.0 -5.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let xs = seq {
+            { t = 4.0; obj = s1; }
+            { t = 6.0; obj = s1; }
+        }
+        let comps = prepare_computations (Seq.item(0) xs) r xs
+        let c = refracted_color w comps 5
+        Assert.Equal(black, c)
+
+    [<Fact>]
+    let ``The refracted color at the maximum recursive depth``() =
+        let s1 = Sphere({ shapeProperties.Default with material = { glass with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }})
+        let s2 = Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; })
+        let w = { world.Default with objs = [s1; s2]; }
+        let r = {
+            origin = point 0.0 0.0 -5.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let xs = seq {
+            { t = 4.0; obj = s1; }
+            { t = 6.0; obj = s1; }
+        }
+        let comps = prepare_computations (Seq.item(0) xs) r xs
+        let c = refracted_color w comps 0
+        Assert.Equal(black, c)
+
+    [<Fact>]
+    let ``The refracted color under total internal reflection``() =
+        let s1 = Sphere({ shapeProperties.Default with material = { glass with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }})
+        let s2 = Sphere({ shapeProperties.Default with default_transformation = scaling 0.5 0.5 0.5; })
+        let w = { world.Default with objs = [s1; s2]; }
+        let r = {
+            origin = point 0.0 0.0 (Math.Sqrt(2.0)/2.0);
+            direction = vector 0.0 1.0 0.0;
+        }
+        let xs = seq {
+            { t = (-Math.Sqrt(2.0)/2.0); obj = s1; }
+            { t = (Math.Sqrt(2.0)/2.0); obj = s1; }
+        }
+        let comps = prepare_computations (Seq.item(1) xs) r xs
+        let c = refracted_color w comps 5
         Assert.Equal(black, c)

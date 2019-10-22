@@ -39,6 +39,7 @@ module Shapes =
         reflectv: tuple;
         inside: bool;
         over_point: tuple;
+        under_point: tuple;
         n1: float;
         n2: float;
     }
@@ -103,15 +104,43 @@ module Shapes =
         }
         v.normalize()
 
+    //not happy with this, still an "imperative" algorithm, need to figure out how to do it functionally
+    let rec private func (hit:intersection) pos (xs:seq<intersection>) (container:list<shape>) n1 n2 =
+        let mutable c = container
+        let mutable exit = false
+        let i = xs |> Seq.item pos
+        let isHit = i = hit
+        let n1 = 
+            if isHit then
+                if Seq.isEmpty container then
+                    1.0
+                else
+                    let sp = shapeToProperties (Seq.last c)
+                    sp.material.refractive_index
+            else
+                n1
+        c <- if c |> List.contains i.obj then
+                List.filter (fun (s) -> (s = i.obj) |> not) c
+             else
+                List.append c [i.obj]
+        let n2 = 
+            if isHit then
+                exit <- true
+                if Seq.isEmpty c then
+                    1.0
+                else
+                    let sp = shapeToProperties (Seq.last c)
+                    sp.material.refractive_index
+            else
+                n2
+        if exit |> not && pos < (Seq.length xs) then
+            func hit (pos+1) xs c n1 n2
+        else
+            (n1, n2)
 
-        (*
-    let pc (hit:intersection) (xs:seq<intersection>) =
-        let containers = []
-        xs
-        |> List.map (fun (i) -> )
-        *)
-    let prepare_computations2 (hit:intersection) ray (xs:seq<intersection>) = 
+    let prepare_computations (hit:intersection) ray (xs:seq<intersection>) = 
         let p = position ray hit.t
+        let zero_point = point 0.0 0.0 0.0
         let comps = {
             t = hit.t;
             obj = hit.obj;
@@ -120,7 +149,8 @@ module Shapes =
             normalv = normal_at hit.obj p;
             reflectv = vector 0.0 0.0 0.0;
             inside = false;
-            over_point = point 0.0 0.0 0.0;
+            over_point = zero_point;
+            under_point = zero_point;
             n1 = 0.0;
             n2 = 0.0;
         }
@@ -130,12 +160,11 @@ module Shapes =
             else
                 comps
         let over_point = newComps.point + newComps.normalv * epsilon
+        let under_point = newComps.point - newComps.normalv * epsilon
         let reflectv = reflect ray.direction newComps.normalv
-        { newComps with over_point = over_point; reflectv = reflectv; }
+        let (n1,n2) = func hit 0 xs List.empty<shape> 1.0 1.0
+        { newComps with over_point = over_point; under_point = under_point; reflectv = reflectv; n1 = n1; n2 = n2; }
     
-    let prepare_computations (hit:intersection) ray = 
-        prepare_computations2 hit ray (seq {hit})
-
     let shapeWithColor shape color = 
         let sp = shapeToProperties shape
         { sp with material = { sp.material with color = color; }}

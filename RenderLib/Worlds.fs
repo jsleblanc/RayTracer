@@ -71,8 +71,19 @@ module Worlds =
         let i = intersect_world world ray
         match hit i with 
         | Some hit -> 
-            let comp = prepare_computations hit ray
+            let comp = prepare_computations hit ray i
             shade_hit world comp remaining
         | None -> black
 
-
+    let rec refracted_color world comps remaining =
+        let sp = shapeToProperties comps.obj
+        if remaining = 0 || sp.material.transparency = 0.0 then
+            black
+        else
+            let n_ratio = comps.n1 / comps.n2
+            let cos_i = comps.eyev.dotProduct(comps.normalv)
+            let sin2_t = n_ratio**2.0 * (1.0 - cos_i**2.0)
+            if sin2_t > 1.0 then
+                black
+            else
+                white

@@ -104,7 +104,7 @@ module IntersectionTests =
             t = 4.0;
             obj = s;
         } 
-        let comps = prepare_computations i r
+        let comps = prepare_computations i r (seq {i})
         Assert.Equal(i.t, comps.t)
         Assert.Equal(point 0.0 0.0 -1.0, comps.point)
         Assert.Equal(vector 0.0 0.0 -1.0, comps.eyev)
@@ -121,7 +121,7 @@ module IntersectionTests =
             t = 4.0;
             obj = s;
         } 
-        let comps = prepare_computations i r
+        let comps = prepare_computations i r (seq {i})
         Assert.False(comps.inside)
 
     [<Fact>]
@@ -135,7 +135,7 @@ module IntersectionTests =
             t = 1.0;
             obj = s;
         } 
-        let comps = prepare_computations i r
+        let comps = prepare_computations i r (seq {i})
         Assert.Equal(point 0.0 0.0 1.0, comps.point)
         Assert.Equal(vector 0.0 0.0 -1.0, comps.eyev)
         Assert.Equal(vector 0.0 0.0 -1.0, comps.normalv)
@@ -152,7 +152,7 @@ module IntersectionTests =
             t = 5.0;
             obj = s;
         } 
-        let comps = prepare_computations i r
+        let comps = prepare_computations i r (seq {i})
         Assert.True(comps.over_point.z < -epsilon/2.0)
         Assert.True(comps.point.z > comps.over_point.z)
 
@@ -167,7 +167,7 @@ module IntersectionTests =
             t = Math.Sqrt(2.0);
             obj = p;
         }
-        let comps = prepare_computations i r
+        let comps = prepare_computations i r (seq {i})
         Assert.Equal(vector 0.0 (Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0), comps.reflectv)
 
     [<Theory>]
@@ -193,6 +193,22 @@ module IntersectionTests =
             { t = 5.25; obj = c; };
             { t = 6.0; obj = a; };
         }
-        let comps = prepare_computations2 (Seq.item(index) xs) r xs
+        let comps = prepare_computations (Seq.item(index) xs) r xs
         Assert.Equal(n1, comps.n1)
         Assert.Equal(n2, comps.n2)
+
+    [<Fact>]
+    let ``The under point is offset below the surface``() =
+        let r = {
+            origin = point 0.0 0.0 -5.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let s = Sphere({ shapeProperties.Default with material = glass; default_transformation = translation 0.0 0.0 1.0;})
+        let i = {
+            t = 5.0;
+            obj = s;
+        }
+        let xs = seq {i}
+        let comps = prepare_computations i r xs
+        Assert.True(comps.under_point.z > epsilon/2.0)
+        Assert.True(comps.point.z < comps.under_point.z)
