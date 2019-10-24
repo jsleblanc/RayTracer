@@ -53,16 +53,20 @@ let main argv =
 
     let right =
         let m = { material.Default with color = red; diffuse = 0.7; specular = 0.3; }
-        Sphere({ shapeProperties.Default with material = m; default_transformation = (translation 0.75 0.5 5.5) * (scaling 0.75 0.75 0.75); })
+        Sphere({ shapeProperties.Default with material = m; default_transformation = (translation -0.75 1.5 5.0) * (scaling 0.75 0.75 0.75); })
 
     let left = 
         let m = { material.Default with color = yellow; diffuse = 0.7; specular = 0.3; }
         Sphere({ shapeProperties.Default with material = m; default_transformation = (translation -1.5 0.33 -0.75) * (scaling 0.33 0.33 0.33); })
 
-    //let light = { position = point 0.0 10.0 -10.0; intensity = color 1.0 1.0 1.0; }
-    let world = { world.Default with objs = [ plane; middle; right; left; ]; }
+    let cube =
+        Cube({ shapeProperties.Default with material = { material.Default with color = green; }; default_transformation = (translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)); })
 
-    let vt = view_transform (point 0.0 1.5 -5.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
+    //let light = { position = point 0.0 10.0 -10.0; intensity = color 1.0 1.0 1.0; }
+    let world = { world.Default with objs = [ plane; middle; right; left; cube; ]; }
+
+    //let vt = view_transform (point 0.0 1.5 -5.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
+    let vt = view_transform (point 3.0 1.5 -3.5) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
     let camera = { create_default_camera 1920 1200 with transform = vt; }
 
     printfn "Calculating..."
