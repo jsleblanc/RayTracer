@@ -22,8 +22,9 @@ module Shapes =
         }
 
     type shape =
-    | Sphere of shapeProperties
     | Plane of shapeProperties
+    | Sphere of shapeProperties
+    | Cube of shapeProperties
 
     type intersection = {
         t: float;
@@ -46,12 +47,40 @@ module Shapes =
 
     let shapeToProperties shape =
         match shape with
-        | Sphere s -> s
         | Plane p -> p
+        | Sphere s -> s
+        | Cube c -> c
+
+    let private check_axis origin (direction:float) = 
+        let tmin_numerator = -1.0 - origin
+        let tmax_numerator = 1.0 - origin
+        let mutable tmin = 0.0
+        let mutable tmax = 0.0
+        if Math.Abs(direction) >= epsilon then
+            tmin <- tmin_numerator / direction
+            tmax <- tmax_numerator / direction
+        else
+            tmin <- tmin_numerator * Double.PositiveInfinity
+            tmax <- tmax_numerator * Double.PositiveInfinity
+        if tmin > tmax then
+            (tmax, tmin)
+        else
+            (tmin, tmax)
 
     let private local_normal_at shape pt =
         match shape with
         | Sphere _ -> pt - (point 0.0 0.0 0.0)
+        | Cube _ -> 
+            let ax = Math.Abs(pt.x)
+            let ay = Math.Abs(pt.y)
+            let maxc = seq { ax; ay; Math.Abs(pt.z); } |> Seq.max
+            if maxc = ax then
+                vector pt.x 0.0 0.0
+            else
+                if maxc = ay then
+                    vector 0.0 pt.y 0.0
+                else
+                    vector 0.0 0.0 pt.z
         | Plane _ -> vector 0.0 1.0 0.0
 
     let private local_intersect shape local_ray =
@@ -70,6 +99,19 @@ module Shapes =
                 seq {
                     { t = t1; obj = shape; }; 
                     { t = t2; obj = shape; };
+                }
+        | Cube _ ->
+            let (xtmin, xtmax) = check_axis local_ray.origin.x local_ray.direction.x
+            let (ytmin, ytmax) = check_axis local_ray.origin.y local_ray.direction.y
+            let (ztmin, ztmax) = check_axis local_ray.origin.z local_ray.direction.z
+            let tmin = seq { xtmin; ytmin; ztmin; } |> Seq.max
+            let tmax = seq { xtmax; ytmax; ztmax; } |> Seq.min
+            if tmin > tmax then
+                Seq.empty<intersection>
+            else
+                seq {
+                    { t = tmin; obj = shape; };
+                    { t = tmax; obj = shape; };
                 }
         | Plane p -> 
             if Math.Abs(local_ray.direction.y) < epsilon then
