@@ -212,3 +212,47 @@ module IntersectionTests =
         let comps = prepare_computations i r xs
         Assert.True(comps.under_point.z > epsilon/2.0)
         Assert.True(comps.point.z < comps.under_point.z)
+
+    [<Fact>]
+    let ``The Schlick approximation under total internal reflection``() =
+        let s = Sphere({shapeProperties.Default with material = glass; })
+        let r = {
+            origin = point 0.0 0.0 (Math.Sqrt(2.0)/2.0);
+            direction = vector 0.0 1.0 0.0;
+        }
+        let xs = seq {
+            { t = (-Math.Sqrt(2.0)/2.0); obj = s; };
+            { t = (Math.Sqrt(2.0)/2.0); obj = s; };
+        }
+        let comps = prepare_computations (Seq.item(1) xs) r xs
+        let reflectance = schlick comps
+        Assert.Equal(1.0, reflectance)
+
+    [<Fact>]
+    let ``The Schlick approximation with a perpendicular viewing angle``() =
+        let s = Sphere({shapeProperties.Default with material = glass; })
+        let r = {
+            origin = point 0.0 0.0 0.0;
+            direction = vector 0.0 1.0 0.0;
+        }
+        let xs = seq {
+            { t = -1.0; obj = s; };
+            { t = 1.0; obj = s; };
+        }
+        let comps = prepare_computations (Seq.item(1) xs) r xs
+        let reflectance = schlick comps
+        Assert.True(areEqualFloat reflectance 0.04)
+
+    [<Fact>]
+    let ``The Schlick approximation with small angle and n2 > n2``() =
+        let s = Sphere({shapeProperties.Default with material = glass; })
+        let r = {
+            origin = point 0.0 0.99 -2.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let xs = seq {
+            { t = 1.8589; obj = s; };
+        }
+        let comps = prepare_computations (Seq.item(0) xs) r xs
+        let reflectance = schlick comps
+        Assert.Equal(0.48873081012212183, reflectance)

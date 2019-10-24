@@ -177,3 +177,20 @@ module Shapes =
         let sp = shapeToProperties object
         let object_point = inverse sp.default_transformation * pt
         pattern_at pattern object_point
+
+    let schlick comps =
+        let f cos comps = 
+            let r0 = ((comps.n1 - comps.n2) / (comps.n1 + comps.n2))**2.0
+            r0 + (1.0 - r0) * (1.0 - cos)**5.0
+        
+        let cos = comps.eyev.dotProduct(comps.normalv)
+        if comps.n1 > comps.n2 then
+            let n = comps.n1 / comps.n2
+            let sin2_t = n**2.0 * (1.0 - cos**2.0)            
+            if sin2_t > 1.0 then
+                1.0
+            else
+                let cos_t = Math.Sqrt(1.0 - sin2_t)
+                f cos_t comps
+        else
+            f cos comps

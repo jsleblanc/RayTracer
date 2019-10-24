@@ -66,7 +66,11 @@ module Worlds =
         let surface = lighting sp.material comps.obj world.light comps.point comps.eyev comps.normalv shadowed
         let reflected = reflected_color world comps remaining
         let refracted = refracted_color world comps remaining
-        surface + reflected + refracted
+        if sp.material.reflective > 0.0 && sp.material.transparency > 0.0 then
+            let reflectance = schlick comps
+            surface + reflected * reflectance + refracted * (1.0 - reflectance)
+        else
+            surface + reflected + refracted
 
     and color_at world ray remaining =
         let i = intersect_world world ray
