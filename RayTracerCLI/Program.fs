@@ -48,7 +48,7 @@ let main argv =
         //Plane({ shapeProperties.Default with material = planeMaterial; default_transformation = (translation 0.0 0.0 10.0) * (rotation_x (Math.PI/2.0)); })
 
     let middle = 
-        let m = { glass with diffuse = 0.01; ambient = 0.2; reflective = 0.9; specular = 1.0; shininess = 300.0; }
+        let m = { glass with diffuse = 0.01; ambient = 0.02; reflective = 0.9; specular = 1.0; shininess = 300.0; }
         Sphere({ shapeProperties.Default with material = m; default_transformation = translation -0.5 1.0 0.5; })
 
     let right =
@@ -67,7 +67,7 @@ let main argv =
 
     //let vt = view_transform (point 0.0 1.5 -5.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
     let vt = view_transform (point 3.0 1.5 -3.5) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
-    let camera = { create_default_camera 1920 1200 with transform = vt; }
+    let camera = { create_default_camera 3840 2160 with transform = vt; }
 
     printfn "Calculating..."
     let sw = Stopwatch.StartNew()
