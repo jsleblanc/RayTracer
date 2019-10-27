@@ -26,6 +26,7 @@ module Shapes =
     | Sphere of shapeProperties
     | Cube of shapeProperties
     | Cylinder of shapeProperties * Minimum:float * Maximum:float * Closed:bool
+    | Cone of shapeProperties * Minimum:float * Maximum:float * Closed:bool
 
     type intersection = {
         t: float;
@@ -170,6 +171,7 @@ module Shapes =
                     let s1 = seq { calc t0; calc t1; } |> Seq.choose id 
                     let s2 = intersect_caps local_ray
                     s1 |> Seq.append s2
+
 
     let intersect shape ray =
         let sp = shapeToProperties shape

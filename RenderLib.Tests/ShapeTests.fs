@@ -280,3 +280,52 @@ module ShapeTests =
             Assert.Equal(vector 0.0 1.0 0.0, f (point 0.0 2.0 0.0))
             Assert.Equal(vector 0.0 1.0 0.0, f (point 0.5 2.0 0.0))
             Assert.Equal(vector 0.0 1.0 0.0, f (point 0.0 2.0 0.5))
+
+    module ConeTests = 
+
+        [<Fact>]
+        let ``Intersecting a cone with a ray``() =
+            let ray_strikes o (v:tuple) t0 t1 =
+                let c = Cone(shapeProperties.Default,Double.NegativeInfinity,Double.PositiveInfinity,false)
+                let r = {
+                    origin = o;
+                    direction = v.normalize()
+                }
+                let xs = intersect c r
+                Assert.Equal(2, Seq.length xs)
+                ((Seq.item(0) xs).t = t0) && ((Seq.item(1) xs).t = t1)
+            Assert.True(ray_strikes (point 0.0 0.0 -5.0) (vector 0.0 0.0 1.0) 5.0 5.0)
+            Assert.True(ray_strikes (point 0.0 0.0 -5.0) (vector 1.0 1.0 1.0) 8.66025 8.66025)
+            Assert.True(ray_strikes (point 1.0 1.0 -5.0) (vector -0.5 -1.0 1.0) 4.55006 49.44994)
+
+        [<Fact>]
+        let ``Intersecting a cone with a ray parallel to one if its halves``() =
+            let c = Cone(shapeProperties.Default,Double.NegativeInfinity,Double.PositiveInfinity,false)
+            let r = {
+                origin = point 0.0 0.0 -1.0;
+                direction = (vector 0.0 1.0 1.0).normalize();
+            }
+            let xs = intersect c r
+            Assert.Equal(1, Seq.length xs)
+            Assert.True(areEqualFloat (Seq.item(0) xs).t 0.35355)
+
+        [<Fact>]
+        let ``Intersecting a cones end caps``() =
+            let ray_strikes o (d:tuple) =
+                let c = Cone(shapeProperties.Default,-0.5,0.5,true)
+                let r = {
+                    origin = o;
+                    direction = d.normalize();
+                }
+                let xs = intersect c r
+                Seq.length xs
+            Assert.Equal(0, ray_strikes (point 0.0 0.0 -5.0) (vector 0.0 1.0 0.0))
+            Assert.Equal(2, ray_strikes (point 0.0 0.0 -0.25) (vector 0.0 1.0 1.0))
+            Assert.Equal(4, ray_strikes (point 0.0 0.0 -0.25) (vector 0.0 1.0 0.0))
+
+        [<Fact>]
+        let ``Computing the normal vector on a cone``() =
+            let c = Cone(shapeProperties.Default,Double.NegativeInfinity,Double.PositiveInfinity,false)
+            Assert.Equal(vector 0.0 0.0 0.0, normal_at c (point 0.0 0.0 0.0))
+            Assert.Equal(vector 1.0 (-Math.Sqrt(2.0)) 1.0, normal_at c (point 1.0 1.0 1.0))
+            Assert.Equal(vector -1.0 1.0 0.0, normal_at c (point -1.0 -1.0 0.0))
