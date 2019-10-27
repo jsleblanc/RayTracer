@@ -25,6 +25,7 @@ module Shapes =
     | Plane of shapeProperties
     | Sphere of shapeProperties
     | Cube of shapeProperties
+    | Cylinder of shapeProperties
 
     type intersection = {
         t: float;
@@ -50,6 +51,7 @@ module Shapes =
         | Plane p -> p
         | Sphere s -> s
         | Cube c -> c
+        | Cylinder c -> c
 
     let private check_axis origin (direction:float) = 
         let tmin_numerator = -1.0 - origin
@@ -82,6 +84,7 @@ module Shapes =
                 else
                     vector 0.0 0.0 pt.z
         | Plane _ -> vector 0.0 1.0 0.0
+        | Cylinder _ -> vector pt.x 0.0 pt.z
 
     let private local_intersect shape local_ray =
         let normal = local_normal_at shape local_ray.origin
@@ -118,6 +121,23 @@ module Shapes =
                 Seq.empty<intersection>
             else
                 seq [{ t = -local_ray.origin.y / local_ray.direction.y; obj = Plane p; }]
+        | Cylinder cyl ->
+            let a = local_ray.direction.x**2.0 + local_ray.direction.z**2.0
+            if areEqualFloat a 0.0 then
+                Seq.empty<intersection>
+            else
+                let b = 2.0 * local_ray.origin.x * local_ray.direction.x + 2.0 * local_ray.origin.z * local_ray.direction.z
+                let c = local_ray.origin.x**2.0 + local_ray.origin.z**2.0 - 1.0
+                let disc = b**2.0 - 4.0 * a * c
+                if disc < 0.0 then
+                    Seq.empty<intersection>
+                else
+                    let t0 = (-b - Math.Sqrt(disc)) / (2.0 * a)
+                    let t1 = (-b + Math.Sqrt(disc)) / (2.0 * a)
+                    seq {
+                        { t = t0; obj = Cylinder cyl; };
+                        { t = t1; obj = Cylinder cyl; }
+                    }
 
     let intersect shape ray =
         let sp = shapeToProperties shape
