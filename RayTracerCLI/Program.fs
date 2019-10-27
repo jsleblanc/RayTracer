@@ -62,12 +62,15 @@ let main argv =
     let cube =
         Cube({ shapeProperties.Default with material = { material.Default with color = green; }; default_transformation = (translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)); })
 
+    let cylinder =
+        Cylinder({ shapeProperties.Default with material = { material.Default with color = green; }; default_transformation = (translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)); },1.0,3.0,true)
+
     //let light = { position = point 0.0 10.0 -10.0; intensity = color 1.0 1.0 1.0; }
-    let world = { world.Default with objs = [ plane; middle; right; left; cube; ]; }
+    let world = { world.Default with objs = [ plane; middle; right; left; cylinder; ]; }
 
     //let vt = view_transform (point 0.0 1.5 -5.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
     let vt = view_transform (point 3.0 1.5 -3.5) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
-    let camera = { create_default_camera 3840 2160 with transform = vt; }
+    let camera = { create_default_camera 640 480 with transform = vt; }
 
     printfn "Calculating..."
     let sw = Stopwatch.StartNew()

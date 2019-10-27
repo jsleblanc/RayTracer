@@ -201,7 +201,7 @@ module ShapeTests =
         [<Fact>]
         let ``A ray misses a cylinder``() =
             let ray_misses o (v:tuple) =
-                let cyl = Cylinder(shapeProperties.Default)
+                let cyl = Cylinder(shapeProperties.Default, Double.NegativeInfinity, Double.PositiveInfinity, false)
                 let direction = v.normalize()
                 let r = {
                     origin = o;
@@ -216,11 +216,10 @@ module ShapeTests =
         [<Fact>]
         let ``A ray strikes a cylinder``() =
             let ray_strikes o (v:tuple) t0 t1 =
-                let cyl = Cylinder(shapeProperties.Default)
-                let direction = v.normalize()
+                let cyl = Cylinder(shapeProperties.Default, Double.NegativeInfinity, Double.PositiveInfinity, false)
                 let r = {
                     origin = o;
-                    direction = direction;
+                    direction = v.normalize();
                 }
                 let xs = intersect cyl r 
                 Assert.Equal(2, Seq.length xs)
@@ -231,8 +230,53 @@ module ShapeTests =
 
         [<Fact>]
         let ``Normal vector on a cylinder``() =
-            let cyl = Cylinder(shapeProperties.Default)
+            let cyl = Cylinder(shapeProperties.Default, Double.NegativeInfinity, Double.PositiveInfinity, false)
             Assert.Equal(vector 1.0 0.0 0.0, normal_at cyl (point 1.0 0.0 0.0))
             Assert.Equal(vector 0.0 0.0 -1.0, normal_at cyl (point 0.0 5.0 -1.0))
             Assert.Equal(vector 0.0 0.0 1.0, normal_at cyl (point 0.0 -2.0 1.0))
             Assert.Equal(vector -1.0 0.0 0.0, normal_at cyl (point -1.0 1.0 0.0))
+
+        [<Fact>]
+        let ``Intersecting a constrained cylinder``() =
+            let f p (d:tuple) =
+                let cyl = Cylinder(shapeProperties.Default, 1.0, 2.0, false)
+                let r = {
+                    origin = p;
+                    direction = d.normalize();
+                }
+                let xs = intersect cyl r
+                Seq.length xs
+            Assert.Equal(0, f (point 0.0 1.5 0.0) (vector 0.1 1.0 0.0))
+            Assert.Equal(0, f (point 0.0 3.0 -5.0) (vector 0.0 0.0 1.0))
+            Assert.Equal(0, f (point 0.0 0.0 -5.0) (vector 0.0 0.0 1.0))
+            Assert.Equal(0, f (point 0.0 2.0 -5.0) (vector 0.0 0.0 1.0))
+            Assert.Equal(0, f (point 0.0 1.0 -5.0) (vector 0.0 0.0 1.0))
+            Assert.Equal(2, f (point 0.0 1.5 -2.0) (vector 0.0 0.0 1.0))
+
+        [<Fact>]
+        let ``Intersecting the caps of a closed cylinder``() =
+            let f p (d:tuple) =
+                let cyl = Cylinder(shapeProperties.Default,1.0,2.0,true)
+                let r = {
+                    origin = p;
+                    direction = d.normalize();
+                }
+                let xs = intersect cyl r
+                Seq.length xs
+            Assert.Equal(2, f (point 0.0 3.0 0.0) (vector 0.0 -1.0 0.0))
+            Assert.Equal(2, f (point 0.0 3.0 -2.0) (vector 0.0 -1.0 2.0))
+            Assert.Equal(2, f (point 0.0 4.0 -2.0) (vector 0.0 -1.0 1.0))
+            Assert.Equal(2, f (point 0.0 0.0 -2.0) (vector 0.0 1.0 2.0))
+            Assert.Equal(2, f (point 0.0 -1.0 -2.0) (vector 0.0 1.0 1.0))
+
+        [<Fact>]
+        let ``The normal vector on a cylinder's end caps``() = 
+            let f p =
+                let cyl = Cylinder(shapeProperties.Default,1.0,2.0,true)
+                normal_at cyl p
+            Assert.Equal(vector 0.0 -1.0 0.0, f (point 0.0 1.0 0.0))
+            Assert.Equal(vector 0.0 -1.0 0.0, f (point 0.5 1.0 0.0))
+            Assert.Equal(vector 0.0 -1.0 0.0, f (point 0.0 1.0 0.5))
+            Assert.Equal(vector 0.0 1.0 0.0, f (point 0.0 2.0 0.0))
+            Assert.Equal(vector 0.0 1.0 0.0, f (point 0.5 2.0 0.0))
+            Assert.Equal(vector 0.0 1.0 0.0, f (point 0.0 2.0 0.5))

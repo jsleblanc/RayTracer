@@ -25,7 +25,7 @@ module Shapes =
     | Plane of shapeProperties
     | Sphere of shapeProperties
     | Cube of shapeProperties
-    | Cylinder of shapeProperties
+    | Cylinder of shapeProperties * Minimum:float * Maximum:float * Closed:bool
 
     type intersection = {
         t: float;
@@ -51,7 +51,13 @@ module Shapes =
         | Plane p -> p
         | Sphere s -> s
         | Cube c -> c
-        | Cylinder c -> c
+        | Cylinder (c,_,_,_) -> c
+
+    let private swapIfGreater min max =
+        if min > max then
+            (max, min)
+        else
+            (min, max)            
 
     let private check_axis origin (direction:float) = 
         let tmin_numerator = -1.0 - origin
@@ -64,10 +70,7 @@ module Shapes =
         else
             tmin <- tmin_numerator * Double.PositiveInfinity
             tmax <- tmax_numerator * Double.PositiveInfinity
-        if tmin > tmax then
-            (tmax, tmin)
-        else
-            (tmin, tmax)
+        swapIfGreater tmin tmax
 
     let private local_normal_at shape pt =
         match shape with
@@ -84,7 +87,15 @@ module Shapes =
                 else
                     vector 0.0 0.0 pt.z
         | Plane _ -> vector 0.0 1.0 0.0
-        | Cylinder _ -> vector pt.x 0.0 pt.z
+        | Cylinder (_,min,max,_) -> 
+            let dist = pt.x**2.0 + pt.z**2.0
+            if dist < 1.0 && pt.y >= (max - epsilon) then
+                vector 0.0 1.0 0.0
+            else 
+                if dist < 1.0 && pt.y <= (min + epsilon) then
+                    vector 0.0 -1.0 0.0
+                else
+                    vector pt.x 0.0 pt.z
 
     let private local_intersect shape local_ray =
         let normal = local_normal_at shape local_ray.origin
@@ -121,10 +132,25 @@ module Shapes =
                 Seq.empty<intersection>
             else
                 seq [{ t = -local_ray.origin.y / local_ray.direction.y; obj = Plane p; }]
-        | Cylinder cyl ->
+        | Cylinder (cyl,cmin,cmax,closed) ->
+            let check_cap ray t =
+                let x = ray.origin.x + t * ray.direction.x
+                let z = ray.origin.z + t * ray.direction.z
+                (x**2.0 + z**2.0) <= 1.0
+            let intersect_caps ray =
+                if not closed || (areEqualFloat ray.direction.y 0.0) then
+                    Seq.empty<intersection>
+                else
+                    let calc v =
+                        let t = (v - ray.origin.y) / ray.direction.y
+                        if check_cap ray t then
+                            Some { t = t; obj = Cylinder (cyl,cmin,cmax,closed);}
+                        else
+                            None
+                    seq { calc cmin; calc cmax; } |> Seq.choose id
             let a = local_ray.direction.x**2.0 + local_ray.direction.z**2.0
             if areEqualFloat a 0.0 then
-                Seq.empty<intersection>
+                intersect_caps local_ray
             else
                 let b = 2.0 * local_ray.origin.x * local_ray.direction.x + 2.0 * local_ray.origin.z * local_ray.direction.z
                 let c = local_ray.origin.x**2.0 + local_ray.origin.z**2.0 - 1.0
@@ -134,10 +160,16 @@ module Shapes =
                 else
                     let t0 = (-b - Math.Sqrt(disc)) / (2.0 * a)
                     let t1 = (-b + Math.Sqrt(disc)) / (2.0 * a)
-                    seq {
-                        { t = t0; obj = Cylinder cyl; };
-                        { t = t1; obj = Cylinder cyl; }
-                    }
+                    let (t0,t1) = swapIfGreater t0 t1
+                    let calc t =
+                        let y = local_ray.origin.y + t * local_ray.direction.y
+                        if cmin < y && y < cmax then
+                            Some { t = t; obj = Cylinder (cyl,cmin,cmax,closed); }
+                        else
+                            None
+                    let s1 = seq { calc t0; calc t1; } |> Seq.choose id 
+                    let s2 = intersect_caps local_ray
+                    s1 |> Seq.append s2
 
     let intersect shape ray =
         let sp = shapeToProperties shape
