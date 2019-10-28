@@ -183,10 +183,10 @@ module Shapes =
                     let s2 = intersect_caps
                     s1 |> Seq.append s2
         | Cone (cone,cmin,cmax,closed) ->
-            let check_cap t y =
+            let check_cap t (y:float) =
                 let x = ray.origin.x + t * ray.direction.x
                 let z = ray.origin.z + t * ray.direction.z
-                (x**2.0 + z**2.0) <= y
+                (x**2.0 + z**2.0) <= Math.Abs(y)
             let intersect_caps =
                 if not closed || (areEqualFloat ray.direction.y 0.0) then
                     Seq.empty<intersection>
@@ -203,7 +203,9 @@ module Shapes =
             let c = ray.origin.x**2.0 - ray.origin.y**2.0 + ray.origin.z**2.0
             match (areEqualFloat a 0.0),(areEqualFloat b 0.0) with
             | true, true -> Seq.empty<intersection>
-            | true, false -> seq { { t = -c/(2.0*b); obj = Cone (cone,cmin,cmax,closed); } }
+            | true, false -> 
+                let s = seq { { t = -c/(2.0*b); obj = Cone (cone,cmin,cmax,closed); } }
+                intersect_caps |> Seq.append s
             | false, _ ->
                 let disc = b**2.0 - 4.0 * a * c
                 if disc < 0.0 then
