@@ -9,26 +9,27 @@ open RenderLib.Matrix
 open RenderLib.Shapes
 open RenderLib.Translations
 open RenderLib.Ray
+open RenderLib.Material
 
 module ShapeTests = 
     
     [<Fact>]
     let ``A sphere's default transformation``() =
-        let s = Sphere(shapeProperties.Default)
+        let s = Sphere(material.Default,identity_matrix())
         let st = shapeTransformation s
         Assert.Equal(identity_matrix(), st)
 
     [<Fact>]
     let ``Changing a sphere's transformation``() =
         let t = translation 2.0 3.0 4.0
-        let s = Sphere({ shapeProperties.Default with default_transformation = t; })
+        let s = Sphere(material.Default,t)
         let st = shapeTransformation s
         Assert.Equal(t, st)
 
     [<Fact>]
     let ``Intersecting a scaled sphere with a ray``() =
         let r = { origin = point 0.0 0.0 -5.0; direction = vector 0.0 0.0 1.0; }
-        let x = Sphere { shapeProperties.Default with default_transformation = scaling 2.0 2.0 2.0; }
+        let x = Sphere(material.Default,scaling 2.0 2.0 2.0)
         let xs = intersect x r
         Assert.Equal(2, Seq.length xs)
         Assert.Equal(3.0, (Seq.item 0 xs).t)
@@ -37,7 +38,7 @@ module ShapeTests =
     [<Fact>]
     let ``Intersecting a translated sphere with a ray``() =
         let r = { origin = point 0.0 0.0 -5.0; direction = vector 0.0 0.0 1.0; }
-        let x = Sphere { shapeProperties.Default with default_transformation = translation 5.0 0.0 0.0; }
+        let x = Sphere(material.Default,translation 5.0 0.0 0.0)
         let xs = intersect x r
         Assert.True(Seq.isEmpty xs)           
 
@@ -45,45 +46,45 @@ module ShapeTests =
         
         [<Fact>]
         let ``The normal on a sphere at a point on the x axis``() =
-            let s = Sphere(shapeProperties.Default)
+            let s = Sphere(material.Default,identity_matrix())
             let n = normal_at s (point 1.0 0.0 0.0)
             Assert.Equal(vector 1.0 0.0 0.0, n)
 
         [<Fact>]
         let ``The normal on a sphere at a point on the y axis``() =
-            let s = Sphere(shapeProperties.Default)
+            let s = Sphere(material.Default,identity_matrix())
             let n = normal_at s (point 0.0 1.0 0.0)
             Assert.Equal(vector 0.0 1.0 0.0, n)
 
         [<Fact>]
         let ``The normal on a sphere at a point on the z axis``() =
-            let s = Sphere(shapeProperties.Default)
+            let s = Sphere(material.Default,identity_matrix())
             let n = normal_at s (point 0.0 0.0 1.0)
             Assert.Equal(vector 0.0 0.0 1.0, n)
 
         [<Fact>]
         let ``The normal on a sphere at a nonaxial point``() =
             let v = Math.Sqrt(3.0) / 3.0
-            let s = Sphere(shapeProperties.Default)
+            let s = Sphere(material.Default,identity_matrix())
             let n = normal_at s (point v v v)
             Assert.Equal(vector v v v, n)
 
         [<Fact>]
         let ``The normal is a normalized vector``() =
-            let s = Sphere(shapeProperties.Default)
+            let s = Sphere(material.Default,identity_matrix())
             let v = Math.Sqrt(3.0) / 3.0
             let n = normal_at s (point v v v)
             Assert.Equal(n.normalize(), n)
 
         [<Fact>]
         let ``Computing the normal on a translated sphere``() =
-            let x = Sphere { shapeProperties.Default with default_transformation = translation 0.0 1.0 0.0; }                
+            let x = Sphere(material.Default,translation 0.0 1.0 0.0)
             let n = normal_at x (point 0.0 1.70711 -0.70711)
             Assert.Equal(vector 0.0 0.7071067812 -0.7071067812, roundtuple n)
 
         [<Fact>]
         let ``Computing the normal on a transformed sphere``() =
-            let x = Sphere { shapeProperties.Default with default_transformation = (scaling 1.0 0.5 1.0) * rotation_z (Math.PI / 5.0); }
+            let x = Sphere(material.Default,(scaling 1.0 0.5 1.0) * rotation_z (Math.PI / 5.0))
             let n = normal_at x (point 0.0 (Math.Sqrt(2.0)/2.0) (-Math.Sqrt(2.0)/2.0))
             Assert.Equal(vector 0.0 0.97014250014533188 -0.24253562503633294, n)
     
@@ -91,7 +92,7 @@ module ShapeTests =
 
         [<Fact>]
         let ``The normal of a plane is a constant everywhere``() =
-            let p = Plane(shapeProperties.Default)
+            let p = Plane(material.Default,identity_matrix())
             let n1 = normal_at p (point 0.0 0.0 0.0)
             let n2 = normal_at p (point 10.0 0.0 -10.0)
             let n3 = normal_at p (point -5.0 0.0 150.0)
@@ -102,7 +103,7 @@ module ShapeTests =
     
         [<Fact>]
         let ``Intersect with a ray parallel to the plane``() =
-            let p = Plane(shapeProperties.Default)
+            let p = Plane(material.Default,identity_matrix())
             let r = {
                 origin = point 0.0 10.0 0.0;
                 direction = vector 0.0 0.0 1.0;
@@ -112,7 +113,7 @@ module ShapeTests =
 
         [<Fact>]
         let ``Intersect with a coplanar ray``() =
-            let p = Plane(shapeProperties.Default)
+            let p = Plane(material.Default,identity_matrix())
             let r = {
                 origin = point 0.0 0.0 0.0;
                 direction = vector 0.0 0.0 1.0;
@@ -122,7 +123,7 @@ module ShapeTests =
 
         [<Fact>]
         let ``A ray intersecting a plane from above``() =
-            let p = Plane(shapeProperties.Default)
+            let p = Plane(material.Default,identity_matrix())
             let r = {
                 origin = point 0.0 1.0 0.0;
                 direction = vector 0.0 -1.0 0.0;
@@ -134,7 +135,7 @@ module ShapeTests =
 
         [<Fact>]
         let ``A ray intersecting a plane from below``() =
-            let p = Plane(shapeProperties.Default)
+            let p = Plane(material.Default,identity_matrix())
             let r = {
                 origin = point 0.0 -1.0 0.0;
                 direction = vector 0.0 1.0 0.0;
@@ -153,7 +154,7 @@ module ShapeTests =
                     origin = o;
                     direction = d;
                 }
-                let c = Cube(shapeProperties.Default)
+                let c = Cube(material.Default,identity_matrix())
                 let xs = intersect c ray
                 let a = (Seq.length xs) = 2
                 let b = (Seq.item(0) xs).t = t1
@@ -170,7 +171,7 @@ module ShapeTests =
         [<Fact>]
         let ``A ray misses a cube``() =
             let ray_misses_cube o d =
-                let c = Cube(shapeProperties.Default)
+                let c = Cube(material.Default,identity_matrix())
                 let r = {
                     origin = o;
                     direction = d;
@@ -186,7 +187,7 @@ module ShapeTests =
 
         [<Fact>]
         let ``The normal on the surface of a cube``() =
-            let c = Cube(shapeProperties.Default)
+            let c = Cube(material.Default,identity_matrix())
             Assert.Equal(vector 1.0 0.0 0.0, normal_at c (point 1.0 0.5 -0.8))
             Assert.Equal(vector -1.0 0.0 0.0, normal_at c (point -1.0 -0.2 0.9))
             Assert.Equal(vector 0.0 1.0 0.0, normal_at c (point -0.4 1.0 -0.1))
@@ -201,7 +202,7 @@ module ShapeTests =
         [<Fact>]
         let ``A ray misses a cylinder``() =
             let ray_misses o (v:tuple) =
-                let cyl = Cylinder(shapeProperties.Default, Double.NegativeInfinity, Double.PositiveInfinity, false)
+                let cyl = Cylinder(material.Default,identity_matrix(), Double.NegativeInfinity, Double.PositiveInfinity, false)
                 let direction = v.normalize()
                 let r = {
                     origin = o;
@@ -216,7 +217,7 @@ module ShapeTests =
         [<Fact>]
         let ``A ray strikes a cylinder``() =
             let ray_strikes o (v:tuple) t0 t1 =
-                let cyl = Cylinder(shapeProperties.Default, Double.NegativeInfinity, Double.PositiveInfinity, false)
+                let cyl = Cylinder(material.Default,identity_matrix(), Double.NegativeInfinity, Double.PositiveInfinity, false)
                 let r = {
                     origin = o;
                     direction = v.normalize();
@@ -230,7 +231,7 @@ module ShapeTests =
 
         [<Fact>]
         let ``Normal vector on a cylinder``() =
-            let cyl = Cylinder(shapeProperties.Default, Double.NegativeInfinity, Double.PositiveInfinity, false)
+            let cyl = Cylinder(material.Default,identity_matrix(), Double.NegativeInfinity, Double.PositiveInfinity, false)
             Assert.Equal(vector 1.0 0.0 0.0, normal_at cyl (point 1.0 0.0 0.0))
             Assert.Equal(vector 0.0 0.0 -1.0, normal_at cyl (point 0.0 5.0 -1.0))
             Assert.Equal(vector 0.0 0.0 1.0, normal_at cyl (point 0.0 -2.0 1.0))
@@ -239,7 +240,7 @@ module ShapeTests =
         [<Fact>]
         let ``Intersecting a constrained cylinder``() =
             let f p (d:tuple) =
-                let cyl = Cylinder(shapeProperties.Default, 1.0, 2.0, false)
+                let cyl = Cylinder(material.Default,identity_matrix(), 1.0, 2.0, false)
                 let r = {
                     origin = p;
                     direction = d.normalize();
@@ -256,7 +257,7 @@ module ShapeTests =
         [<Fact>]
         let ``Intersecting the caps of a closed cylinder``() =
             let f p (d:tuple) =
-                let cyl = Cylinder(shapeProperties.Default,1.0,2.0,true)
+                let cyl = Cylinder(material.Default,identity_matrix(),1.0,2.0,true)
                 let r = {
                     origin = p;
                     direction = d.normalize();
@@ -272,7 +273,7 @@ module ShapeTests =
         [<Fact>]
         let ``The normal vector on a cylinder's end caps``() = 
             let f p =
-                let cyl = Cylinder(shapeProperties.Default,1.0,2.0,true)
+                let cyl = Cylinder(material.Default,identity_matrix(),1.0,2.0,true)
                 normal_at cyl p
             Assert.Equal(vector 0.0 -1.0 0.0, f (point 0.0 1.0 0.0))
             Assert.Equal(vector 0.0 -1.0 0.0, f (point 0.5 1.0 0.0))
@@ -286,7 +287,7 @@ module ShapeTests =
         [<Fact>]
         let ``Intersecting a cone with a ray``() =
             let ray_strikes o (v:tuple) t0 t1 =
-                let c = Cone(shapeProperties.Default,Double.NegativeInfinity,Double.PositiveInfinity,false)
+                let c = Cone(material.Default,identity_matrix(),Double.NegativeInfinity,Double.PositiveInfinity,false)
                 let r = {
                     origin = o;
                     direction = v.normalize()
@@ -300,7 +301,7 @@ module ShapeTests =
 
         [<Fact>]
         let ``Intersecting a cone with a ray parallel to one if its halves``() =
-            let c = Cone(shapeProperties.Default,Double.NegativeInfinity,Double.PositiveInfinity,false)
+            let c = Cone(material.Default,identity_matrix(),Double.NegativeInfinity,Double.PositiveInfinity,false)
             let r = {
                 origin = point 0.0 0.0 -1.0;
                 direction = (vector 0.0 1.0 1.0).normalize();
@@ -312,7 +313,7 @@ module ShapeTests =
         [<Fact>]
         let ``Intersecting a cones end caps``() =
             let ray_strikes o (d:tuple) =
-                let c = Cone(shapeProperties.Default,-0.5,0.5,true)
+                let c = Cone(material.Default,identity_matrix(),-0.5,0.5,true)
                 let r = {
                     origin = o;
                     direction = d.normalize();
@@ -325,7 +326,7 @@ module ShapeTests =
 
         [<Fact>]
         let ``Computing the normal vector on a cone``() =
-            let c = Cone(shapeProperties.Default,Double.NegativeInfinity,Double.PositiveInfinity,true)
+            let c = Cone(material.Default,identity_matrix(),Double.NegativeInfinity,Double.PositiveInfinity,true)
             Assert.Equal(vector 0.0 0.0 0.0, local_normal_at c (point 0.0 0.0 0.0))
             Assert.Equal(vector 1.0 (-Math.Sqrt(2.0)) 1.0, local_normal_at c (point 1.0 1.0 1.0))
             Assert.Equal(vector -1.0 1.0 0.0, local_normal_at c (point -1.0 -1.0 0.0))

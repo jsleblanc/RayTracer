@@ -2,7 +2,6 @@
 
 open System
 open Common
-open Color
 open Tuple
 open Matrix
 open Ray
@@ -11,20 +10,12 @@ open Patterns
 
 module Shapes = 
 
-    type shapeProperties = {
-        material: material;
-        default_transformation: matrix;
-    } with static member Default = {
-            material = material.Default;
-            default_transformation = identity_matrix ();
-        }
-
     type shape =
-    | Plane of shapeProperties
-    | Sphere of shapeProperties
-    | Cube of shapeProperties
-    | Cylinder of shapeProperties * Minimum:float * Maximum:float * Closed:bool
-    | Cone of shapeProperties * Minimum:float * Maximum:float * Closed:bool
+    | Plane of material:material * transformation:matrix
+    | Sphere of material:material * transformation:matrix
+    | Cube of material:material * transformation:matrix
+    | Cylinder of material:material * transformation:matrix * Minimum:float * Maximum:float * Closed:bool
+    | Cone of material:material * transformation:matrix * Minimum:float * Maximum:float * Closed:bool
 
     type intersection = {
         t: float;
@@ -47,19 +38,19 @@ module Shapes =
 
     let shapeTransformation shape = 
         match shape with
-        | Plane p -> p.default_transformation
-        | Sphere s -> s.default_transformation
-        | Cube c -> c.default_transformation
-        | Cylinder (c,_,_,_) -> c.default_transformation
-        | Cone (c,_,_,_) -> c.default_transformation
+        | Plane (_,t) -> t
+        | Sphere (_,t) -> t
+        | Cube (_,t) -> t
+        | Cylinder (_,t,_,_,_) -> t
+        | Cone (_,t,_,_,_) -> t
 
     let shapeMaterial shape =
         match shape with
-        | Plane p -> p.material
-        | Sphere s -> s.material
-        | Cube c -> c.material
-        | Cylinder (c,_,_,_) -> c.material
-        | Cone (c,_,_,_) -> c.material
+        | Plane (m,_) -> m
+        | Sphere (m,_) -> m
+        | Cube (m,_) -> m
+        | Cylinder (m,_,_,_,_) -> m
+        | Cone (m,_,_,_,_) -> m
 
     let private swapIfGreater min max =
         if min > max then
@@ -95,7 +86,7 @@ module Shapes =
                 else
                     vector 0.0 0.0 pt.z
         | Plane _ -> vector 0.0 1.0 0.0
-        | Cylinder (_,min,max,_) -> 
+        | Cylinder (_,_,min,max,_) -> 
             let dist = pt.x**2.0 + pt.z**2.0
             if dist < 1.0 && pt.y >= (max - epsilon) then
                 vector 0.0 1.0 0.0
@@ -104,7 +95,7 @@ module Shapes =
                     vector 0.0 -1.0 0.0
                 else
                     vector pt.x 0.0 pt.z
-        | Cone (_,min,max,_) -> 
+        | Cone (_,_,min,max,_) -> 
             let dist = pt.x**2.0 + pt.z**2.0
             if dist < 1.0 && pt.y >= (max - epsilon) then
                 vector 0.0 1.0 0.0
@@ -147,12 +138,12 @@ module Shapes =
                     { t = tmin; obj = shape; };
                     { t = tmax; obj = shape; };
                 }
-        | Plane p -> 
+        | Plane (m,t) -> 
             if Math.Abs(ray.direction.y) < epsilon then
                 Seq.empty<intersection>
             else
-                seq [{ t = -ray.origin.y / ray.direction.y; obj = Plane p; }]
-        | Cylinder (cyl,cmin,cmax,closed) ->
+                seq [{ t = -ray.origin.y / ray.direction.y; obj = Plane (m,t); }]
+        | Cylinder (mat,trans,cmin,cmax,closed) ->
             let check_cap t =
                 let x = ray.origin.x + t * ray.direction.x
                 let z = ray.origin.z + t * ray.direction.z
@@ -164,7 +155,7 @@ module Shapes =
                     let calc v =
                         let t = (v - ray.origin.y) / ray.direction.y
                         if check_cap t then
-                            Some { t = t; obj = Cylinder (cyl,cmin,cmax,closed);}
+                            Some { t = t; obj = Cylinder (mat,trans,cmin,cmax,closed);}
                         else
                             None
                     seq { calc cmin; calc cmax; } |> Seq.choose id
@@ -182,13 +173,13 @@ module Shapes =
                     let calc t =
                         let y = ray.origin.y + t * ray.direction.y
                         if cmin < y && y < cmax then
-                            Some { t = t; obj = Cylinder (cyl,cmin,cmax,closed); }
+                            Some { t = t; obj = Cylinder (mat,trans,cmin,cmax,closed); }
                         else
                             None
                     let s1 = seq { calc t0; calc t1; } |> Seq.choose id 
                     let s2 = intersect_caps
                     s1 |> Seq.append s2
-        | Cone (cone,cmin,cmax,closed) ->
+        | Cone (mat,trans,cmin,cmax,closed) ->
             let check_cap t (y:float) =
                 let x = ray.origin.x + t * ray.direction.x
                 let z = ray.origin.z + t * ray.direction.z
@@ -200,7 +191,7 @@ module Shapes =
                     let calc v =
                         let t = (v - ray.origin.y) / ray.direction.y
                         if check_cap t v then
-                            Some { t = t; obj = Cone (cone,cmin,cmax,closed);}
+                            Some { t = t; obj = Cone (mat,trans,cmin,cmax,closed);}
                         else
                             None
                     seq { calc cmin; calc cmax; } |> Seq.choose id
@@ -210,7 +201,7 @@ module Shapes =
             match (areEqualFloat a 0.0),(areEqualFloat b 0.0) with
             | true, true -> Seq.empty<intersection>
             | true, false -> 
-                let s = seq { { t = -c/(2.0*b); obj = Cone (cone,cmin,cmax,closed); } }
+                let s = seq { { t = -c/(2.0*b); obj = Cone (mat,trans,cmin,cmax,closed); } }
                 intersect_caps |> Seq.append s
             | false, _ ->
                 let disc = b**2.0 - 4.0 * a * c
@@ -221,7 +212,7 @@ module Shapes =
                     let calc t =
                         let y = ray.origin.y + t * ray.direction.y
                         if cmin < y && y < cmax then
-                            Some { t = t; obj = Cone (cone,cmin,cmax,closed); }
+                            Some { t = t; obj = Cone (mat,trans,cmin,cmax,closed); }
                         else
                             None
                     let s1 = seq { calc t0; calc t1; } |> Seq.choose id 
