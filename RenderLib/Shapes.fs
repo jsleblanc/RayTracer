@@ -12,11 +12,9 @@ open Patterns
 module Shapes = 
 
     type shapeProperties = {
-        identity: Guid;
         material: material;
         default_transformation: matrix;
     } with static member Default = {
-            identity = Guid.NewGuid ();
             material = material.Default;
             default_transformation = identity_matrix ();
         }
@@ -47,13 +45,21 @@ module Shapes =
         n2: float;
     }
 
-    let shapeToProperties shape =
+    let shapeTransformation shape = 
         match shape with
-        | Plane p -> p
-        | Sphere s -> s
-        | Cube c -> c
-        | Cylinder (c,_,_,_) -> c
-        | Cone (c,_,_,_) -> c
+        | Plane p -> p.default_transformation
+        | Sphere s -> s.default_transformation
+        | Cube c -> c.default_transformation
+        | Cylinder (c,_,_,_) -> c.default_transformation
+        | Cone (c,_,_,_) -> c.default_transformation
+
+    let shapeMaterial shape =
+        match shape with
+        | Plane p -> p.material
+        | Sphere s -> s.material
+        | Cube c -> c.material
+        | Cylinder (c,_,_,_) -> c.material
+        | Cone (c,_,_,_) -> c.material
 
     let private swapIfGreater min max =
         if min > max then
@@ -223,8 +229,8 @@ module Shapes =
                     s1 |> Seq.append s2
 
     let intersect shape ray =
-        let sp = shapeToProperties shape
-        let local_ray = transform ray (inverse sp.default_transformation)
+        let st = shapeTransformation shape
+        let local_ray = transform ray (inverse st)
         local_intersect shape local_ray
 
     let hit (intersections:seq<intersection>) : intersection option = 
@@ -236,8 +242,8 @@ module Shapes =
             Some lowest
 
     let normal_at shape pt =
-        let sp = shapeToProperties shape
-        let i = inverse sp.default_transformation
+        let st = shapeTransformation shape
+        let i = inverse st
         let local_point = i * pt
         let local_normal = local_normal_at shape local_point
         let world_normal = i.Transpose * local_normal
@@ -260,8 +266,8 @@ module Shapes =
                 if Seq.isEmpty container then
                     1.0
                 else
-                    let sp = shapeToProperties (Seq.last c)
-                    sp.material.refractive_index
+                    let sm = shapeMaterial (Seq.last c)
+                    sm.refractive_index
             else
                 n1
         c <- if c |> List.contains i.obj then
@@ -274,8 +280,8 @@ module Shapes =
                 if Seq.isEmpty c then
                     1.0
                 else
-                    let sp = shapeToProperties (Seq.last c)
-                    sp.material.refractive_index
+                    let sm = shapeMaterial (Seq.last c)
+                    sm.refractive_index
             else
                 n2
         if exit |> not && pos < (Seq.length xs) then
@@ -310,19 +316,6 @@ module Shapes =
         let (n1,n2) = func hit 0 xs List.empty<shape> 1.0 1.0
         { newComps with over_point = over_point; under_point = under_point; reflectv = reflectv; n1 = n1; n2 = n2; }
     
-    let shapeWithColor shape color = 
-        let sp = shapeToProperties shape
-        { sp with material = { sp.material with color = color; }}
-
-    let shapeWithTransformation shape matrix =
-        let sp = shapeToProperties shape
-        { sp with default_transformation = matrix; }
-
-    let pattern_at_object (pattern:pattern) object (pt:tuple) =
-        let sp = shapeToProperties object
-        let object_point = inverse sp.default_transformation * pt
-        pattern_at pattern object_point
-
     let schlick comps =
         let f cos comps = 
             let r0 = ((comps.n1 - comps.n2) / (comps.n1 + comps.n2))**2.0
@@ -339,3 +332,8 @@ module Shapes =
                 f cos_t comps
         else
             f cos comps
+
+    let pattern_at_object (pattern:pattern) object (pt:tuple) =
+        let st = shapeTransformation object
+        let object_point = inverse st * pt
+        pattern_at pattern object_point

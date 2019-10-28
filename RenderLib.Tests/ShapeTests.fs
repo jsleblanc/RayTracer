@@ -15,15 +15,15 @@ module ShapeTests =
     [<Fact>]
     let ``A sphere's default transformation``() =
         let s = Sphere(shapeProperties.Default)
-        let sp = shapeToProperties s
-        Assert.Equal(identity_matrix(), sp.default_transformation)
+        let st = shapeTransformation s
+        Assert.Equal(identity_matrix(), st)
 
     [<Fact>]
     let ``Changing a sphere's transformation``() =
         let t = translation 2.0 3.0 4.0
         let s = Sphere({ shapeProperties.Default with default_transformation = t; })
-        let sp = shapeToProperties s
-        Assert.Equal(t, sp.default_transformation)
+        let st = shapeTransformation s
+        Assert.Equal(t, st)
 
     [<Fact>]
     let ``Intersecting a scaled sphere with a ray``() =

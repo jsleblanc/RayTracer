@@ -49,8 +49,8 @@ module Worlds =
         if remaining < 1 then
             black
         else
-            let sp = shapeToProperties comps.obj
-            if sp.material.reflective = 0.0 then
+            let sm = shapeMaterial comps.obj
+            if sm.reflective = 0.0 then
                 black
             else
                 let reflect_ray = {
@@ -58,15 +58,15 @@ module Worlds =
                     direction = comps.reflectv;
                 }
                 let c = color_at world reflect_ray (remaining - 1)
-                c * sp.material.reflective
+                c * sm.reflective
 
     and shade_hit world comps remaining = 
         let shadowed = is_shadowed world comps.over_point
-        let sp = shapeToProperties comps.obj
-        let surface = lighting sp.material comps.obj world.light comps.point comps.eyev comps.normalv shadowed
+        let sm = shapeMaterial comps.obj
+        let surface = lighting sm comps.obj world.light comps.point comps.eyev comps.normalv shadowed
         let reflected = reflected_color world comps remaining
         let refracted = refracted_color world comps remaining
-        if sp.material.reflective > 0.0 && sp.material.transparency > 0.0 then
+        if sm.reflective > 0.0 && sm.transparency > 0.0 then
             let reflectance = schlick comps
             surface + reflected * reflectance + refracted * (1.0 - reflectance)
         else
@@ -81,8 +81,8 @@ module Worlds =
         | None -> black
 
     and refracted_color world comps remaining =
-        let sp = shapeToProperties comps.obj
-        if remaining = 0 || sp.material.transparency = 0.0 then
+        let sm = shapeMaterial comps.obj
+        if remaining = 0 || sm.transparency = 0.0 then
             black
         else
             let n_ratio = comps.n1 / comps.n2
@@ -98,4 +98,4 @@ module Worlds =
                     direction = direction;
                 }
                 let c = color_at world refract_ray (remaining - 1)
-                c * sp.material.transparency
+                c * sm.transparency
