@@ -73,15 +73,7 @@ module Patterns =
             b
 
     let private checkers_at (a:color) (b:color) pt =
-        let integral a =
-            if a < 0.0 then
-                Math.Ceiling(a)
-            else
-                Math.Floor(a)
-        let ix = integral pt.x
-        let iy = integral pt.y
-        let iz = integral pt.z
-        if (ix + iy + iz) % 2.0 = 0.0 then
+        if (Math.Floor(pt.x) + Math.Floor(pt.y) + Math.Floor(pt.z)) % 2.0 = 0.0 then
             a
         else
             b

@@ -63,7 +63,7 @@ module Worlds =
     and shade_hit world comps remaining = 
         let shadowed = is_shadowed world comps.over_point
         let sm = shapeMaterial comps.obj
-        let surface = lighting sm comps.obj world.light comps.point comps.eyev comps.normalv shadowed
+        let surface = lighting sm comps.obj world.light comps.over_point comps.eyev comps.normalv shadowed
         let reflected = reflected_color world comps remaining
         let refracted = refracted_color world comps remaining
         if sm.reflective > 0.0 && sm.transparency > 0.0 then
