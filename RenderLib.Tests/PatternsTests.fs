@@ -12,6 +12,7 @@ open RenderLib.Ray
 open RenderLib.Material
 open RenderLib.Patterns
 open RenderLib.Shapes
+open RenderLib.Lights
 
 module PatternsTests = 
 

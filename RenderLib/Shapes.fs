@@ -6,7 +6,6 @@ open Tuple
 open Matrix
 open Ray
 open Material
-open Patterns
 open System.Collections.Generic
 
 module Shapes = 
@@ -350,11 +349,6 @@ module Shapes =
                 f cos_t comps
         else
             f cos comps
-
-    let pattern_at_object (pattern:pattern) object (pt:tuple) =
-        let st = shapeTransformation object
-        let object_point = inverse st * pt
-        pattern_at pattern object_point
 
     let add_child g c =
         match g with
