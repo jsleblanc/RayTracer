@@ -86,6 +86,7 @@ module Shapes =
 
     let local_normal_at shape pt =
         match shape with
+        | Group _ -> raise (Exception("local_normal_at should not be called on a Group shape!"))
         | Sphere _ -> pt - (point 0.0 0.0 0.0)
         | Cube _ -> 
             let ax = Math.Abs(pt.x)
@@ -120,7 +121,6 @@ module Shapes =
                     if pt.y > 0.0 then 
                         y <- -y
                     vector pt.x y pt.z
-        | Group _ -> vector 0.0 0.0 0.0
 
     let rec local_intersect shape ray =
         let normal = local_normal_at shape ray.origin
