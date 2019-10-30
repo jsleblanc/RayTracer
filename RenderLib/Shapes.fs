@@ -7,15 +7,17 @@ open Matrix
 open Ray
 open Material
 open Patterns
+open System.Collections.Generic
 
 module Shapes = 
 
     type shape =
-    | Plane of material:material * transformation:matrix
-    | Sphere of material:material * transformation:matrix
-    | Cube of material:material * transformation:matrix
-    | Cylinder of material:material * transformation:matrix * Minimum:float * Maximum:float * Closed:bool
-    | Cone of material:material * transformation:matrix * Minimum:float * Maximum:float * Closed:bool
+    | Plane of material:material * transformation:matrix * Parent:shape option
+    | Sphere of material:material * transformation:matrix * Parent:shape option
+    | Cube of material:material * transformation:matrix * Parent:shape option
+    | Cylinder of material:material * transformation:matrix * Parent:shape option * Minimum:float * Maximum:float * Closed:bool
+    | Cone of material:material * transformation:matrix * Parent:shape option * Minimum:float * Maximum:float * Closed:bool
+    | Group of material:material * transformation:matrix * Parent:shape option * Children:HashSet<shape>
 
     type intersection = {
         t: float;
@@ -38,19 +40,31 @@ module Shapes =
 
     let shapeTransformation shape = 
         match shape with
-        | Plane (_,t) -> t
-        | Sphere (_,t) -> t
-        | Cube (_,t) -> t
-        | Cylinder (_,t,_,_,_) -> t
-        | Cone (_,t,_,_,_) -> t
+        | Plane (_,t,_) -> t
+        | Sphere (_,t,_) -> t
+        | Cube (_,t,_) -> t
+        | Cylinder (_,t,_,_,_,_) -> t
+        | Cone (_,t,_,_,_,_) -> t
+        | Group (_,t,_,_) -> t
 
     let shapeMaterial shape =
         match shape with
-        | Plane (m,_) -> m
-        | Sphere (m,_) -> m
-        | Cube (m,_) -> m
-        | Cylinder (m,_,_,_,_) -> m
-        | Cone (m,_,_,_,_) -> m
+        | Plane (m,_,_) -> m
+        | Sphere (m,_,_) -> m
+        | Cube (m,_,_) -> m
+        | Cylinder (m,_,_,_,_,_) -> m
+        | Cone (m,_,_,_,_,_) -> m
+        | Group (m,t,_,_) -> m
+
+    let shapeParent shape =
+        match shape with
+        | Plane (_,_,p) -> p
+        | Sphere (_,_,p) -> p
+        | Cube (_,_,p) -> p
+        | Cylinder (_,_,p,_,_,_) -> p
+        | Cone (_,_,p,_,_,_) -> p
+        | Group (_,_,p,_) -> p
+        | _ -> None
 
     let private swapIfGreater min max =
         if min > max then
@@ -86,7 +100,7 @@ module Shapes =
                 else
                     vector 0.0 0.0 pt.z
         | Plane _ -> vector 0.0 1.0 0.0
-        | Cylinder (_,_,min,max,_) -> 
+        | Cylinder (_,_,_,min,max,_) -> 
             let dist = pt.x**2.0 + pt.z**2.0
             if dist < 1.0 && pt.y >= (max - epsilon) then
                 vector 0.0 1.0 0.0
@@ -95,7 +109,7 @@ module Shapes =
                     vector 0.0 -1.0 0.0
                 else
                     vector pt.x 0.0 pt.z
-        | Cone (_,_,min,max,_) -> 
+        | Cone (_,_,_,min,max,_) -> 
             let dist = pt.x**2.0 + pt.z**2.0
             if dist < 1.0 && pt.y >= (max - epsilon) then
                 vector 0.0 1.0 0.0
@@ -107,8 +121,9 @@ module Shapes =
                     if pt.y > 0.0 then 
                         y <- -y
                     vector pt.x y pt.z
+        | Group _ -> vector 0.0 0.0 0.0
 
-    let local_intersect shape ray =
+    let rec local_intersect shape ray =
         let normal = local_normal_at shape ray.origin
         match shape with
         | Sphere _ ->
@@ -138,12 +153,12 @@ module Shapes =
                     { t = tmin; obj = shape; };
                     { t = tmax; obj = shape; };
                 }
-        | Plane (m,t) -> 
+        | Plane _ -> 
             if Math.Abs(ray.direction.y) < epsilon then
                 Seq.empty<intersection>
             else
-                seq [{ t = -ray.origin.y / ray.direction.y; obj = Plane (m,t); }]
-        | Cylinder (mat,trans,cmin,cmax,closed) ->
+                seq [{ t = -ray.origin.y / ray.direction.y; obj = shape; }]
+        | Cylinder (_,_,_,cmin,cmax,closed) ->
             let check_cap t =
                 let x = ray.origin.x + t * ray.direction.x
                 let z = ray.origin.z + t * ray.direction.z
@@ -155,7 +170,7 @@ module Shapes =
                     let calc v =
                         let t = (v - ray.origin.y) / ray.direction.y
                         if check_cap t then
-                            Some { t = t; obj = Cylinder (mat,trans,cmin,cmax,closed);}
+                            Some { t = t; obj = shape;}
                         else
                             None
                     seq { calc cmin; calc cmax; } |> Seq.choose id
@@ -173,13 +188,13 @@ module Shapes =
                     let calc t =
                         let y = ray.origin.y + t * ray.direction.y
                         if cmin < y && y < cmax then
-                            Some { t = t; obj = Cylinder (mat,trans,cmin,cmax,closed); }
+                            Some { t = t; obj = shape; }
                         else
                             None
                     let s1 = seq { calc t0; calc t1; } |> Seq.choose id 
                     let s2 = intersect_caps
                     s1 |> Seq.append s2
-        | Cone (mat,trans,cmin,cmax,closed) ->
+        | Cone (_,_,_,cmin,cmax,closed) ->
             let check_cap t (y:float) =
                 let x = ray.origin.x + t * ray.direction.x
                 let z = ray.origin.z + t * ray.direction.z
@@ -191,7 +206,7 @@ module Shapes =
                     let calc v =
                         let t = (v - ray.origin.y) / ray.direction.y
                         if check_cap t v then
-                            Some { t = t; obj = Cone (mat,trans,cmin,cmax,closed);}
+                            Some { t = t; obj = shape;}
                         else
                             None
                     seq { calc cmin; calc cmax; } |> Seq.choose id
@@ -201,7 +216,7 @@ module Shapes =
             match (areEqualFloat a 0.0),(areEqualFloat b 0.0) with
             | true, true -> Seq.empty<intersection>
             | true, false -> 
-                let s = seq { { t = -c/(2.0*b); obj = Cone (mat,trans,cmin,cmax,closed); } }
+                let s = seq { { t = -c/(2.0*b); obj = shape; } }
                 intersect_caps |> Seq.append s
             | false, _ ->
                 let disc = b**2.0 - 4.0 * a * c
@@ -212,14 +227,19 @@ module Shapes =
                     let calc t =
                         let y = ray.origin.y + t * ray.direction.y
                         if cmin < y && y < cmax then
-                            Some { t = t; obj = Cone (mat,trans,cmin,cmax,closed); }
+                            Some { t = t; obj = shape; }
                         else
                             None
                     let s1 = seq { calc t0; calc t1; } |> Seq.choose id 
                     let s2 = intersect_caps
                     s1 |> Seq.append s2
-
-    let intersect shape ray =
+        | Group (_,_,_,children) ->
+            children
+            |> Seq.map (fun (c) -> intersect c ray)
+            |> Seq.collect (fun (s) -> s)
+            |> Seq.sortBy (fun (i) -> i.t)
+            
+    and intersect shape ray =
         let st = shapeTransformation shape
         let local_ray = transform ray (inverse st)
         local_intersect shape local_ray
@@ -232,19 +252,26 @@ module Shapes =
             let lowest = Seq.minBy (fun (i:intersection) -> i.t) filtered
             Some lowest
 
-    let normal_at shape pt =
-        let st = shapeTransformation shape
-        let i = inverse st
-        let local_point = i * pt
+    let rec world_to_object shape (point:tuple) =
+        let mutable pt = point
+        match shapeParent shape with
+        | Some parent -> pt <- world_to_object parent point
+        | None -> pt <- point
+        (inverse (shapeTransformation shape)) * pt
+
+    let rec normal_to_world shape (normal:tuple) = 
+        let mutable n = (inverse (shapeTransformation shape)).Transpose * normal
+        n <- { n with w = 0.0; }
+        n <- n.normalize()
+        match shapeParent shape with
+        | Some parent -> n <- normal_to_world parent n
+        | None -> n <- n
+        n
+
+    let normal_at shape (world_point:tuple) =
+        let local_point = world_to_object shape world_point
         let local_normal = local_normal_at shape local_point
-        let world_normal = i.Transpose * local_normal
-        let v = {
-            x = world_normal.x;
-            y = world_normal.y;
-            z = world_normal.z;
-            w = 0.0;
-        }
-        v.normalize()
+        normal_to_world shape local_normal
 
     //not happy with this, still an "imperative" algorithm, need to figure out how to do it functionally
     let rec private func (hit:intersection) pos (xs:seq<intersection>) (container:list<shape>) n1 n2 =
@@ -328,3 +355,11 @@ module Shapes =
         let st = shapeTransformation object
         let object_point = inverse st * pt
         pattern_at pattern object_point
+
+    let add_child g c =
+        match g with
+        | Group (_,_,_,children) -> children.Add c
+
+    let has_child g c =
+        match g with
+        | Group (_,_,_,children) -> children.Contains c

@@ -15,7 +15,7 @@ module IntersectionTests =
     
     [<Fact>]
     let ``An intersection encapsulates t and object``() =
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let i = {
             t = 3.5;
             obj = s;
@@ -24,7 +24,7 @@ module IntersectionTests =
 
     [<Fact>]
     let ``The hit, when all intersections have positive t``() =
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let i1 = {
             t = 1.0;
             obj = s;
@@ -40,7 +40,7 @@ module IntersectionTests =
 
     [<Fact>]
     let ``The hit, when some intersections have negative t``() =
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let i1 = {
             t = -1.0;
             obj = s;
@@ -56,7 +56,7 @@ module IntersectionTests =
 
     [<Fact>]
     let ``The hit, when all intersections have negative t``() =
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let i1 = {
             t = -1.0;
             obj = s;
@@ -72,7 +72,7 @@ module IntersectionTests =
 
     [<Fact>]
     let ``The hit is always the lowest non-negative intersection``() =
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let i1 = {
             t = 5.0;
             obj = s;
@@ -100,7 +100,7 @@ module IntersectionTests =
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
         }
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let i = {
             t = 4.0;
             obj = s;
@@ -117,7 +117,7 @@ module IntersectionTests =
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
         }
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let i = {
             t = 4.0;
             obj = s;
@@ -131,7 +131,7 @@ module IntersectionTests =
             origin = point 0.0 0.0 0.0;
             direction = vector 0.0 0.0 1.0;
         }
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let i = {
             t = 1.0;
             obj = s;
@@ -148,7 +148,7 @@ module IntersectionTests =
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
         }
-        let s = Sphere(material.Default,translation 0.0 0.0 1.0)
+        let s = Sphere(material.Default,translation 0.0 0.0 1.0,None)
         let i = {
             t = 5.0;
             obj = s;
@@ -159,7 +159,7 @@ module IntersectionTests =
 
     [<Fact>]
     let ``Precomputing the reflection vector``() =
-        let p = Plane(material.Default,identity_matrix())
+        let p = Plane(material.Default,identity_matrix(),None)
         let r = {
             origin = point 0.0 1.0 -1.0;
             direction = vector 0.0 (-Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0);
@@ -179,9 +179,9 @@ module IntersectionTests =
     [<InlineData(4, 2.5, 1.5)>]
     [<InlineData(5, 1.5, 1.0)>]
     let ``Finding n1 and n2 at various intersections``(index, n1, n2) =
-        let a = Sphere(glass,scaling 2.0 2.0 2.0)
-        let b = Sphere({ glass with refractive_index = 2.0; },translation 0.0 0.0 -0.25)
-        let c = Sphere({ glass with refractive_index = 2.5; },translation 0.0 0.0 0.25)
+        let a = Sphere(glass,scaling 2.0 2.0 2.0,None)
+        let b = Sphere({ glass with refractive_index = 2.0; },translation 0.0 0.0 -0.25,None)
+        let c = Sphere({ glass with refractive_index = 2.5; },translation 0.0 0.0 0.25,None)
         let r = {
             origin = point 0.0 0.0 -4.0;
             direction = vector 0.0 0.0 1.0;
@@ -204,7 +204,7 @@ module IntersectionTests =
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
         }
-        let s = Sphere(glass,translation 0.0 0.0 1.0)
+        let s = Sphere(glass,translation 0.0 0.0 1.0,None)
         let i = {
             t = 5.0;
             obj = s;
@@ -216,7 +216,7 @@ module IntersectionTests =
 
     [<Fact>]
     let ``The Schlick approximation under total internal reflection``() =
-        let s = Sphere(glass,identity_matrix())
+        let s = Sphere(glass,identity_matrix(),None)
         let r = {
             origin = point 0.0 0.0 (Math.Sqrt(2.0)/2.0);
             direction = vector 0.0 1.0 0.0;
@@ -231,7 +231,7 @@ module IntersectionTests =
 
     [<Fact>]
     let ``The Schlick approximation with a perpendicular viewing angle``() =
-        let s = Sphere(glass,identity_matrix())
+        let s = Sphere(glass,identity_matrix(),None)
         let r = {
             origin = point 0.0 0.0 0.0;
             direction = vector 0.0 1.0 0.0;
@@ -246,7 +246,7 @@ module IntersectionTests =
 
     [<Fact>]
     let ``The Schlick approximation with small angle and n2 > n2``() =
-        let s = Sphere(glass,identity_matrix())
+        let s = Sphere(glass,identity_matrix(),None)
         let r = {
             origin = point 0.0 0.99 -2.0;
             direction = vector 0.0 0.0 1.0;

@@ -15,7 +15,7 @@ open RenderLib.Camera
 
 module CameraTests = 
 
-    let default_world = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix()); Sphere(material.Default,scaling 0.5 0.5 0.5)]; }
+    let default_world = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None)]; }
 
     [<Fact>]
     let ``Constructing a camera``() =

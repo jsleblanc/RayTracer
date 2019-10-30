@@ -35,7 +35,7 @@ module RayTests =
     [<Fact>]
     let ``A ray intersects a sphere at two points``() =
         let r = { origin = point 0.0 0.0 -5.0; direction = vector 0.0 0.0 1.0; }
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let xs = intersect s r
         Assert.Equal(2, Seq.length xs)
         Assert.Equal(4.0, (Seq.item 0 xs).t)
@@ -44,7 +44,7 @@ module RayTests =
     [<Fact>]
     let ``A ray intersects a sphere at a tangent``() =
         let r = { origin = point 0.0 1.0 -5.0; direction = vector 0.0 0.0 1.0; }
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let xs = intersect s r
         Assert.Equal(2, Seq.length xs)
         Assert.Equal(5.0, (Seq.item 0 xs).t)
@@ -53,14 +53,14 @@ module RayTests =
     [<Fact>]
     let ``A ray misses a sphere``() =
         let r = { origin = point 0.0 2.0 -5.0; direction = vector 0.0 0.0 1.0; }
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let xs = intersect s r
         Assert.Equal(0, Seq.length xs)
 
     [<Fact>]
     let ``A ray originates inside a sphere``() =
         let r = { origin = point 0.0 0.0 0.0; direction = vector 0.0 0.0 1.0; }
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let xs = intersect s r
         Assert.Equal(2, Seq.length xs)
         Assert.Equal(-1.0, (Seq.item 0 xs).t)
@@ -69,7 +69,7 @@ module RayTests =
     [<Fact>]
     let ``A sphere is behind a ray``() =
         let r = { origin = point 0.0 0.0 5.0; direction = vector 0.0 0.0 1.0; }
-        let s = Sphere(material.Default,identity_matrix())
+        let s = Sphere(material.Default,identity_matrix(),None)
         let xs = intersect s r
         Assert.Equal(2, Seq.length xs)
         Assert.Equal(-6.0, (Seq.item 0 xs).t)
