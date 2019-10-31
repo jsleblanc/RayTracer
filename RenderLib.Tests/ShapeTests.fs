@@ -416,3 +416,97 @@ module ShapeTests =
             add_child g2 s
             let n = normal_at s (point 1.7321 1.1547 -5.5774)
             Assert.Equal(vector 0.2857036818 0.4285431518 -0.8571605294, n)
+
+    module BoudningBoxTests = 
+
+        [<Fact>]
+        let ``Adding a point to a bounding box should re-evaluate minimum and maximum``() =
+            let b = 
+                boundingBox.Default
+                |> boundingBoxAddPoint (point -5.0 2.0 0.0)
+                |> boundingBoxAddPoint (point 7.0 0.0 -3.0)
+            Assert.Equal(point -5.0 0.0 -3.0, b.minimum)
+            Assert.Equal(point 7.0 2.0 0.0, b.maximum)
+
+        [<Fact>]
+        let ``An unbounded cylinder has a bouding box`` () =
+            let c = Cylinder(material.Default,identity_matrix(),None,Double.NegativeInfinity,Double.PositiveInfinity,false)
+            let b = bounds_of c
+            Assert.Equal(point -1.0 Double.NegativeInfinity -1.0, b.minimum)
+            Assert.Equal(point 1.0 Double.PositiveInfinity 1.0, b.maximum)
+
+        [<Fact>]
+        let ``A bounded cylinder has a bounding box``() =
+            let c = Cylinder(material.Default,identity_matrix(),None,-5.0,3.0,false)
+            let b = bounds_of c
+            Assert.Equal(point -1.0 -5.0 -1.0, b.minimum)
+            Assert.Equal(point 1.0 3.0 1.0, b.maximum)
+
+        [<Fact>]
+        let ``An unbounded cone has a bounding box``() =
+            let c = Cone(material.Default,identity_matrix(),None,Double.NegativeInfinity,Double.PositiveInfinity,false)
+            let b = bounds_of c
+            Assert.Equal(point Double.NegativeInfinity Double.NegativeInfinity Double.NegativeInfinity, b.minimum)
+            Assert.Equal(point Double.PositiveInfinity Double.PositiveInfinity Double.PositiveInfinity, b.maximum)
+
+        [<Fact>]
+        let ``A bounded cone has a bouding box``() =
+            let c = Cone(material.Default,identity_matrix(),None,-5.0,3.0,false)
+            let b = bounds_of c
+            Assert.Equal(point -5.0 -5.0 -5.0, b.minimum)
+            Assert.Equal(point 5.0 3.0 5.0, b.maximum)
+
+        [<Fact>]
+        let ``Adding one bounding box to another``() =
+            let box1 = { minimum = point -5.0 -2.0 0.0; maximum = point 7.0 4.0 4.0; }
+            let box2 = { minimum = point 8.0 -7.0 -2.0; maximum = point 14.0 2.0 8.0; }
+            let a = add_bounding_boxes box2 box1
+            Assert.Equal(point -5.0 -7.0 -2.0, a.minimum)
+            Assert.Equal(point 14.0 4.0 8.0, a.maximum)
+
+        [<Fact>]
+        let ``Checking to see if a box contains a given point``() =
+            let box = { minimum = point 5.0 -2.0 0.0; maximum = point 11.0 4.0 7.0; }
+            Assert.True(box_contains_point box (point 5.0 -2.0 0.0))
+            Assert.True(box_contains_point box (point 11.0 4.0 7.0))
+            Assert.True(box_contains_point box (point 8.0 1.0 3.0))
+            Assert.False(box_contains_point box (point 3.0 0.0 3.0))
+            Assert.False(box_contains_point box (point 8.0 -4.0 3.0))
+            Assert.False(box_contains_point box (point 8.0 1.0 -1.0))
+            Assert.False(box_contains_point box (point 13.0 1.0 3.0))
+            Assert.False(box_contains_point box (point 8.0 5.0 3.0))
+            Assert.False(box_contains_point box (point 8.0 1.0 8.0))
+
+        [<Fact>]
+        let ``Checking to see if a box contains a given box``() =
+            let box = { minimum = point 5.0 -2.0 0.0; maximum = point 11.0 4.0 7.0; }
+            Assert.True(box_contains_box box { minimum = point 5.0 -2.0 0.0; maximum = point 11.0 4.0 7.0; })
+            Assert.True(box_contains_box box { minimum = point 6.0 -1.0 1.0; maximum = point 10.0 3.0 6.0; })
+            Assert.False(box_contains_box box { minimum = point 4.0 -3.0 -1.0; maximum = point 10.0 3.0 6.0; })
+            Assert.False(box_contains_box box { minimum = point 6.0 -1.0 1.0; maximum = point 12.0 5.0 8.0; })
+
+        [<Fact>]
+        let ``Transforming a bounding box``() =
+            let box = { minimum = point -1.0 -1.0 -1.0; maximum = point 1.0 1.0 1.0; }
+            let m = rotation_x (Math.PI/4.0) * rotation_y (Math.PI/4.0)
+            let box2 = transform_box box m
+            Assert.Equal(point -1.414213562 -1.707106781 -1.707106781, box2.minimum)
+            Assert.Equal(point 1.414213562 1.707106781 1.707106781, box2.maximum)
+
+        [<Fact>]
+        let ``Querying a shape's bounding box in its parents's space``() =
+            let s = Sphere(material.Default,(translation 1.0 -3.0 5.0) * (scaling 0.5 2.0 4.0),None)
+            let box = parent_space_bounds_of s
+            Assert.Equal(point 0.5 -5.0 1.0, box.minimum)
+            Assert.Equal(point 1.5 -1.0 9.0, box.maximum)
+
+        [<Fact>]
+        let ``A group has a bounding box that contains its children``() =
+            let g = Group(material.Default,identity_matrix(),None,new HashSet<shape>())
+            let s = Sphere(material.Default,(translation 2.0 5.0 -3.0) * (scaling 2.0 2.0 2.0),Some g)
+            let c = Cylinder(material.Default,(translation -4.0 -1.0 4.0) * (scaling 0.5 1.0 0.5),Some g,-2.0,2.0,false)
+            add_child g s
+            add_child g c
+            let box = bounds_of g
+            Assert.Equal(point -4.5 -3.0 -5.0, box.minimum)
+            Assert.Equal(point 4.0 7.0 4.5, box.maximum)

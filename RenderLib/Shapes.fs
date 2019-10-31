@@ -37,6 +37,14 @@ module Shapes =
         n2: float;
     }
 
+    type boundingBox = {
+        minimum: tuple;
+        maximum: tuple;
+    } with static member Default = {
+            minimum = point Double.PositiveInfinity Double.PositiveInfinity Double.PositiveInfinity;
+            maximum = point Double.NegativeInfinity Double.NegativeInfinity Double.NegativeInfinity;
+        }
+
     let shapeTransformation shape = 
         match shape with
         | Plane (_,t,_) -> t
@@ -84,6 +92,60 @@ module Shapes =
             tmax <- tmax_numerator * Double.PositiveInfinity
         swapIfGreater tmin tmax
 
+    let boundingBoxAddPoint pt (box:boundingBox) =
+        {
+            minimum = point (Math.Min(pt.x, box.minimum.x)) (Math.Min(pt.y, box.minimum.y)) (Math.Min(pt.z, box.minimum.z));
+            maximum = point (Math.Max(pt.x, box.maximum.x)) (Math.Max(pt.y, box.maximum.y)) (Math.Max(pt.z, box.maximum.z));
+        }
+
+    let add_bounding_boxes (box1:boundingBox) (box2:boundingBox) =
+        boundingBoxAddPoint box2.minimum box1 |> boundingBoxAddPoint box2.maximum        
+
+    let box_contains_point (box:boundingBox) (pt:tuple) =
+        pt.x >= box.minimum.x && pt.x <= box.maximum.x &&
+        pt.y >= box.minimum.y && pt.y <= box.maximum.y &&
+        pt.z >= box.minimum.z && pt.z <= box.maximum.z
+
+    let box_contains_box (box1:boundingBox) (box2:boundingBox) =
+        box_contains_point box1 box2.minimum &&
+        box_contains_point box1 box2.maximum
+
+    let transform_box (box:boundingBox) (m:matrix) =
+        let p1 = box.minimum
+        let p2 = point box.minimum.x box.minimum.y box.maximum.z
+        let p3 = point box.minimum.x box.maximum.y box.minimum.z
+        let p4 = point box.minimum.x box.maximum.y box.maximum.z
+        let p5 = point box.maximum.x box.minimum.y box.minimum.z
+        let p6 = point box.maximum.x box.minimum.y box.minimum.z
+        let p7 = point box.maximum.x box.maximum.y box.minimum.z
+        let p8 = box.maximum
+        let mutable new_box = boundingBox.Default
+        for p in [|p1;p2;p3;p4;p5;p6;p7;p8;|] do
+            new_box <- boundingBoxAddPoint (m * p) new_box
+        new_box
+
+    let rec bounds_of shape =
+        match shape with
+        | Sphere _ -> { minimum = point -1.0 -1.0 -1.0; maximum = point 1.0 1.0 1.0; }
+        | Plane _ -> { minimum = point Double.NegativeInfinity 0.0 Double.NegativeInfinity; maximum = point Double.PositiveInfinity 0.0 Double.PositiveInfinity; }
+        | Cube _ -> { minimum = point -1.0 -1.0 -1.0; maximum = point 1.0 1.0 1.0; }
+        | Cylinder (_,_,_,min,max,_) -> { minimum = point -1.0 min -1.0; maximum = point 1.0 max 1.0; }
+        | Cone (_,_,_,min,max,_) ->
+            let a = Math.Abs(min)
+            let b = Math.Abs(max)
+            let limit = Math.Max(a,b)
+            { minimum = point -limit min -limit; maximum = point limit max limit; }
+        | Group (_,_,_,children) ->
+            let mutable box = boundingBox.Default
+            for child in children do
+                let cbox = parent_space_bounds_of child
+                box <- add_bounding_boxes box cbox
+            box
+
+    and parent_space_bounds_of shape = 
+        let t = shapeTransformation shape
+        transform_box (bounds_of shape) t        
+
     let local_normal_at shape pt =
         match shape with
         | Group _ -> raise (Exception("local_normal_at should not be called on a Group shape!"))
@@ -123,9 +185,9 @@ module Shapes =
                     vector pt.x y pt.z
 
     let rec local_intersect shape ray =
-        let normal = local_normal_at shape ray.origin
         match shape with
         | Sphere _ ->
+            let normal = local_normal_at shape ray.origin
             let a = ray.direction.dotProduct(ray.direction)
             let b = 2.0 * ray.direction.dotProduct(normal)
             let c = normal.dotProduct(normal) - 1.0
