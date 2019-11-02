@@ -47,36 +47,36 @@ let main argv =
     let planeMaterial = 
         { material.Default with color = color 1.0 0.9 0.9; specular = 0.0; pattern = Some p; }
 
-    let plane = Plane(planeMaterial,identity_matrix(),Some g)
+    let plane = Plane(planeMaterial,identity_matrix(),None)
         //Plane({ shapeProperties.Default with material = planeMaterial; default_transformation = (translation 0.0 0.0 10.0) * (rotation_x (Math.PI/2.0)); })
 
     let middle = 
         let m = { glass with diffuse = 0.01; ambient = 0.02; reflective = 0.9; specular = 1.0; shininess = 300.0; }
-        Sphere(m,translation -0.5 1.0 0.5,Some g)
+        Sphere(m,translation -0.5 1.0 0.5,None)
 
     let right =
         let m = { material.Default with color = red; diffuse = 0.7; specular = 0.3; }
-        Sphere(m,(translation -0.75 1.5 5.0) * (scaling 0.75 0.75 0.75),Some g)
+        Sphere(m,(translation -0.75 1.5 5.0) * (scaling 0.75 0.75 0.75),None)
 
     let left = 
         let m = { material.Default with color = yellow; diffuse = 0.7; specular = 0.3; }
-        Sphere(m,(translation -1.5 0.33 -0.75) * (scaling 0.33 0.33 0.33),Some g)
+        Sphere(m,(translation -1.5 0.33 -0.75) * (scaling 0.33 0.33 0.33),None)
 
     let cube =
-        Cube({ material.Default with color = green; },(translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)),Some g)
+        Cube({ material.Default with color = green; },(translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)),None)
 
     let cylinder =
-        Cylinder({ material.Default with color = green; },(translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)),Some g,1.0,3.0,true)
+        Cylinder({ material.Default with color = green; },(translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)),None,1.0,3.0,true)
 
-    add_child g plane
-    add_child g middle
-    add_child g right
-    add_child g left
-    add_child g cube
-    add_child g cylinder
+    //with_child g plane
+    with_child g middle
+    with_child g right
+    with_child g left
+    with_child g cube
+    with_child g cylinder
 
     //let light = { position = point 0.0 10.0 -10.0; intensity = color 1.0 1.0 1.0; }
-    let world = { world.Default with objs = [ plane; middle; right; left; cylinder; cube; ]; }
+    let world = { world.Default with objs = [ plane; g; ]; }
 
     //let vt = view_transform (point 0.0 1.5 -5.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
     let vt = view_transform (point 3.0 1.5 -3.5) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)

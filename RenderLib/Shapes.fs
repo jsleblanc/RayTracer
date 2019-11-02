@@ -194,9 +194,14 @@ module Shapes =
                     if pt.y > 0.0 then 
                         y <- -y
                     vector pt.x y pt.z
+    
+    let cache = System.Collections.Concurrent.ConcurrentDictionary<'a, 'b>()
+    let memoize (f: 'a -> 'b) =
+        fun x -> cache.GetOrAdd(x, f)
 
     let rec local_intersect shape ray =
-        let hits_box = intersects (bounds_of shape) ray
+        let fn = memoize bounds_of
+        let hits_box = intersects (fn shape) ray
         if not hits_box then
             Seq.empty<intersection>
         else
