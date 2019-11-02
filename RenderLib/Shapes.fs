@@ -79,9 +79,9 @@ module Shapes =
         else
             (min, max)            
 
-    let private check_axis origin (direction:float) = 
-        let tmin_numerator = -1.0 - origin
-        let tmax_numerator = 1.0 - origin
+    let private check_axis origin (direction:float) min max = 
+        let tmin_numerator = min - origin
+        let tmax_numerator = max - origin
         let mutable tmin = 0.0
         let mutable tmax = 0.0
         if Math.Abs(direction) >= epsilon then
@@ -146,6 +146,17 @@ module Shapes =
         let t = shapeTransformation shape
         transform_box (bounds_of shape) t        
 
+    let intersects (box:boundingBox) ray = 
+        let (xtmin, xtmax) = check_axis ray.origin.x ray.direction.x box.minimum.x box.maximum.x
+        let (ytmin, ytmax) = check_axis ray.origin.y ray.direction.y box.minimum.y box.maximum.y
+        let (ztmin, ztmax) = check_axis ray.origin.z ray.direction.z box.minimum.z box.maximum.z
+        let tmin = seq { xtmin; ytmin; ztmin; } |> Seq.max
+        let tmax = seq { xtmax; ytmax; ztmax; } |> Seq.min
+        if tmin > tmax then 
+            false
+        else
+            true
+
     let local_normal_at shape pt =
         match shape with
         | Group _ -> raise (Exception("local_normal_at should not be called on a Group shape!"))
@@ -185,120 +196,124 @@ module Shapes =
                     vector pt.x y pt.z
 
     let rec local_intersect shape ray =
-        match shape with
-        | Sphere _ ->
-            let normal = local_normal_at shape ray.origin
-            let a = ray.direction.dotProduct(ray.direction)
-            let b = 2.0 * ray.direction.dotProduct(normal)
-            let c = normal.dotProduct(normal) - 1.0
-            let discriminant = b**2.0 - 4.0 * a * c
-            if discriminant < 0.0 then
-                Seq.empty<intersection>
-            else 
-                let t1 = (-b - Math.Sqrt(discriminant)) / (2.0 * a)
-                let t2 = (-b + Math.Sqrt(discriminant)) / (2.0 * a)
-                seq {
-                    { t = t1; obj = shape; }; 
-                    { t = t2; obj = shape; };
-                }
-        | Cube _ ->
-            let (xtmin, xtmax) = check_axis ray.origin.x ray.direction.x
-            let (ytmin, ytmax) = check_axis ray.origin.y ray.direction.y
-            let (ztmin, ztmax) = check_axis ray.origin.z ray.direction.z
-            let tmin = seq { xtmin; ytmin; ztmin; } |> Seq.max
-            let tmax = seq { xtmax; ytmax; ztmax; } |> Seq.min
-            if tmin > tmax then
-                Seq.empty<intersection>
-            else
-                seq {
-                    { t = tmin; obj = shape; };
-                    { t = tmax; obj = shape; };
-                }
-        | Plane _ -> 
-            if Math.Abs(ray.direction.y) < epsilon then
-                Seq.empty<intersection>
-            else
-                seq [{ t = -ray.origin.y / ray.direction.y; obj = shape; }]
-        | Cylinder (_,_,_,cmin,cmax,closed) ->
-            let check_cap t =
-                let x = ray.origin.x + t * ray.direction.x
-                let z = ray.origin.z + t * ray.direction.z
-                (x**2.0 + z**2.0) <= 1.0
-            let intersect_caps =
-                if not closed || (areEqualFloat ray.direction.y 0.0) then
+        let hits_box = intersects (bounds_of shape) ray
+        if not hits_box then
+            Seq.empty<intersection>
+        else
+            match shape with
+            | Sphere _ ->
+                let normal = local_normal_at shape ray.origin
+                let a = ray.direction.dotProduct(ray.direction)
+                let b = 2.0 * ray.direction.dotProduct(normal)
+                let c = normal.dotProduct(normal) - 1.0
+                let discriminant = b**2.0 - 4.0 * a * c
+                if discriminant < 0.0 then
+                    Seq.empty<intersection>
+                else 
+                    let t1 = (-b - Math.Sqrt(discriminant)) / (2.0 * a)
+                    let t2 = (-b + Math.Sqrt(discriminant)) / (2.0 * a)
+                    seq {
+                        { t = t1; obj = shape; }; 
+                        { t = t2; obj = shape; };
+                    }
+            | Cube _ ->
+                let (xtmin, xtmax) = check_axis ray.origin.x ray.direction.x -1.0 1.0
+                let (ytmin, ytmax) = check_axis ray.origin.y ray.direction.y -1.0 1.0
+                let (ztmin, ztmax) = check_axis ray.origin.z ray.direction.z -1.0 1.0
+                let tmin = seq { xtmin; ytmin; ztmin; } |> Seq.max
+                let tmax = seq { xtmax; ytmax; ztmax; } |> Seq.min
+                if tmin > tmax then
                     Seq.empty<intersection>
                 else
-                    let calc v =
-                        let t = (v - ray.origin.y) / ray.direction.y
-                        if check_cap t then
-                            Some { t = t; obj = shape;}
-                        else
-                            None
-                    seq { calc cmin; calc cmax; } |> Seq.choose id
-            let a = ray.direction.x**2.0 + ray.direction.z**2.0
-            if areEqualFloat a 0.0 then
-                intersect_caps
-            else
-                let b = 2.0 * ray.origin.x * ray.direction.x + 2.0 * ray.origin.z * ray.direction.z
-                let c = ray.origin.x**2.0 + ray.origin.z**2.0 - 1.0
-                let disc = b**2.0 - 4.0 * a * c
-                if disc < 0.0 then
+                    seq {
+                        { t = tmin; obj = shape; };
+                        { t = tmax; obj = shape; };
+                    }
+            | Plane _ -> 
+                if Math.Abs(ray.direction.y) < epsilon then
                     Seq.empty<intersection>
                 else
-                    let (t0,t1) = swapIfGreater ((-b - Math.Sqrt(disc)) / (2.0 * a)) ((-b + Math.Sqrt(disc)) / (2.0 * a))
-                    let calc t =
-                        let y = ray.origin.y + t * ray.direction.y
-                        if cmin < y && y < cmax then
-                            Some { t = t; obj = shape; }
-                        else
-                            None
-                    let s1 = seq { calc t0; calc t1; } |> Seq.choose id 
-                    let s2 = intersect_caps
-                    s1 |> Seq.append s2
-        | Cone (_,_,_,cmin,cmax,closed) ->
-            let check_cap t (y:float) =
-                let x = ray.origin.x + t * ray.direction.x
-                let z = ray.origin.z + t * ray.direction.z
-                (x**2.0 + z**2.0) <= Math.Abs(y)
-            let intersect_caps =
-                if not closed || (areEqualFloat ray.direction.y 0.0) then
-                    Seq.empty<intersection>
+                    seq [{ t = -ray.origin.y / ray.direction.y; obj = shape; }]
+            | Cylinder (_,_,_,cmin,cmax,closed) ->
+                let check_cap t =
+                    let x = ray.origin.x + t * ray.direction.x
+                    let z = ray.origin.z + t * ray.direction.z
+                    (x**2.0 + z**2.0) <= 1.0
+                let intersect_caps =
+                    if not closed || (areEqualFloat ray.direction.y 0.0) then
+                        Seq.empty<intersection>
+                    else
+                        let calc v =
+                            let t = (v - ray.origin.y) / ray.direction.y
+                            if check_cap t then
+                                Some { t = t; obj = shape;}
+                            else
+                                None
+                        seq { calc cmin; calc cmax; } |> Seq.choose id
+                let a = ray.direction.x**2.0 + ray.direction.z**2.0
+                if areEqualFloat a 0.0 then
+                    intersect_caps
                 else
-                    let calc v =
-                        let t = (v - ray.origin.y) / ray.direction.y
-                        if check_cap t v then
-                            Some { t = t; obj = shape;}
-                        else
-                            None
-                    seq { calc cmin; calc cmax; } |> Seq.choose id
-            let a = ray.direction.x**2.0 - ray.direction.y**2.0 + ray.direction.z**2.0
-            let b = 2.0 * ray.origin.x * ray.direction.x - 2.0 * ray.origin.y * ray.direction.y + 2.0 * ray.origin.z * ray.direction.z
-            let c = ray.origin.x**2.0 - ray.origin.y**2.0 + ray.origin.z**2.0
-            match (areEqualFloat a 0.0),(areEqualFloat b 0.0) with
-            | true, true -> Seq.empty<intersection>
-            | true, false -> 
-                let s = seq { { t = -c/(2.0*b); obj = shape; } }
-                intersect_caps |> Seq.append s
-            | false, _ ->
-                let disc = b**2.0 - 4.0 * a * c
-                if disc < 0.0 then
-                    Seq.empty<intersection>
-                else
-                    let (t0,t1) = swapIfGreater ((-b - Math.Sqrt(disc)) / (2.0 * a)) ((-b + Math.Sqrt(disc)) / (2.0 * a))
-                    let calc t =
-                        let y = ray.origin.y + t * ray.direction.y
-                        if cmin < y && y < cmax then
-                            Some { t = t; obj = shape; }
-                        else
-                            None
-                    let s1 = seq { calc t0; calc t1; } |> Seq.choose id 
-                    let s2 = intersect_caps
-                    s1 |> Seq.append s2
-        | Group (_,_,_,children) ->
-            children
-            |> Seq.map (fun (c) -> intersect c ray)
-            |> Seq.collect (fun (s) -> s)
-            |> Seq.sortBy (fun (i) -> i.t)
+                    let b = 2.0 * ray.origin.x * ray.direction.x + 2.0 * ray.origin.z * ray.direction.z
+                    let c = ray.origin.x**2.0 + ray.origin.z**2.0 - 1.0
+                    let disc = b**2.0 - 4.0 * a * c
+                    if disc < 0.0 then
+                        Seq.empty<intersection>
+                    else
+                        let (t0,t1) = swapIfGreater ((-b - Math.Sqrt(disc)) / (2.0 * a)) ((-b + Math.Sqrt(disc)) / (2.0 * a))
+                        let calc t =
+                            let y = ray.origin.y + t * ray.direction.y
+                            if cmin < y && y < cmax then
+                                Some { t = t; obj = shape; }
+                            else
+                                None
+                        let s1 = seq { calc t0; calc t1; } |> Seq.choose id 
+                        let s2 = intersect_caps
+                        s1 |> Seq.append s2
+            | Cone (_,_,_,cmin,cmax,closed) ->
+                let check_cap t (y:float) =
+                    let x = ray.origin.x + t * ray.direction.x
+                    let z = ray.origin.z + t * ray.direction.z
+                    (x**2.0 + z**2.0) <= Math.Abs(y)
+                let intersect_caps =
+                    if not closed || (areEqualFloat ray.direction.y 0.0) then
+                        Seq.empty<intersection>
+                    else
+                        let calc v =
+                            let t = (v - ray.origin.y) / ray.direction.y
+                            if check_cap t v then
+                                Some { t = t; obj = shape;}
+                            else
+                                None
+                        seq { calc cmin; calc cmax; } |> Seq.choose id
+                let a = ray.direction.x**2.0 - ray.direction.y**2.0 + ray.direction.z**2.0
+                let b = 2.0 * ray.origin.x * ray.direction.x - 2.0 * ray.origin.y * ray.direction.y + 2.0 * ray.origin.z * ray.direction.z
+                let c = ray.origin.x**2.0 - ray.origin.y**2.0 + ray.origin.z**2.0
+                match (areEqualFloat a 0.0),(areEqualFloat b 0.0) with
+                | true, true -> Seq.empty<intersection>
+                | true, false -> 
+                    let s = seq { { t = -c/(2.0*b); obj = shape; } }
+                    intersect_caps |> Seq.append s
+                | false, _ ->
+                    let disc = b**2.0 - 4.0 * a * c
+                    if disc < 0.0 then
+                        Seq.empty<intersection>
+                    else
+                        let (t0,t1) = swapIfGreater ((-b - Math.Sqrt(disc)) / (2.0 * a)) ((-b + Math.Sqrt(disc)) / (2.0 * a))
+                        let calc t =
+                            let y = ray.origin.y + t * ray.direction.y
+                            if cmin < y && y < cmax then
+                                Some { t = t; obj = shape; }
+                            else
+                                None
+                        let s1 = seq { calc t0; calc t1; } |> Seq.choose id 
+                        let s2 = intersect_caps
+                        s1 |> Seq.append s2
+            | Group (_,_,_,children) ->
+                children
+                |> Seq.map (fun (c) -> intersect c ray)
+                |> Seq.collect (fun (s) -> s)
+                |> Seq.sortBy (fun (i) -> i.t)
             
     and intersect shape ray =
         let st = shapeTransformation shape

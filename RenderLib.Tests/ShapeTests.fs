@@ -510,3 +510,57 @@ module ShapeTests =
             let box = bounds_of g
             Assert.Equal(point -4.5 -3.0 -5.0, box.minimum)
             Assert.Equal(point 4.0 7.0 4.5, box.maximum)
+
+        [<Fact>]
+        let ``Intersecting a ray with a bounding box at the origin``() =
+            let func o (d:tuple) =
+                let box = {
+                    minimum = point -1.0 -1.0 -1.0;
+                    maximum = point 1.0 1.0 1.0;
+                }
+                let n = d.normalize()
+                let r = {
+                    origin = o;
+                    direction = n;
+                }
+                intersects box r
+            Assert.True(func (point 5.0 0.5 0.0) (vector -1.0 0.0 0.0))
+            Assert.True(func (point -5.0 0.5 0.0) (vector 1.0 0.0 0.0))
+            Assert.True(func (point 0.5 5.0 0.0) (vector 0.0 -1.0 0.0))
+            Assert.True(func (point 0.5 -5.0 0.0) (vector 0.0 1.0 0.0))
+            Assert.True(func (point 0.5 0.0 5.0) (vector 0.0 0.0 -1.0))
+            Assert.True(func (point 0.5 0.0 -5.0) (vector 0.0 0.0 1.0))
+            Assert.True(func (point 0.0 0.5 0.0) (vector 0.0 0.0 1.0))
+            Assert.False(func (point -2.0 0.0 0.0) (vector 2.0 4.0 6.0))
+            Assert.False(func (point 0.0 -2.0 0.0) (vector 6.0 2.0 4.0)) 
+            Assert.False(func (point 0.0 0.0 -2.0) (vector 4.0 6.0 2.0)) 
+            Assert.False(func (point 2.0 0.0 2.0) (vector 0.0 0.0 -1.0))
+            Assert.False(func (point 0.0 2.0 2.0) (vector 0.0 -1.0 0.0))
+            Assert.False(func (point 2.0 2.0 0.0) (vector -1.0 0.0 0.0))
+
+        [<Fact>]
+        let ``Intersecting a ray with a non-cubic bounding box``() =
+            let func o (d:tuple) =
+                let box = {
+                    minimum = point 5.0 -2.0 0.0;
+                    maximum = point 11.0 4.0 7.0;
+                }
+                let n = d.normalize()
+                let r = {
+                    origin = o;
+                    direction = n;
+                }
+                intersects box r
+            Assert.True(func (point 15.0 1.0 2.0) (vector -1.0 0.0 0.0))
+            Assert.True(func (point -5.0 -1.0 4.0) (vector 1.0 0.0 0.0))
+            Assert.True(func (point 7.0 6.0 5.0) (vector 0.0 -1.0 0.0))
+            Assert.True(func (point 9.0 -5.0 6.0) (vector 0.0 1.0 0.0))
+            Assert.True(func (point 8.0 2.0 12.0) (vector 0.0 0.0 -1.0))
+            Assert.True(func (point 6.0 0.0 -5.0) (vector 0.0 0.0 1.0))
+            Assert.True(func (point 8.0 1.0 3.5) (vector 0.0 0.0 1.0))
+            Assert.False(func (point 9.0 -1.0 -8.0) (vector 2.0 4.0 6.0))
+            Assert.False(func (point 8.0 3.0 -4.0) (vector 6.0 2.0 4.0))
+            Assert.False(func (point 9.0 -1.0 -2.0) (vector 4.0 6.0 2.0))
+            Assert.False(func (point 4.0 0.0 9.0) (vector 0.0 0.0 -1.0))
+            Assert.False(func (point 8.0 6.0 -1.0) (vector 0.0 -1.0 0.0))
+            Assert.False(func (point 12.0 5.0 4.0) (vector -1.0 0.0 0.0))
