@@ -92,7 +92,7 @@ module Shapes =
             tmax <- tmax_numerator * Double.PositiveInfinity
         swapIfGreater tmin tmax
 
-    let boundingBoxAddPoint pt (box:boundingBox) =
+    let boundingBoxAddPoint pt box =
         {
             minimum = point (Math.Min(pt.x, box.minimum.x)) (Math.Min(pt.y, box.minimum.y)) (Math.Min(pt.z, box.minimum.z));
             maximum = point (Math.Max(pt.x, box.maximum.x)) (Math.Max(pt.y, box.maximum.y)) (Math.Max(pt.z, box.maximum.z));
@@ -146,7 +146,7 @@ module Shapes =
         let t = shapeTransformation shape
         transform_box (bounds_of shape) t        
 
-    let intersects (box:boundingBox) ray = 
+    let intersects box ray = 
         let (xtmin, xtmax) = check_axis ray.origin.x ray.direction.x box.minimum.x box.maximum.x
         let (ytmin, ytmax) = check_axis ray.origin.y ray.direction.y box.minimum.y box.maximum.y
         let (ztmin, ztmax) = check_axis ray.origin.z ray.direction.z box.minimum.z box.maximum.z
@@ -430,6 +430,15 @@ module Shapes =
     let add_child g c =
         match g with
         | Group (_,_,_,children) -> children.Add c
+
+    let with_child g c =
+        match c with
+        | Plane (m,t,_) -> add_child g (Plane(m,t,Some g))
+        | Sphere (m,t,_) -> add_child g (Sphere(m,t,Some g))
+        | Cube (m,t,_) -> add_child g (Cube(m,t,Some g))
+        | Cylinder (m,t,_,min,max,closed) -> add_child g (Cylinder(m,t,Some g,min,max,closed))
+        | Cone (m,t,_,min,max,closed) -> add_child g (Cone(m,t,Some g,min,max,closed))
+        | Group (m,t,_,children) -> add_child g (Group(m,t,Some g,children))
 
     let has_child g c =
         match g with
