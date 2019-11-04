@@ -16,7 +16,7 @@ module Shapes =
     | Cube of material:material * transformation:matrix * Parent:shape option
     | Cylinder of material:material * transformation:matrix * Parent:shape option * Minimum:float * Maximum:float * Closed:bool
     | Cone of material:material * transformation:matrix * Parent:shape option * Minimum:float * Maximum:float * Closed:bool
-    | Group of material:material * transformation:matrix * Parent:shape option * Children:HashSet<shape>
+    | Group of material:material option * transformation:matrix * Parent:shape option * Children:HashSet<shape>
 
     type intersection = {
         t: float;
@@ -54,14 +54,34 @@ module Shapes =
         | Cone (_,t,_,_,_,_) -> t
         | Group (_,t,_,_) -> t
 
-    let shapeMaterial shape =
+    let rec shapeMaterial shape =
         match shape with
-        | Plane (m,_,_) -> m
-        | Sphere (m,_,_) -> m
-        | Cube (m,_,_) -> m
-        | Cylinder (m,_,_,_,_,_) -> m
-        | Cone (m,_,_,_,_,_) -> m
-        | Group (m,t,_,_) -> m
+        | Plane (m,_,p) -> 
+            match p with
+            | Some parent -> shapeMaterial parent
+            | None -> m
+        | Sphere (m,_,p) -> 
+            match p with
+            | Some parent -> shapeMaterial parent
+            | None -> m
+        | Cube (m,_,p) -> 
+            match p with
+            | Some parent -> shapeMaterial parent
+            | None -> m
+        | Cylinder (m,_,p,_,_,_) -> 
+            match p with
+            | Some parent -> shapeMaterial parent
+            | None -> m
+        | Cone (m,_,p,_,_,_) -> 
+            match p with
+            | Some parent -> shapeMaterial parent
+            | None -> m
+        | Group (m,_,p,_) -> 
+            match m,p with
+            | Some m, None -> m
+            | None, Some parent -> shapeMaterial parent
+            | Some _, Some parent -> shapeMaterial parent
+            | None, None -> material.Default
 
     let shapeParent shape =
         match shape with
@@ -435,8 +455,9 @@ module Shapes =
     let add_child g c =
         match g with
         | Group (_,_,_,children) -> children.Add c
+        g
 
-    let with_child g c =
+    let with_child c g =
         match c with
         | Plane (m,t,_) -> add_child g (Plane(m,t,Some g))
         | Sphere (m,t,_) -> add_child g (Sphere(m,t,Some g))

@@ -8,6 +8,7 @@ open RenderLib.Shapes
 open RenderLib.Translations
 open RenderLib.Material
 open RenderLib.Patterns
+open RenderLib.Lights
 open RenderLib.Worlds
 open RenderLib.Camera
 open SixLabors.ImageSharp
@@ -39,7 +40,27 @@ let main argv =
                 image.[x,y] <- pixel
         image.Save("output.jpg", encoder)
 
-    let g = Group(material.Default,identity_matrix(),None,new HashSet<shape>())
+    let hexagon_corner =
+        Sphere(material.Default,(translation 0.0 0.0 -1.0) * (scaling 0.25 0.25 0.25),None)
+
+    let hexagon_edge =
+        Cylinder(material.Default,(translation 0.0 0.0 -1.0) * (rotation_y (-Math.PI/6.0)) * (rotation_z (-Math.PI/2.0)) * (scaling 0.25 1.0 0.25),None,0.0,1.0,false)
+
+    let hexagon_side t =
+        let side = Group(Some { material.Default with color = yellow; },t,None,new HashSet<shape>())
+        side
+        |> with_child hexagon_corner
+        |> with_child hexagon_edge
+
+    let hexagon t = 
+        let hex = Group(Some { material.Default with color = yellow; },t,None,new HashSet<shape>())
+        for x in 0 .. 5 do
+            let v = float x
+            let side = hexagon_side (rotation_y (v*Math.PI/3.0))
+            with_child side hex
+        hex
+
+    let g = Group(None,identity_matrix(),None,new HashSet<shape>())
 
     //let p = Solid(red)// blue
     let p = checkers_pattern (scaling 0.5 0.5 0.5) white blue
@@ -69,17 +90,19 @@ let main argv =
         Cylinder({ material.Default with color = green; },(translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)),None,1.0,3.0,true)
 
     //with_child g plane
-    with_child g middle
-    with_child g right
-    with_child g left
-    with_child g cube
-    with_child g cylinder
+    with_child middle g
+    with_child right g
+    with_child left g
+    with_child cube g
+    with_child cylinder g
 
-    //let light = { position = point 0.0 10.0 -10.0; intensity = color 1.0 1.0 1.0; }
-    let world = { world.Default with objs = [ plane; g; ]; }
+    //((rotation_z (Math.PI / -3.0)) * (rotation_x (Math.PI/2.0)))
 
-    //let vt = view_transform (point 0.0 1.5 -5.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
-    let vt = view_transform (point 3.0 1.5 -3.5) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
+    let light = { position = point 0.0 10.0 -10.0; intensity = color 1.0 1.0 1.0; }
+    let world = { world.Default with light = light; objs = [ hexagon (rotation_x (Math.PI / -3.0)); ]; }
+
+    let vt = view_transform (point 0.0 1.5 -5.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
+    //let vt = view_transform (point 3.0 1.5 -3.5) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
     let camera = { create_default_camera 1600 1200 with transform = vt; }
 
     printfn "Calculating..."

@@ -336,9 +336,9 @@ module ShapeTests =
 
         [<Fact>]
         let ``Adding a child to a group``() =
-            let g = Group(material.Default,identity_matrix(),None,new HashSet<shape>())
+            let g = Group(Some material.Default,identity_matrix(),None,new HashSet<shape>())
             let s = Sphere(material.Default,identity_matrix(),Some g)
-            Assert.True(add_child g s)
+            add_child g s
             Assert.True(has_child g s)
             match s with
             | Sphere (_,_,Some parent) -> Assert.Equal(parent,g)
@@ -346,7 +346,7 @@ module ShapeTests =
 
         [<Fact>]
         let ``Intersecting a ray with an empty group``() =
-            let g = Group(material.Default,identity_matrix(),None,new HashSet<shape>())
+            let g = Group(Some material.Default,identity_matrix(),None,new HashSet<shape>())
             let r = {
                 origin = point 0.0 0.0 0.0;
                 direction = vector 0.0 0.0 1.0;
@@ -356,7 +356,7 @@ module ShapeTests =
 
         [<Fact>]
         let ``Intersecting a ray with a nonempty group``() =
-            let g = Group(material.Default,identity_matrix(),None,new HashSet<shape>())
+            let g = Group(Some material.Default,identity_matrix(),None,new HashSet<shape>())
             let s1 = Sphere(material.Default,identity_matrix(),Some g)
             let s2 = Sphere(material.Default,translation 0.0 0.0 -3.0,Some g)
             let s3 = Sphere(material.Default,translation 5.0 0.0 0.0,Some g)
@@ -376,7 +376,7 @@ module ShapeTests =
 
         [<Fact>]
         let ``Intersecting a transformed group``() =
-            let g = Group(material.Default,scaling 2.0 2.0 2.0,None,new HashSet<shape>())
+            let g = Group(Some material.Default,scaling 2.0 2.0 2.0,None,new HashSet<shape>())
             let s = Sphere(material.Default,translation 5.0 0.0 0.0,Some g)
             add_child g s
             let r = {
@@ -388,8 +388,8 @@ module ShapeTests =
 
         [<Fact>]
         let ``Converting a point from world to object space``() =
-            let g1 = Group(material.Default,rotation_y (Math.PI/2.0),None,new HashSet<shape>())
-            let g2 = Group(material.Default,scaling 2.0 2.0 2.0,Some g1,new HashSet<shape>())
+            let g1 = Group(Some material.Default,rotation_y (Math.PI/2.0),None,new HashSet<shape>())
+            let g2 = Group(Some material.Default,scaling 2.0 2.0 2.0,Some g1,new HashSet<shape>())
             add_child g1 g2
             let s = Sphere(material.Default,translation 5.0 0.0 0.0,Some g2)
             add_child g2 s
@@ -398,8 +398,8 @@ module ShapeTests =
 
         [<Fact>]
         let ``Converting a normal from object to world space``() =
-            let g1 = Group(material.Default,rotation_y (Math.PI/2.0),None,new HashSet<shape>())
-            let g2 = Group(material.Default,scaling 1.0 2.0 3.0,Some g1,new HashSet<shape>())
+            let g1 = Group(Some material.Default,rotation_y (Math.PI/2.0),None,new HashSet<shape>())
+            let g2 = Group(Some material.Default,scaling 1.0 2.0 3.0,Some g1,new HashSet<shape>())
             add_child g1 g2
             let s = Sphere(material.Default,translation 5.0 0.0 0.0,Some g2)
             add_child g2 s
@@ -409,8 +409,8 @@ module ShapeTests =
 
         [<Fact>]
         let ``Finding the nomral on a child object``() =
-            let g1 = Group(material.Default,rotation_y (Math.PI/2.0),None,new HashSet<shape>())
-            let g2 = Group(material.Default,scaling 1.0 2.0 3.0,Some g1,new HashSet<shape>())
+            let g1 = Group(Some material.Default,rotation_y (Math.PI/2.0),None,new HashSet<shape>())
+            let g2 = Group(Some material.Default,scaling 1.0 2.0 3.0,Some g1,new HashSet<shape>())
             add_child g1 g2
             let s = Sphere(material.Default,translation 5.0 0.0 0.0,Some g2)
             add_child g2 s
@@ -502,7 +502,7 @@ module ShapeTests =
 
         [<Fact>]
         let ``A group has a bounding box that contains its children``() =
-            let g = Group(material.Default,identity_matrix(),None,new HashSet<shape>())
+            let g = Group(Some material.Default,identity_matrix(),None,new HashSet<shape>())
             let s = Sphere(material.Default,(translation 2.0 5.0 -3.0) * (scaling 2.0 2.0 2.0),Some g)
             let c = Cylinder(material.Default,(translation -4.0 -1.0 4.0) * (scaling 0.5 1.0 0.5),Some g,-2.0,2.0,false)
             add_child g s
