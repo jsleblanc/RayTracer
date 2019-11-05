@@ -47,13 +47,13 @@ let main argv =
         Cylinder(material.Default,(translation 0.0 0.0 -1.0) * (rotation_y (-Math.PI/6.0)) * (rotation_z (-Math.PI/2.0)) * (scaling 0.25 1.0 0.25),None,0.0,1.0,false)
 
     let hexagon_side t =
-        let side = Group(Some { material.Default with color = yellow; },t,None,new HashSet<shape>())
+        let side = Group(None,t,None,new HashSet<shape>())
         side
         |> with_child hexagon_corner
         |> with_child hexagon_edge
 
     let hexagon t = 
-        let hex = Group(Some { material.Default with color = yellow; },t,None,new HashSet<shape>())
+        let hex = Group(None,t,None,new HashSet<shape>())
         for x in 0 .. 5 do
             let v = float x
             let side = hexagon_side (rotation_y (v*Math.PI/3.0))
@@ -104,6 +104,17 @@ let main argv =
     let vt = view_transform (point 0.0 1.5 -5.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
     //let vt = view_transform (point 3.0 1.5 -3.5) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
     let camera = { create_default_camera 1600 1200 with transform = vt; }
+    
+    (*
+    //sphere inside a sphere - doesn't work yet
+    let pt = checkers_pattern (translation 0.0 0.1 0.0) black white
+    let plane = Plane({ material.Default with pattern = Some pt; },translation 0.0 -10.1 0.0,None)
+    let s1 = Sphere({glass with diffuse = 0.1; shininess = 300.0; reflective = 1.0; },identity_matrix(),None)
+    let s2 = Sphere({glass with diffuse = 0.1; shininess = 300.0; reflective = 1.0; refractive_index = 1.0;},scaling 0.5 0.5 0.5,None)
+    let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
+    let camera = { create_default_camera 1600 1200 with field_of_view = Math.PI / 3.0; }
+    let world = { world.Default with light = light; objs = [plane;s1;s2;];}
+    *)
 
     printfn "Calculating..."
     let sw = Stopwatch.StartNew()
