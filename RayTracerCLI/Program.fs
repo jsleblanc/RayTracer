@@ -117,12 +117,15 @@ let main argv =
     printfn "Calculating..."
     let sw = Stopwatch.StartNew()   
 
-    for x in 1 .. 180 do
-        let world = { world.Default with light = light; objs = [ hexagon (rotation_x (Math.PI / float x)); ]; }    
+    let radians = Math.PI / 180.0
+    let mutable r = 1.0 * radians
+    for x in 1 .. 360 do
+        let world = { world.Default with light = light; objs = [ hexagon (rotation_x r); ]; }    
         let canvas = render camera world
         let filename = sprintf "Test_%03i.jpg" x
         canvas_to_jpg filename canvas
         printfn "%s done in %s" filename (sw.Elapsed.ToString())
+        r <- float x * radians
 
     //let canvas = render camera world
 
