@@ -26,7 +26,7 @@ let main argv =
     let green = color 0.0 1.0 0.0
     let yellow = color 1.0 1.0 0.0
 
-    let canvas_to_jpg (c:Canvas.canvas) =
+    let canvas_to_jpg (fileName:string) (c:Canvas.canvas) =
         let encoder = new JpegEncoder()
         encoder.Quality <- new Nullable<int>(100)
         let image = new Image<Argb32>(c.GetLength(0), c.GetLength(1))
@@ -38,7 +38,7 @@ let main argv =
                 let b = single c.blue
                 let pixel = new Argb32(r,g,b,0.0f)
                 image.[x,y] <- pixel
-        image.Save("output.jpg", encoder)
+        image.Save(fileName, encoder)
 
     let hexagon_corner =
         Sphere(material.Default,(translation 0.0 0.0 -1.0) * (scaling 0.25 0.25 0.25),None)
@@ -97,14 +97,11 @@ let main argv =
     with_child cylinder g
 
     //((rotation_z (Math.PI / -3.0)) * (rotation_x (Math.PI/2.0)))
-
-    let light = { position = point 0.0 10.0 -10.0; intensity = color 1.0 1.0 1.0; }
-    let world = { world.Default with light = light; objs = [ hexagon (rotation_x (Math.PI / -3.0)); ]; }
-
-    let vt = view_transform (point 0.0 1.5 -5.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
-    //let vt = view_transform (point 3.0 1.5 -3.5) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
-    let camera = { create_default_camera 1600 1200 with transform = vt; }
     
+    let vt = view_transform (point 0.0 1.5 -3.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)    
+    let camera = { create_default_camera 640 480 with transform = vt; }
+    let light = { position = point 0.0 10.0 -10.0; intensity = color 1.0 1.0 1.0; }
+        
     (*
     //sphere inside a sphere 
     let pt = checkers_pattern (translation 0.0 0.1 0.0) blue white
@@ -118,14 +115,21 @@ let main argv =
     *)
 
     printfn "Calculating..."
-    let sw = Stopwatch.StartNew()
+    let sw = Stopwatch.StartNew()   
 
-    let canvas = render camera world
+    for x in 1 .. 180 do
+        let world = { world.Default with light = light; objs = [ hexagon (rotation_x (Math.PI / float x)); ]; }    
+        let canvas = render camera world
+        let filename = sprintf "Test_%03i.jpg" x
+        canvas_to_jpg filename canvas
+        printfn "%s done in %s" filename (sw.Elapsed.ToString())
+
+    //let canvas = render camera world
 
     printfn "Calculations completed in %s" (sw.Elapsed.ToString())
     
-    canvas_to_jpg canvas
-    printfn "Written to canvas"
+    //canvas_to_jpg canvas
+    //printfn "Written to canvas"
 
     
     0 // return an integer exit code
