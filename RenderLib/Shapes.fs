@@ -353,7 +353,7 @@ module Shapes =
             let lowest = Seq.minBy (fun (i:intersection) -> i.t) filtered
             Some lowest
 
-    let getParents shape =
+    let getShapes shape =
         let rec func s (acc:seq<shape>) =
             match shapeParent s with            
             | Some parent -> 
@@ -365,15 +365,16 @@ module Shapes =
         parents
 
     let rec world_to_object shape (point:tuple) =
-        let shapes = getParents shape
+        let shapes = getShapes shape
         Seq.fold (fun acc elem -> (inverse (shapeTransformation elem)) * acc) point shapes
 
     let rec normal_to_world shape (normal:tuple) = 
         let foldFunc (elem:shape) (acc:tuple) =
-            let mutable n = (inverse (shapeTransformation elem)).Transpose * acc
+            let i = inverse (shapeTransformation elem)
+            let mutable n = (i.Transpose) * acc
             n <- { n with w = 0.0; }
             n.normalize()
-        let shapes = getParents shape
+        let shapes = getShapes shape
         Seq.foldBack foldFunc shapes normal
 
     let normal_at shape (world_point:tuple) =
