@@ -430,7 +430,7 @@ module ShapeTests =
             Assert.Equal(vector -0.428749814 -0.7525625233 -0.4998232143, v)
 
         [<Fact>]
-        let ``Finding the nomral on a child object``() =
+        let ``Finding the normal on a child object``() =
             let g1 = Group(Some material.Default,rotation_y (Math.PI/2.0),None,new HashSet<shape>())
             let g2 = Group(Some material.Default,scaling 1.0 2.0 3.0,Some g1,new HashSet<shape>())
             add_child g1 g2
