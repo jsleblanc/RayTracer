@@ -397,6 +397,17 @@ module ShapeTests =
             Assert.Equal(point 0.0 0.0 -1.0, p)
 
         [<Fact>]
+        let ``Converting a point from world to object space nested groups``() =
+            //let us = Sphere(material.Default,(rotation_z (Math.PI/4.0))*(rotation_z (Math.PI/3.0))*(rotation_z (Math.PI/3.0))*(scaling 1.0 0.5 0.5),None)
+            let g1 = Group(None,(rotation_z (Math.PI/3.0)),None,new HashSet<shape>())
+            let s = Sphere(material.Default,(rotation_z (Math.PI/3.0))*(scaling 1.0 0.5 0.5),Some g1)            
+            with_child s g1
+            let g2 = Group(None,(rotation_z (Math.PI/4.0)),Some g1,new HashSet<shape>())
+            with_child g1 g2
+            let p = world_to_object g2 (point -0.4975074385 -0.2721372954 -0.2336173106)
+            Assert.Equal(point 0.4101209687 0.7832576841 -0.4672346213, p)
+
+        [<Fact>]
         let ``Converting a normal from object to world space``() =
             let g1 = Group(Some material.Default,rotation_y (Math.PI/2.0),None,new HashSet<shape>())
             let g2 = Group(Some material.Default,scaling 1.0 2.0 3.0,Some g1,new HashSet<shape>())
@@ -406,6 +417,17 @@ module ShapeTests =
             let q = (Math.Sqrt(3.0)/3.0) 
             let n = normal_to_world s (vector q q q)
             Assert.Equal(vector 0.2857142857 0.4285714286 -0.8571428571, n)
+
+        [<Fact>]
+        let ``Converting a normal from object to world space nested groups``() =
+            //let us = Sphere(material.Default,(rotation_z (Math.PI/4.0))*(rotation_z (Math.PI/3.0))*(rotation_z (Math.PI/3.0))*(scaling 1.0 0.5 0.5),None)
+            let g1 = Group(None,(rotation_z (Math.PI/3.0)),None,new HashSet<shape>())
+            let s = Sphere(material.Default,(rotation_z (Math.PI/3.0))*(scaling 1.0 0.5 0.5),Some g1)            
+            with_child s g1
+            let g2 = Group(None,(rotation_z (Math.PI/4.0)),Some g1,new HashSet<shape>())
+            with_child g1 g2
+            let v = normal_to_world g2 (point 0.4101209687 0.7832576841 -0.4672346213)
+            Assert.Equal(vector -0.428749814 -0.7525625233 -0.4998232143, v)
 
         [<Fact>]
         let ``Finding the nomral on a child object``() =
