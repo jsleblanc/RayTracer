@@ -426,7 +426,7 @@ module ShapeTests =
             with_child s g1
             let g2 = Group(None,(rotation_z (Math.PI/4.0)),Some g1,new HashSet<shape>())
             with_child g1 g2
-            let v = normal_to_world g2 (point 0.4101209687 0.7832576841 -0.4672346213)
+            let v = normal_to_world g2 (vector 0.4101209687 0.7832576841 -0.4672346213)
             Assert.Equal(vector -0.428749814 -0.7525625233 -0.4998232143, v)
 
         [<Fact>]
