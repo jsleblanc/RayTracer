@@ -72,7 +72,7 @@ module Camera =
                     yield (x,y)
             }
         coords
-        |> PSeq.map (fun (x,y) -> 
+        |> Seq.map (fun (x,y) -> 
                 let ray = ray_for_pixel camera x y
                 let color = color_at world ray 5
                 (color, x, y)

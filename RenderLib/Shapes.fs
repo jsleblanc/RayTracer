@@ -355,14 +355,13 @@ module Shapes =
 
     let getShapes shape =
         let rec func s (acc:seq<shape>) =
-            match shapeParent s with            
+            match shapeParent s with
             | Some parent -> 
                 let p2 = seq { parent }
                 let acc2 = Seq.concat [p2; acc;]
                 func parent acc2
             | None -> acc
-        let parents = func shape (seq {shape;})
-        parents
+        func shape (seq {shape;})
 
     let rec world_to_object shape (point:tuple) =
         let shapes = getShapes shape

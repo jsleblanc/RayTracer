@@ -59,30 +59,7 @@ let main argv =
             with_child side hex
         hex
 
-    let hexagon2 t = 
-        //let t = scaling 1.5 1.5 1.5
-        let children = new HashSet<shape>()
-        let hex = Group(Some material.Default,t,None,children)
-
-        let children1 = new HashSet<shape>()
-        let side1 = Group(Some material.Default,(rotation_y (0.0*Math.PI/3.0)) * t,None,children1)
-        let s1 = Sphere(material.Default,(translation 0.0 0.0 -1.0) * (scaling 0.25 0.25 0.25),Some side1)
-        let c1 = Cylinder(material.Default,(translation 0.0 0.0 -1.0) * (rotation_y (-Math.PI/6.0)) * (rotation_z (-Math.PI/2.0)) * (scaling 0.25 1.0 0.25),Some side1,0.0,1.0,false)
-        children1.Add(s1)
-        children1.Add(c1)
-
-        let children2 = new HashSet<shape>()
-        let side2 = Group(Some material.Default,(rotation_y (1.0*Math.PI/3.0)) * t,None,children2)
-        let s2 = Sphere(material.Default,(translation 0.0 0.0 -1.0) * (scaling 0.25 0.25 0.25) * (rotation_y (1.0*Math.PI/3.0)),Some side2)
-        let c2 = Cylinder(material.Default,(translation 0.0 0.0 -1.0) * (rotation_y (-Math.PI/6.0)) * (rotation_z (-Math.PI/2.0)) * (scaling 0.25 1.0 0.25) * (rotation_y (1.0*Math.PI/3.0)),Some side2,0.0,1.0,false)
-        children2.Add(s2)
-        children2.Add(c2)
-
-        children.Add(side1)
-        //children.Add(side2)
-        hex
-
-    //((rotation_z (Math.PI / -3.0)) * (rotation_x (Math.PI/2.0)))
+    let h = hexagon ((rotation_x (Math.PI / -3.0)))// * (rotation_x (Math.PI/2.0)))
     
     let vt = view_transform (point 0.0 0.0 -3.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)    
     let camera = { create_default_camera 640 480 with transform = vt; }
@@ -97,12 +74,14 @@ let main argv =
     with_child s g1
     let g2 = Group(None,(rotation_z (Math.PI/4.0)),Some g1,new HashSet<shape>())
     with_child g1 g2
-    let world = { world.Default with light = light; objs = [g2;]; }    
-    let canvas = render camera world
-    canvas_to_jpg "output.jpg" canvas
+    let world = { world.Default with light = light; objs = [h;]; }    
 
     printfn "Calculating..."
     let sw = Stopwatch.StartNew()   
+
+    let canvas = render camera world
+    canvas_to_jpg "output.jpg" canvas
+
     (*
     let radians = Math.PI / 180.0
     let mutable r = 53.0 * radians
@@ -119,8 +98,8 @@ let main argv =
     //let corner_transform = (translation 0.0 0.0 -1.0) * (scaling 0.25 0.25 0.25)// * (rotation_x r)
     //let edge_transform = (translation 0.0 0.0 -1.0) * (rotation_y (-Math.PI/6.0)) * (rotation_z (-Math.PI/2.0)) * (scaling 0.25 1.0 0.25)// * (rotation_x r)
 
-    //let ray = ray_for_pixel camera 320 254
-    //let color = color_at world ray 5
+    let ray = ray_for_pixel camera 260 375
+    let color = color_at world ray 5
 
     //let canvas = render camera world
 
