@@ -31,3 +31,9 @@ module Common =
 
     let round (x:float) =
         Math.Round(x, 12, MidpointRounding.AwayFromZero)
+
+    let swapIfGreater min max =
+        if min > max then
+            (max, min)
+        else
+            (min, max)     

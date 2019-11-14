@@ -91,13 +91,7 @@ module Shapes =
         | Cylinder (_,_,p,_,_,_) -> p
         | Cone (_,_,p,_,_,_) -> p
         | Group (_,_,p,_) -> p
-        | _ -> None
-
-    let private swapIfGreater min max =
-        if min > max then
-            (max, min)
-        else
-            (min, max)            
+        | _ -> None     
 
     let private check_axis origin (direction:float) min max = 
         let tmin_numerator = min - origin
