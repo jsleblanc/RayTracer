@@ -219,7 +219,7 @@ module WorldTests =
             ShapePlane.build
             |> Shapes2.texture m
             |> Shapes2.transform (translation 0.0 1.0 0.0)
-        let w = Worlds.build_default [lower;upper;]
+        let w = Worlds.build [lower;upper;] { position = point 0.0 0.0 0.0; intensity = color 1.0 1.0 1.0; }
         let r = {
             origin = point 0.0 0.0 0.0;
             direction = vector 0.0 1.0 0.0;
