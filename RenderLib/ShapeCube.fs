@@ -11,7 +11,7 @@ open Shapes2
 module ShapeCube =
 
     let build =
-        let local_normal_at shape pt =
+        let local_normal_at hit shape pt =
             let ax = Math.Abs(pt.x)
             let ay = Math.Abs(pt.y)
             let maxc = seq { ax; ay; Math.Abs(pt.z); } |> Seq.max

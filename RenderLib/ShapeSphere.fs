@@ -11,9 +11,9 @@ open Shapes2
 module ShapeSphere = 
 
     let build =
-        let local_normal_at shape pt = pt - (point 0.0 0.0 0.0)
+        let local_normal_at hit shape pt = pt - (point 0.0 0.0 0.0)
         let local_intersect shape trail ray =
-            let normal = local_normal_at shape ray.origin
+            let normal = local_normal_at None shape ray.origin
             let a = ray.direction.dotProduct(ray.direction)
             let b = 2.0 * ray.direction.dotProduct(normal)
             let c = normal.dotProduct(normal) - 1.0

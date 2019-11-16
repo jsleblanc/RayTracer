@@ -11,7 +11,7 @@ open Shapes2
 module ShapePlane =
 
     let build = 
-        let local_normal_at shape pt = vector 0.0 1.0 0.0
+        let local_normal_at hit shape pt = vector 0.0 1.0 0.0
         let local_intersect shape trail ray =
             if Math.Abs(ray.direction.y) < epsilon then
                 Seq.empty<intersection>

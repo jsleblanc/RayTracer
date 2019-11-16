@@ -27,6 +27,7 @@ module Shapes2 =
         smooth: bool;
     }
     
+    [<CustomEquality; NoComparison>]
     type shape = {
         shape:shape_t;
         transform:matrix;
@@ -37,7 +38,18 @@ module Shapes2 =
         local_normal_at:normal_t;
         bounds_of:bounds_of_t;
         shadow: bool;
-    }
+    } with 
+        override this.Equals(other) = 
+            match other with
+            | :? shape as other ->
+                this.shape = other.shape &&
+                this.transform = other.transform &&
+                this.inverse_transform = other.inverse_transform &&
+                this.inverse_transpose_transform = other.inverse_transpose_transform &&
+                this.material = other.material &&
+                this.shadow = other.shadow
+            | _ -> Object.Equals(this, other)
+        override this.GetHashCode() = 0
     and shape_t =
     | Plane
     | Sphere
@@ -47,14 +59,14 @@ module Shapes2 =
     | Triangle of tri_data
     | Group of Children:seq<shape>
     and intersection = {
-        t: float;
-        obj: shape;
+        t:float;
+        obj:shape;
         trail:shape list;
         u:float;
         v:float;
     }
     and intersect_t = shape -> shape list -> ray -> intersection seq
-    and normal_t = shape -> tuple -> tuple
+    and normal_t = intersection option -> shape -> tuple -> tuple
     and bounds_of_t = shape -> boundingBox
 
     let build (shape:shape_t) (isect:intersect_t) (normal:normal_t) (bounds_of:bounds_of_t) = {
@@ -101,5 +113,27 @@ module Shapes2 =
             | Some m -> m
         loop shape trail
         
+    let world_to_object shape trail wpoint  =
+        let rec loop point t = 
+            match t with
+            | [] -> point
+            | parent :: parents ->
+                parent.inverse_transform * (loop point parents)
+        in
+        loop wpoint (shape :: trail)
+
+    let normal_to_world shape trail (normal:tuple) =
+        let rec loop (normal:tuple) t =
+            match t with
+            | [] -> normal
+            | shape :: shapes ->
+                let n = shape.inverse_transpose_transform * normal
+                let n_p = (vector n.x n.y n.z).normalize() in
+                loop n_p shapes
+        in
+        loop normal (shape :: trail)
+
     let normal_at hit shape trail wpoint =
-        vector 0.0 0.0 0.0
+        let object_point = world_to_object shape trail wpoint in
+        let object_normal = shape.local_normal_at hit shape object_point in
+        normal_to_world shape trail object_normal
