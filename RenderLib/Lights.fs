@@ -21,8 +21,7 @@ module Lights =
     }
 
     let pattern_at_object (pattern:pattern) object (world_point:tuple) =
-        //let local_point = world_to_object object world_point
-        let local_point = point 0.0 0.0 0.0
+        let local_point = world_to_object object [] world_point
         pattern_at pattern local_point
 
     let lighting m obj light point eyev normalv inShadow =

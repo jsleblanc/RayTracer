@@ -3,7 +3,7 @@
 open Xunit
 open FsCheck
 open System
-open RenderLib.Common
+open RenderLib
 open RenderLib.Color
 open RenderLib.Tuple
 open RenderLib.Matrix
@@ -11,7 +11,7 @@ open RenderLib.Translations
 open RenderLib.Ray
 open RenderLib.Material
 open RenderLib.Patterns
-open RenderLib.Shapes
+open RenderLib.Shapes2
 open RenderLib.Lights
 
 module PatternsTests = 
@@ -50,21 +50,21 @@ module PatternsTests =
 
     [<Fact>]
     let ``Stripes with an object transformation``() =
-        let obj = Sphere(material.Default,scaling 2.0 2.0 2.0,None)
+        let obj = ShapeSphere.build |> Shapes2.transform (scaling 2.0 2.0 2.0)
         let pattern = stripe_pattern_default white black
         let c = pattern_at_object pattern obj (point 1.5 0.0 0.0)
         Assert.Equal(white, c)
 
     [<Fact>]
     let ``Stripes with a pattern transformation``() =
-        let obj = Sphere(material.Default,identity_matrix(),None)
+        let obj = ShapeSphere.build
         let pattern = stripe_pattern (scaling 2.0 2.0 2.0) white black
         let c = pattern_at_object pattern obj (point 1.5 0.0 0.0)
         Assert.Equal(white, c)
 
     [<Fact>]
     let ``Stripes with both an object and a pattern transformation``() =
-        let obj = Sphere(material.Default,identity_matrix(),None)
+        let obj = ShapeSphere.build
         let pattern = stripe_pattern (translation 0.5 0.0 0.0) white black
         let c = pattern_at_object pattern obj (point 2.5 0.0 0.0)
         Assert.Equal(white, c)

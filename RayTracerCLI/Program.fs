@@ -65,12 +65,14 @@ let main argv =
 *)
 
     //let p = Solid(red)// blue
-    let p = checkers_pattern (scaling 0.5 0.5 0.5) white blue
+    
     //let p = Blended(stripe_pattern_default white blue, stripe_pattern (rotation_y(-Math.PI/2.0)) white blue)
     //let planeMaterial = { material.Default with color = color 1.0 0.9 0.9; specular = 0.0; pattern = Some p; }
 
-    let plane = ShapePlane.build
-        //Plane({ shapeProperties.Default with material = planeMaterial; default_transformation = (translation 0.0 0.0 10.0) * (rotation_x (Math.PI/2.0)); })
+    let plane = 
+        ShapePlane.build
+        |> Shapes2.texture { Material.material.Default with color = color 1.0 0.9 0.9; specular = 0.0; pattern = Some (checkers_pattern (scaling 0.5 0.5 0.5) white blue); }
+        //|> Shapes2.transform ((translation 0.0 0.0 10.0) * (rotation_x (Math.PI/2.0)))
 
     let middle = 
         ShapeSphere.build
@@ -103,7 +105,7 @@ let main argv =
     printfn "Calculating..."
     let sw = Stopwatch.StartNew()   
 
-    let world = Worlds.build [left;right;middle;plane;] light
+    let world = Worlds.build [left;right;middle;cube;plane;] light
     let canvas = render camera world
     canvas_to_jpg "output.jpg" canvas
 

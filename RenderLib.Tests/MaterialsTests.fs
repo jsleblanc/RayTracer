@@ -1,23 +1,21 @@
 ﻿namespace RenderLib.Tests
 
 open Xunit
-open FsCheck
 open System
-open RenderLib.Common
+open RenderLib
 open RenderLib.Tuple
 open RenderLib.Material
 open RenderLib.Patterns
 open RenderLib.Color
 open RenderLib.Lights
-open RenderLib.Shapes
-open RenderLib.Matrix
+open RenderLib.Shapes2
 
 module MaterialsTests = 
 
     [<Fact>]
     let ``Lighting with the eye between the light and the surface``() =
-        let s = Sphere(material.Default,identity_matrix(),None)
-        let m = material.Default
+        let s = ShapeSphere.build
+        let m = Material.material.Default
         let position = point 0.0 0.0 0.0
         let eyev = vector 0.0 0.0 -1.0
         let normalv = vector 0.0 0.0 -1.0
@@ -30,8 +28,8 @@ module MaterialsTests =
 
     [<Fact>]
     let ``Lighting with the eye between light and surface, eye offset 45 degrees``() =
-        let s = Sphere(material.Default,identity_matrix(),None)
-        let m = material.Default
+        let s = ShapeSphere.build
+        let m = Material.material.Default
         let position = point 0.0 0.0 0.0
         let eyev = vector 0.0 (Math.Sqrt(2.0)/2.0) (-Math.Sqrt(2.0)/2.0)
         let normalv = vector 0.0 0.0 -1.0
@@ -44,8 +42,8 @@ module MaterialsTests =
 
     [<Fact>]
     let ``Lighting with eye opposite surface, light offset 45 degrees``() =
-        let s = Sphere(material.Default,identity_matrix(),None)
-        let m = material.Default
+        let s = ShapeSphere.build
+        let m = Material.material.Default
         let position = point 0.0 0.0 0.0
         let eyev = vector 0.0 0.0 -1.0
         let normalv = vector 0.0 0.0 -1.0
@@ -58,8 +56,8 @@ module MaterialsTests =
 
     [<Fact>]
     let ``Lighting with eye in the path of the reflection vector``() =
-        let s = Sphere(material.Default,identity_matrix(),None)
-        let m = material.Default
+        let s = ShapeSphere.build
+        let m = Material.material.Default
         let position = point 0.0 0.0 0.0
         let v = -Math.Sqrt(2.0) / 2.0
         let eyev = vector 0.0 v v
@@ -73,8 +71,8 @@ module MaterialsTests =
 
     [<Fact>]
     let ``Lighting with the light behind the surface``() =
-        let s = Sphere(material.Default,identity_matrix(),None)
-        let m = material.Default
+        let s = ShapeSphere.build
+        let m = Material.material.Default
         let position = point 0.0 0.0 0.0
         let eyev = vector 0.0 0.0 -1.0
         let normalv = vector 0.0 0.0 -1.0
@@ -87,8 +85,8 @@ module MaterialsTests =
 
     [<Fact>]
     let ``Lighting with the surface in shadow``() =
-        let s = Sphere(material.Default,identity_matrix(),None)
-        let m = material.Default
+        let s = ShapeSphere.build
+        let m = Material.material.Default
         let position = point 0.0 0.0 0.0
         let eyev = vector 0.0 0.0 -1.0
         let normalv = vector 0.0 0.0 -1.0
@@ -102,8 +100,8 @@ module MaterialsTests =
 
     [<Fact>]
     let ``Lighting with a pattern applied``() =
-        let s = Sphere(material.Default,identity_matrix(),None)
-        let m = { material.Default with pattern = Some (stripe_pattern_default white black); ambient = 1.0; diffuse = 0.0; specular = 0.0; }
+        let s = ShapeSphere.build
+        let m = { Material.material.Default with pattern = Some (stripe_pattern_default white black); ambient = 1.0; diffuse = 0.0; specular = 0.0; }
         let eyev = vector 0.0 0.0 -1.0
         let normalv = vector 0.0 0.0 -1.0
         let light = point_light (point 0.0 0.0 -10.0) white
