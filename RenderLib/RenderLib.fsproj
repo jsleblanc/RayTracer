@@ -16,6 +16,7 @@
     <Compile Include="Material.fs" />
     <Compile Include="Shapes.fs" />
     <Compile Include="Shapes2.fs" />
+    <Compile Include="PreparedComputations.fs" />
     <Compile Include="ShapeSphere.fs" />
     <Compile Include="ShapePlane.fs" />
     <Compile Include="ShapeCube.fs" />

@@ -49,11 +49,11 @@ module Shapes2 =
     and intersection = {
         t: float;
         obj: shape;
-        trail:seq<shape>;
+        trail:shape list;
         u:float;
         v:float;
     }
-    and intersect_t = shape -> shape seq -> ray -> intersection seq
+    and intersect_t = shape -> shape list -> ray -> intersection seq
     and normal_t = shape -> tuple -> tuple
     and bounds_of_t = shape -> boundingBox
 
@@ -91,5 +91,13 @@ module Shapes2 =
         let ray2 = Ray.transform ray shape.inverse_transform
         shape.local_intersect shape trail ray2
 
-
+    let material trail shape =
+        let rec loop head tail =
+            match head.material with
+            | None -> 
+                match tail with
+                | [] -> material.Default
+                | head :: tail -> loop head tail
+            | Some m -> m
+        loop shape trail
         
