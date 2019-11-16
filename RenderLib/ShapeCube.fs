@@ -41,11 +41,11 @@ module ShapeCube =
             let tmin = seq { xtmin; ytmin; ztmin; } |> Seq.max
             let tmax = seq { xtmax; ytmax; ztmax; } |> Seq.min
             if tmin > tmax then
-                Seq.empty<intersection>
+                []
             else
-                seq {
-                    Shapes2.build_intersection tmin shape trail
-                    Shapes2.build_intersection tmax shape trail
-                }
+                [
+                    Shapes2.build_intersection tmin shape trail;
+                    Shapes2.build_intersection tmax shape trail;
+                ]
         let bounds_of shape = { minimum = point -1.0 -1.0 -1.0; maximum = point 1.0 1.0 1.0; }
         build Cube local_intersect local_normal_at bounds_of

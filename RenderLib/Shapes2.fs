@@ -65,7 +65,7 @@ module Shapes2 =
         u:float;
         v:float;
     }
-    and intersect_t = shape -> shape list -> ray -> intersection seq
+    and intersect_t = shape -> shape list -> ray -> intersection list
     and normal_t = intersection option -> shape -> tuple -> tuple
     and bounds_of_t = shape -> boundingBox
 
@@ -84,12 +84,12 @@ module Shapes2 =
     let build_intersection t shape trail =
         { t = t; obj = shape; trail = trail; u = 0.0; v = 0.0; }
 
-    let private sort_intersection (xs:seq<intersection>) =
-        xs |> Seq.sortBy (fun (a) -> a.t)
+    let private sort_intersection (xs:intersection list) =
+        xs |> List.sortBy (fun (a) -> a.t)
 
-    let hit (xs:seq<intersection>) =
+    let hit (xs:intersection list) =
         let sorted = sort_intersection xs
-        sorted |> Seq.tryFind (fun (i) -> i.t > 0.0)
+        sorted |> List.tryFind (fun (i) -> i.t > 0.0)
 
     let transform transform shape =
         let inverse_transform = inverse transform

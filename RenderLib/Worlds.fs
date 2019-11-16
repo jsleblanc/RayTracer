@@ -7,6 +7,7 @@ open Color
 open Matrix
 open Ray
 open Lights
+open PreparedComputations
 open Shapes2
 
 module Worlds = 
@@ -31,15 +32,21 @@ module Worlds =
             }
         }
 
-    let addShape world shape =
+    let addShape shape world =
         let shapes = world.objs @ [shape]
         { world with objs = shapes }
 
     let intersect_world world (ray:ray) =
-        world.objs
-        |> Seq.map (fun (shape) -> intersect shape ray)
-        |> Seq.collect (fun c -> c)
-        |> Seq.sortBy (fun i -> i.t)
+        let rec aux (xs:intersection list) shapes =
+            match shapes with
+            | [] -> xs
+            | shape :: shapes ->
+                let xs_p = Shapes2.intersect shape shapes ray
+                match xs_p with
+                | [] -> aux xs shapes
+                | _ -> aux ((List.concat [xs;xs_p;]) |> List.sortBy (fun (i) -> i.t)) shapes
+        in
+        aux [] world.objs
 
     let is_shadowed (w:world) (p:tuple) =
         let v = w.light.position - p
@@ -58,7 +65,7 @@ module Worlds =
         if remaining < 1 then
             black
         else
-            let sm = shapeMaterial comps.obj
+            let sm = PreparedComputations.material comps
             if sm.reflective = 0.0 then
                 black
             else
@@ -69,10 +76,10 @@ module Worlds =
                 let c = color_at world reflect_ray (remaining - 1)
                 c * sm.reflective
 
-    and shade_hit world comps remaining = 
+    and shade_hit world (comps:comps) remaining = 
         let shadowed = is_shadowed world comps.over_point
-        let sm = shapeMaterial comps.obj
-        let surface = lighting sm comps.obj world.light comps.over_point comps.eyev comps.normalv shadowed
+        let sm = PreparedComputations.material comps
+        let surface = lighting sm comps.shape world.light comps.over_point comps.eyev comps.normalv shadowed
         let reflected = reflected_color world comps remaining
         let refracted = refracted_color world comps remaining
         if sm.reflective > 0.0 && sm.transparency > 0.0 then
@@ -85,12 +92,12 @@ module Worlds =
         let i = intersect_world world ray
         match hit i with 
         | Some hit -> 
-            let comp = prepare_computations hit ray i
+            let comp = prepare hit ray i
             shade_hit world comp remaining
         | None -> black
 
     and refracted_color world comps remaining =
-        let sm = shapeMaterial comps.obj
+        let sm = PreparedComputations.material comps
         if remaining = 0 || sm.transparency = 0.0 then
             black
         else
