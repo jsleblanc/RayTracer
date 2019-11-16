@@ -1,21 +1,30 @@
 ﻿namespace RenderLib.Tests
 
 open Xunit
-open FsCheck
 open System
+open RenderLib
 open RenderLib.Common
 open RenderLib.Tuple
 open RenderLib.Matrix
 open RenderLib.Color
 open RenderLib.Translations
 open RenderLib.Material
-open RenderLib.Shapes
+open RenderLib.Shapes2
 open RenderLib.Worlds
 open RenderLib.Camera
 
 module CameraTests = 
 
-    let default_world = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None)]; }
+    let default_world = 
+        let s1 = 
+            ShapeSphere.build
+            |> Shapes2.texture { Material.material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }
+        let s2 = 
+            ShapeSphere.build
+            |> Shapes2.texture Material.material.Default
+            |> Shapes2.transform (scaling 0.5 0.5 0.5)
+        let w = Worlds.build_default [s1; s2;]
+        (s1,s2,w)
 
     [<Fact>]
     let ``Constructing a camera``() =
@@ -58,7 +67,7 @@ module CameraTests =
 
     [<Fact>]
     let ``Rendering a world with a camera``() =
-        let w = default_world        
+        let (_,_,w) = default_world        
         let from_point = point 0.0 0.0 -5.0
         let to_point = point 0.0 0.0 0.0
         let up = vector 0.0 1.0 0.0

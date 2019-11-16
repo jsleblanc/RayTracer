@@ -91,13 +91,20 @@ module Shapes2 =
         let sorted = sort_intersection xs
         sorted |> Seq.tryFind (fun (i) -> i.t > 0.0)
 
-    let transform shape transform =
+    //TODO swap parameters to make |> usage easier
+    let transform transform shape =
         let inverse_transform = inverse transform
         let inverse_transpose = inverse_transform.Transpose
         { shape with inverse_transform = inverse_transform; inverse_transpose_transform = inverse_transpose; }
 
-    let texture shape material =
+    //TODO swap parameters to make |> usage easier
+    let texture material shape =
         { shape with material = Some material; }
+
+    let materialOrDefault shape = 
+        match shape.material with
+        | None -> Material.material.Default
+        | Some m -> m
 
     let intersect (shape:shape) trail ray =
         let ray2 = Ray.transform ray shape.inverse_transform

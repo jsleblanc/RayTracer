@@ -116,7 +116,7 @@ let main argv =
 
     printfn "Calculating..."
     let sw = Stopwatch.StartNew()   
-
+    (*
     let radians = Math.PI / 180.0
     let mutable r = 1.0 * radians
     for x in 1 .. 360 do
@@ -126,7 +126,7 @@ let main argv =
         canvas_to_jpg filename canvas
         printfn "%s done in %s" filename (sw.Elapsed.ToString())
         r <- float x * radians
-
+        *)
     //let canvas = render camera world
 
     printfn "Calculations completed in %s" (sw.Elapsed.ToString())

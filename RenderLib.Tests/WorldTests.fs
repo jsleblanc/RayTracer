@@ -3,11 +3,13 @@
 open Xunit
 open FsCheck
 open System
+open RenderLib
 open RenderLib.Common
 open RenderLib.Tuple
 open RenderLib.Color
 open RenderLib.Material
-open RenderLib.Shapes
+open RenderLib.Shapes2
+open RenderLib.PreparedComputations
 open RenderLib.Translations
 open RenderLib.Ray
 open RenderLib.Lights
@@ -17,11 +19,20 @@ open RenderLib.Matrix
 
 module WorldTests = 
 
+    let default_world = 
+        let s1 = 
+            ShapeSphere.build
+            |> Shapes2.texture { Material.material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }
+        let s2 = 
+            ShapeSphere.build
+            |> Shapes2.texture Material.material.Default
+            |> Shapes2.transform (scaling 0.5 0.5 0.5)
+        let w = Worlds.build_default [s1; s2;]
+        (s1,s2,w)
+
     [<Fact>]
     let ``The default world``() =
-        let s1 = Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None)
-        let s2 = Sphere(material.Default,scaling 0.5 0.5 0.5,None)
-        let w = { world.Default with objs = [s1; s2]; }
+        let (s1,s2,w) = default_world
         let l = {
             position = point -10.0 10.0 -10.0;
             intensity = color 1.0 1.0 1.0
@@ -32,7 +43,7 @@ module WorldTests =
 
     [<Fact>]
     let ``Intersect a world with a ray``() =
-        let w = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None)]; }
+        let (s1,s2,w) = default_world
         let r = {
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
@@ -46,60 +57,51 @@ module WorldTests =
 
     [<Fact>]
     let ``Shading an intersection``() =
-        let w = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None)]; }
+        let (s1,s2,w) = default_world
         let r = {
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
         }
         let s = Seq.item(0) w.objs
-        let i = {
-            t = 4.0;
-            obj = s;
-        }
-        let comps = prepare_computations i r (seq {i})
+        let i = Shapes2.build_intersection 4.0 s []
+        let comps = prepare i r [i]
         let c = shade_hit w comps 5
         Assert.Equal(color 0.38066119308103435 0.47582649135129296 0.28549589481077575, c)
 
     [<Fact>]
     let ``Shading an intersection from the inside``() =
-        let default_world = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None)]; }
-        let w = { default_world with light = { position = point 0.0 0.25 0.0; intensity = color 1.0 1.0 1.0; } }
+        let (s1,s2,w) = default_world
+        let w = { w with light = { position = point 0.0 0.25 0.0; intensity = color 1.0 1.0 1.0; } }
         let r = {
             origin = point 0.0 0.0 0.0;
             direction = vector 0.0 0.0 1.0;
         }
         let s = Seq.item(1) w.objs
-        let i = {
-            t = 0.5;
-            obj = s;
-        }
-        let comps = prepare_computations i r (seq {i})
+        let i = Shapes2.build_intersection 0.5 s []
+        let comps = prepare i r [i]
         let c = shade_hit w comps 5
         Assert.Equal(color 0.9049844721 0.9049844721 0.9049844721, c)
 
     [<Fact>]
     let ``shade_hit() is given an intersection in shadow``() =
-        let s1 = Sphere(material.Default,identity_matrix(),None)
-        let s2 = Sphere(material.Default,translation 0.0 0.0 10.0,None)
+        let s1 = ShapeSphere.build
+        let s2 = ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 10.0)
         let w = {
             light = point_light (point 0.0 0.0 -10.0) (color 1.0 1.0 1.0);
             objs = [ s1; s2; ]
         }
-        let i = {
-            t = 4.0;
-            obj = s2;
-        }
+        let i = Shapes2.build_intersection 4.0 s2 []
         let r = {
             origin = point 0.0 0.0 5.0;
             direction = vector 0.0 0.0 1.0;
         }
-        let comps = prepare_computations i r (seq {i})
+        let comps = prepare i r [i]
         let c = shade_hit w comps 5
         Assert.Equal(color 0.1 0.1 0.1, c)
 
     [<Fact>]
     let ``The color when a ray misses``() =
-        let w = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None)]; }
+        let (s1,s2,w) = default_world
         let r = {
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 1.0 0.0;
@@ -109,7 +111,7 @@ module WorldTests =
 
     [<Fact>]
     let ``The color when a ray hits``() =
-        let w = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None)]; }
+        let (s1,s2,w) = default_world
         let r = {
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
@@ -119,98 +121,105 @@ module WorldTests =
 
     [<Fact>]
     let ``The color with an intersection behind the ray``() =
-        let default_world = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None)]; }
-        let w = { default_world with objs = [Sphere({ material.Default with ambient = 1.0; },identity_matrix(),None); Sphere({ material.Default with ambient = 1.0; },identity_matrix(),None)]; }
-        let inner = Seq.item(1) w.objs
+        let (s1,s2,w) = default_world
+        let s1 = s1 |> Shapes2.texture { s1.material.Value with ambient = 1.0; }
+        let s2 = s2 |> Shapes2.texture { s2.material.Value with ambient = 1.0; }
+        let w = { w with objs = [s1;s2;]; }
         let r = {
             origin = point 0.0 0.0 0.75;
             direction = vector 0.0 0.0 -1.0;
         }
         let c = color_at w r 5
-        match inner with
-        | Sphere (m,_,_) -> Assert.Equal(m.color, c)
+        Assert.Equal(s2.material.Value.color, c)
 
     [<Fact>]
     let ``There is no shadow when nothing is collinear with point and light``() =
-        let default_world = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None)]; }
+        let (s1,s2,w) = default_world
         let p = point 0.0 10.0 0.0
-        let result = is_shadowed default_world p
+        let result = is_shadowed w p
         Assert.False(result)
 
     [<Fact>]
     let ``The shadow when an object is between the point and the light``() =
-        let default_world = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None)]; }
+        let (s1,s2,w) = default_world
         let p = point 10.0 -10.0 10.0
-        let result = is_shadowed default_world p
+        let result = is_shadowed w p
         Assert.True(result)
         
     [<Fact>]
     let ``There is no shadow when an object is behind the light``() =
-        let default_world = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None)]; }
+        let (s1,s2,w) = default_world
         let p = point -20.0 20.0 -20.0
-        let result = is_shadowed default_world p
+        let result = is_shadowed w p
         Assert.False(result)
 
     [<Fact>]
     let ``There is no shadow when an object is behind the point``() =
-        let default_world = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None)]; }
+        let (s1,s2,w) = default_world
         let p = point -2.0 2.0 -2.0
-        let result = is_shadowed default_world p
+        let result = is_shadowed w p
         Assert.False(result)
 
     [<Fact>]
     let ``The reflected color for a nonreflective material``() =
-        let s2 = Sphere({ material.Default with ambient = 1.0; },scaling 0.5 0.5 0.5,None)
-        let default_world = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); s2]; }
+        let (s1,s2,w) = default_world
+        let s2 = s2 |> Shapes2.texture { s2.material.Value with ambient = 1.0; }
+        let w = { w with objs = [s1;s2;]; }
         let r = {
             origin = point 0.0 0.0 0.0;
             direction = vector 0.0 0.0 1.0;
         }
-        let i = {
-            t = 1.0;
-            obj = s2;
-        }
-        let comps = prepare_computations i r (seq {i})
-        let color = reflected_color default_world comps 5
+        let i = Shapes2.build_intersection 1.0 s2 []
+        let comps = prepare i r [i]
+        let color = reflected_color w comps 5
         Assert.Equal(black, color)
 
     [<Fact>]
     let ``The reflected color for a reflective material``() = 
-        let p = Plane({ material.Default with reflective = 0.5; }, translation 0.0 -1.0 0.0,None)
-        let w = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None); p; ]; }
+        let (s1,s2,w) = default_world
+        let p = 
+            ShapePlane.build 
+            |> Shapes2.texture { Material.material.Default with reflective = 0.5; }
+            |> Shapes2.transform (translation 0.0 -1.0 0.0)
+        let w = { w with objs = [s1;s2;p;]; }
         let r = {
             origin = point 0.0 0.0 -3.0;
             direction = vector 0.0 (-Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0);
         }
-        let i = {
-            t = Math.Sqrt(2.0);
-            obj = p;
-        }
-        let comps = prepare_computations i r (seq {i})
+        let i = Shapes2.build_intersection (Math.Sqrt(2.0)) p []
+        let comps = prepare i r [i]
         let actual = reflected_color w comps 5
         Assert.Equal(color 0.1903305967 0.2379132459 0.1427479475, actual)
 
     [<Fact>]
     let ``shade_hit() with a reflective material``() =
-        let p = Plane({ material.Default with reflective = 0.5; }, translation 0.0 -1.0 0.0,None)
-        let w = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); p; ]; }
+        let (s1,s2,w) = default_world
+        let p = 
+            ShapePlane.build 
+            |> Shapes2.texture { Material.material.Default with reflective = 0.5; }
+            |> Shapes2.transform (translation 0.0 -1.0 0.0)
+        let w = { w with objs = [s1;s2;p;]; }
         let r = {
             origin = point 0.0 0.0 -3.0;
             direction = vector 0.0 (-Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0);
         }
-        let i = {
-            t = Math.Sqrt(2.0);
-            obj = p;
-        }
-        let comps = prepare_computations i r (seq {i})
+        let i = Shapes2.build_intersection (Math.Sqrt(2.0)) p []
+        let comps = prepare i r [i]
         let c = shade_hit w comps 5
         Assert.Equal(color 0.8767559857 0.9243386349 0.8291733365, c)
 
     [<Fact>]
     let ``color_at() with mutually reflective surfaces``() =
-        let lower = Plane({ material.Default with reflective = 1.0; },translation 0.0 -1.0 0.0,None)
-        let upper = Plane({ material.Default with reflective = 1.0; },translation 0.0 1.0 0.0,None)
-        let w = { world.Default with objs = [ lower; upper; ] }
+        let m = { Material.material.Default with reflective = 1.0; }
+        let lower = 
+            ShapePlane.build
+            |> Shapes2.texture m
+            |> Shapes2.transform (translation 0.0 -1.0 0.0)
+        let upper = 
+            ShapePlane.build
+            |> Shapes2.texture m
+            |> Shapes2.transform (translation 0.0 1.0 0.0)
+        let w = Worlds.build_default [lower;upper;]
         let r = {
             origin = point 0.0 0.0 0.0;
             direction = vector 0.0 1.0 0.0;
@@ -220,118 +229,132 @@ module WorldTests =
 
     [<Fact>]
     let ``The reflected color at the maximum recursive depth``() =
-        let p = Plane({ material.Default with reflective = 0.5; },translation 0.0 -1.0 0.0,None)
-        let w = { world.Default with objs = [Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); p; ]; }
+        let (s1,s2,w) = default_world
+        let p = 
+            ShapePlane.build
+            |> Shapes2.texture { Material.material.Default with reflective = 0.5; }
+            |> Shapes2.transform (translation 0.0 -1.0 0.0)        
+        let w = { w with objs = [s1;s2;p;]; }
         let r = {
             origin = point 0.0 0.0 -3.0;
             direction = vector 0.0 (-Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0);
         }
-        let i = {
-            t = Math.Sqrt(2.0);
-            obj = p;
-        }
-        let comps = prepare_computations i r (seq {i})
+        let i = Shapes2.build_intersection (Math.Sqrt(2.0)) p []
+        let comps = prepare i r [i]
         let c = reflected_color w comps 0
         Assert.Equal(black, c)
 
     [<Fact>]
     let ``The refracted color with an opaque surface``() =
-        let s1 = Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None)
-        let s2 = Sphere(material.Default,scaling 0.5 0.5 0.5,None)
-        let w = { world.Default with objs = [s1; s2]; }
+        let (s1,s2,w) = default_world
         let r = {
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
         }
-        let xs = seq {
-            { t = 4.0; obj = s1; }
-            { t = 6.0; obj = s1; }
-        }
-        let comps = prepare_computations (Seq.item(0) xs) r xs
+        let xs = [
+            Shapes2.build_intersection 4.0 s1 [];
+            Shapes2.build_intersection 6.0 s1 [];
+        ]
+        let comps = prepare (Seq.item(0) xs) r xs
         let c = refracted_color w comps 5
         Assert.Equal(black, c)
 
     [<Fact>]
     let ``The refracted color at the maximum recursive depth``() =
-        let s1 = Sphere({ glass with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None)
-        let s2 = Sphere(material.Default,scaling 0.5 0.5 0.5,None)
-        let w = { world.Default with objs = [s1; s2]; }
+        let (s1,s2,w) = default_world
+        let s1 = s1 |> Shapes2.texture { glass with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }
+        let w = { w with objs = [s1; s2]; }
         let r = {
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
         }
-        let xs = seq {
-            { t = 4.0; obj = s1; }
-            { t = 6.0; obj = s1; }
-        }
-        let comps = prepare_computations (Seq.item(0) xs) r xs
+        let xs = [
+            Shapes2.build_intersection 4.0 s1 [];
+            Shapes2.build_intersection 6.0 s1 [];
+        ]
+        let comps = prepare (Seq.item(0) xs) r xs
         let c = refracted_color w comps 0
         Assert.Equal(black, c)
 
     [<Fact>]
     let ``The refracted color under total internal reflection``() =
-        let s1 = Sphere({ glass with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None)
-        let s2 = Sphere(material.Default,scaling 0.5 0.5 0.5,None)
-        let w = { world.Default with objs = [s1; s2]; }
+        let (s1,s2,w) = default_world
+        let s1 = s1 |> Shapes2.texture { glass with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }
+        let w = { w with objs = [s1; s2]; }
         let r = {
             origin = point 0.0 0.0 (Math.Sqrt(2.0)/2.0);
             direction = vector 0.0 1.0 0.0;
         }
-        let xs = seq {
-            { t = (-Math.Sqrt(2.0)/2.0); obj = s1; }
-            { t = (Math.Sqrt(2.0)/2.0); obj = s1; }
-        }
-        let comps = prepare_computations (Seq.item(1) xs) r xs
+        let xs = [
+            Shapes2.build_intersection (-Math.Sqrt(2.0)/2.0) s1 [];
+            Shapes2.build_intersection (Math.Sqrt(2.0)/2.0) s1 []; 
+        ]
+        let comps = prepare (Seq.item(1) xs) r xs
         let c = refracted_color w comps 5
         Assert.Equal(black, c)
 
     [<Fact>]
     let ``The refracted color with a refracted ray``() =
-        let s1 = Sphere({ material.Default with ambient = 1.0; pattern = Some pattern.Test; },identity_matrix(),None)
-        let s2 = Sphere(glass,scaling 0.5 0.5 0.5,None)
-        let w = { world.Default with objs = [s1; s2]; }
+        let (s1,s2,w) = default_world
+        let s1 = s1 |> Shapes2.texture { s1.material.Value with ambient = 1.0; pattern = Some pattern.Test; }
+        let s2 = s2 |> Shapes2.texture glass
+        let w = { w with objs = [s1; s2]; }
         let r = {
             origin = point 0.0 0.0 0.1;
             direction = vector 0.0 1.0 0.0;
         }
-        let xs = seq {
-            { t = -0.9899; obj = s1; }
-            { t = -0.4899; obj = s2; }
-            { t = 0.4899; obj = s2; }
-            { t = 0.9899; obj = s1; }
-        }
-        let comps = prepare_computations (Seq.item(2) xs) r xs
+        let xs = [
+            Shapes2.build_intersection -0.9899 s1 [];
+            Shapes2.build_intersection -0.4899 s2 [];
+            Shapes2.build_intersection 0.4899 s2 [];
+            Shapes2.build_intersection 0.9899 s1 [];
+        ]
+        let comps = prepare (Seq.item(2) xs) r xs
         let c = refracted_color w comps 5
         Assert.Equal(color 0.0 0.9988846828 0.04721642191, c)
 
     [<Fact>]
     let ``shade_hit() with a transparent material``() =
-        let floor = Plane(glass,translation 0.0 -1.0 0.0,None)
-        let ball = Sphere({ material.Default with color = color 1.0 0.0 0.0; ambient = 0.25;},translation 0.0 -3.5 -0.5,None)
-        let w = { world.Default with objs = [ Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None); floor; ball; ]; }
+        let (s1,s2,w) = default_world
+        let floor = 
+            ShapePlane.build
+            |> Shapes2.texture glass
+            |> Shapes2.transform (translation 0.0 -1.0 0.0)
+        let ball = 
+            ShapeSphere.build
+            |> Shapes2.texture { Material.material.Default with color = color 1.0 0.0 0.0; ambient = 0.25;}
+            |> Shapes2.transform (translation 0.0 -3.5 -0.5)
+        let w = { w with objs = [s1;s2;floor;ball;]; }
         let r = {
             origin = point 0.0 0.0 -3.0;
             direction = vector 0.0 (-Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0);
         }
-        let xs = seq {
-            { t = Math.Sqrt(2.0); obj = floor; }
-        }
-        let comps = prepare_computations (Seq.item(0) xs) r xs
+        let xs = [
+            Shapes2.build_intersection (Math.Sqrt(2.0)) floor [];
+        ]
+        let comps = prepare (Seq.item(0) xs) r xs
         let c = shade_hit w comps 5
         Assert.Equal(color 0.936425389 0.686425389 0.686425389, c)
 
     [<Fact>]
     let ``shade_hit() with a reflective, transparent material``() =
-        let floor = Plane({ glass with transparency = 0.5; reflective = 0.5; },translation 0.0 -1.0 0.0,None)
-        let ball = Sphere({ material.Default with color = color 1.0 0.0 0.0; ambient = 0.5; },translation 0.0 -3.5 -0.5,None)
-        let w = { world.Default with objs = [ Sphere({ material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; },identity_matrix(),None); Sphere(material.Default,scaling 0.5 0.5 0.5,None); floor; ball; ]; }
+        let (s1,s2,w) = default_world
+        let floor = 
+            ShapePlane.build
+            |> Shapes2.texture { glass with transparency = 0.5; reflective = 0.5; }
+            |> Shapes2.transform (translation 0.0 -1.0 0.0)
+        let ball =
+            ShapeSphere.build
+            |> Shapes2.texture { Material.material.Default with color = color 1.0 0.0 0.0; ambient = 0.5; }
+            |> Shapes2.transform (translation 0.0 -3.5 -0.5)
+        let w = { w with objs = [s1;s2;floor;ball;]; }
         let r = {
             origin = point 0.0 0.0 -3.0;
             direction = vector 0.0 (-Math.Sqrt(2.0)/2.0) (Math.Sqrt(2.0)/2.0);
         }
-        let xs = seq {
-            { t = Math.Sqrt(2.0); obj = floor; };
-        }
-        let comps = prepare_computations (Seq.item(0) xs) r xs
+        let xs = [
+            Shapes2.build_intersection (Math.Sqrt(2.0)) floor [];
+        ]
+        let comps = prepare (Seq.item(0) xs) r xs
         let c = shade_hit w comps 5
         Assert.Equal(color 0.9339151406 0.6964342263 0.6924306914, c)

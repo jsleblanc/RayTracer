@@ -7,26 +7,35 @@ open Color
 open Matrix
 open Ray
 open Lights
-open Shapes
+open Shapes2
 
 module Worlds = 
 
     type world = {
         light: point_light; //TODO - support multiple lights
         objs: shape list
-    } with static member Default = {
+    }
+
+    let build shapes lights =
+        {
+            objs = shapes;
+            light = lights;
+        }
+
+    let build_default shapes =
+        {
+            objs = shapes;
             light = {
                 position = point -10.0 10.0 -10.0;
                 intensity = color 1.0 1.0 1.0
             }
-            objs = []
-    }
+        }
 
     let addShape world shape =
         let shapes = world.objs @ [shape]
         { world with objs = shapes }
 
-    let intersect_world world ray =
+    let intersect_world world (ray:ray) =
         world.objs
         |> Seq.map (fun (shape) -> intersect shape ray)
         |> Seq.collect (fun c -> c)
