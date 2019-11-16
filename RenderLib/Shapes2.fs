@@ -101,3 +101,5 @@ module Shapes2 =
             | Some m -> m
         loop shape trail
         
+    let normal_at hit shape trail wpoint =
+        vector 0.0 0.0 0.0
