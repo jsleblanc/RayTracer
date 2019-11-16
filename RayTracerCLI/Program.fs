@@ -4,7 +4,8 @@ open System
 open RenderLib
 open RenderLib.Tuple
 open RenderLib.Color
-open RenderLib.Shapes
+//open RenderLib.Shapes
+open RenderLib.Shapes2
 open RenderLib.Translations
 open RenderLib.Material
 open RenderLib.Patterns
@@ -40,8 +41,10 @@ let main argv =
                 image.[x,y] <- pixel
         image.Save(fileName, encoder)
 
+(*
     let hexagon_corner =
-        Sphere(material.Default,(translation 0.0 0.0 -1.0) * (scaling 0.25 0.25 0.25),None)
+        ShapeSphere.build
+        |> Shapes2.transform (translation 0.0 0.0 -1.0) * (scaling 0.25 0.25 0.25),None)        
 
     let hexagon_edge =
         Cylinder(material.Default,(translation 0.0 0.0 -1.0) * (rotation_y (-Math.PI/6.0)) * (rotation_z (-Math.PI/2.0)) * (scaling 0.25 1.0 0.25),None,0.0,1.0,false)
@@ -59,48 +62,52 @@ let main argv =
             let side = hexagon_side (rotation_y (v*Math.PI/3.0))
             with_child side hex
         hex
-
-    let g = Group(None,identity_matrix(),None,new HashSet<shape>())
+*)
 
     //let p = Solid(red)// blue
     let p = checkers_pattern (scaling 0.5 0.5 0.5) white blue
     //let p = Blended(stripe_pattern_default white blue, stripe_pattern (rotation_y(-Math.PI/2.0)) white blue)
-    let planeMaterial = 
-        { material.Default with color = color 1.0 0.9 0.9; specular = 0.0; pattern = Some p; }
+    //let planeMaterial = { material.Default with color = color 1.0 0.9 0.9; specular = 0.0; pattern = Some p; }
 
-    let plane = Plane(planeMaterial,identity_matrix(),None)
+    let plane = ShapePlane.build
         //Plane({ shapeProperties.Default with material = planeMaterial; default_transformation = (translation 0.0 0.0 10.0) * (rotation_x (Math.PI/2.0)); })
 
     let middle = 
-        let m = { glass with diffuse = 0.01; ambient = 0.02; reflective = 0.9; specular = 1.0; shininess = 300.0; }
-        Sphere(m,translation -0.5 1.0 0.5,None)
+        ShapeSphere.build
+        |> Shapes2.texture { glass with diffuse = 0.01; ambient = 0.02; reflective = 0.9; specular = 1.0; shininess = 300.0; }
+        |> Shapes2.transform (translation -0.5 1.0 0.5)
 
     let right =
-        let m = { material.Default with color = red; diffuse = 0.7; specular = 0.3; }
-        Sphere(m,(translation -0.75 1.5 5.0) * (scaling 0.75 0.75 0.75),None)
+        ShapeSphere.build
+        |> Shapes2.texture { Material.material.Default with color = red; diffuse = 0.7; specular = 0.3; }
+        |> Shapes2.transform ((translation -0.75 1.5 5.0) * (scaling 0.75 0.75 0.75))
 
     let left = 
-        let m = { material.Default with color = yellow; diffuse = 0.7; specular = 0.3; }
-        Sphere(m,(translation -1.5 0.33 -0.75) * (scaling 0.33 0.33 0.33),None)
+        ShapeSphere.build
+        |> Shapes2.texture { Material.material.Default with color = yellow; diffuse = 0.7; specular = 0.3; }
+        |> Shapes2.transform ((translation -1.5 0.33 -0.75) * (scaling 0.33 0.33 0.33))
 
     let cube =
-        Cube({ material.Default with color = green; },(translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)),None)
+        ShapeCube.build
+        |> Shapes2.texture { Material.material.Default with color = green; }
+        |> Shapes2.transform ((translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)))
 
-    let cylinder =
-        Cylinder({ material.Default with color = green; },(translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)),None,1.0,3.0,true)
-
-    //with_child g plane
-    with_child middle g
-    with_child right g
-    with_child left g
-    with_child cube g
-    with_child cylinder g
+    //let cylinder = Cylinder({ material.Default with color = green; },(translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)),None,1.0,3.0,true)
 
     //((rotation_z (Math.PI / -3.0)) * (rotation_x (Math.PI/2.0)))
     
     let vt = view_transform (point 0.0 1.5 -3.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)    
     let camera = { create_default_camera 640 480 with transform = vt; }
     let light = { position = point 0.0 10.0 -10.0; intensity = color 1.0 1.0 1.0; }
+
+    printfn "Calculating..."
+    let sw = Stopwatch.StartNew()   
+
+    let world = Worlds.build [left;right;middle;plane;] light
+    let canvas = render camera world
+    canvas_to_jpg "output.jpg" canvas
+
+    printfn "Calculations completed in %s" (sw.Elapsed.ToString())
         
     (*
     //sphere inside a sphere 
@@ -114,8 +121,6 @@ let main argv =
     let world = { world.Default with light = light; objs = [plane;s1;s2;];}
     *)
 
-    printfn "Calculating..."
-    let sw = Stopwatch.StartNew()   
     (*
     let radians = Math.PI / 180.0
     let mutable r = 1.0 * radians
@@ -129,7 +134,6 @@ let main argv =
         *)
     //let canvas = render camera world
 
-    printfn "Calculations completed in %s" (sw.Elapsed.ToString())
     
     //canvas_to_jpg canvas
     //printfn "Written to canvas"
