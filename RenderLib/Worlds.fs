@@ -58,8 +58,8 @@ module Worlds =
         }
         let intersections = intersect_world w ray
         match hit intersections with
-        | Some i -> i.t < distance
-        | None -> false
+        | Some i when i.t < distance -> true
+        | _ -> false
 
     let rec reflected_color world comps remaining =
         if remaining < 1 then
@@ -76,14 +76,15 @@ module Worlds =
                 let c = color_at world reflect_ray (remaining - 1)
                 c * sm.reflective
 
-    and shade_hit world (comps:comps) remaining = 
-        let shadowed = is_shadowed world comps.over_point
-        let sm = PreparedComputations.material comps
-        let surface = lighting sm comps.shape world.light comps.over_point comps.eyev comps.normalv shadowed
-        let reflected = reflected_color world comps remaining
-        let refracted = refracted_color world comps remaining
-        if sm.reflective > 0.0 && sm.transparency > 0.0 then
-            let reflectance = schlick comps
+    and shade_hit world c remaining = 
+        let material = PreparedComputations.material c
+        let shadowed = is_shadowed world c.over_point
+        let transform = world_to_object c.shape c.trail
+        let surface = lighting material transform world.light c.over_point c.eyev c.normalv shadowed
+        let reflected = reflected_color world c remaining
+        let refracted = refracted_color world c remaining
+        if material.reflective > 0.0 && material.transparency > 0.0 then
+            let reflectance = schlick c
             surface + reflected * reflectance + refracted * (1.0 - reflectance)
         else
             surface + reflected + refracted
@@ -97,8 +98,8 @@ module Worlds =
         | None -> black
 
     and refracted_color world comps remaining =
-        let sm = PreparedComputations.material comps
-        if remaining = 0 || sm.transparency = 0.0 then
+        let material = PreparedComputations.material comps
+        if remaining < 1 || areEqualFloat material.transparency 0.0 then
             black
         else
             let n_ratio = comps.n1 / comps.n2
@@ -114,4 +115,4 @@ module Worlds =
                     direction = direction;
                 }
                 let c = color_at world refract_ray (remaining - 1)
-                c * sm.transparency
+                c * material.transparency

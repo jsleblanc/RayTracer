@@ -52,21 +52,21 @@ module PatternsTests =
     let ``Stripes with an object transformation``() =
         let obj = ShapeSphere.build |> Shapes2.transform (scaling 2.0 2.0 2.0)
         let pattern = stripe_pattern_default white black
-        let c = pattern_at_object pattern obj (point 1.5 0.0 0.0)
+        let c = pattern_at_object pattern (Shapes2.world_to_object obj []) (point 1.5 0.0 0.0)
         Assert.Equal(white, c)
 
     [<Fact>]
     let ``Stripes with a pattern transformation``() =
         let obj = ShapeSphere.build
         let pattern = stripe_pattern (scaling 2.0 2.0 2.0) white black
-        let c = pattern_at_object pattern obj (point 1.5 0.0 0.0)
+        let c = pattern_at_object pattern (Shapes2.world_to_object obj []) (point 1.5 0.0 0.0)
         Assert.Equal(white, c)
 
     [<Fact>]
     let ``Stripes with both an object and a pattern transformation``() =
         let obj = ShapeSphere.build
         let pattern = stripe_pattern (translation 0.5 0.0 0.0) white black
-        let c = pattern_at_object pattern obj (point 2.5 0.0 0.0)
+        let c = pattern_at_object pattern (Shapes2.world_to_object obj []) (point 2.5 0.0 0.0)
         Assert.Equal(white, c)
 
     [<Fact>]

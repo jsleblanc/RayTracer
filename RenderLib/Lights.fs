@@ -20,13 +20,13 @@ module Lights =
         intensity = i;
     }
 
-    let pattern_at_object (pattern:pattern) object (world_point:tuple) =
-        let local_point = world_to_object object [] world_point
+    let pattern_at_object (pattern:pattern) (transform:tuple->tuple) (world_point:tuple) =
+        let local_point = transform world_point
         pattern_at pattern local_point
 
-    let lighting m obj light point eyev normalv inShadow =
+    let lighting m transform light point eyev normalv inShadow =
         let c = match m.pattern with
-                | Some p -> pattern_at_object p obj point
+                | Some pattern -> pattern_at_object pattern transform point
                 | None -> m.color
         let effective_color = c * light.intensity
         let lightv = (light.position - point).normalize()

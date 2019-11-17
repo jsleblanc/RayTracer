@@ -12,6 +12,8 @@ open RenderLib.Shapes2
 
 module MaterialsTests = 
 
+    let identity x = x
+
     [<Fact>]
     let ``Lighting with the eye between the light and the surface``() =
         let s = ShapeSphere.build
@@ -23,7 +25,7 @@ module MaterialsTests =
             position = point 0.0 0.0 -10.0;
             intensity = color 1.0 1.0 1.0;
         } 
-        let r = lighting m s light position eyev normalv false
+        let r = lighting m identity light position eyev normalv false
         Assert.Equal(color 1.9 1.9 1.9, r)
 
     [<Fact>]
@@ -37,7 +39,7 @@ module MaterialsTests =
             position = point 0.0 0.0 -10.0;
             intensity = color 1.0 1.0 1.0;
         } 
-        let r = lighting m s light position eyev normalv false
+        let r = lighting m identity light position eyev normalv false
         Assert.Equal(color 1.0 1.0 1.0, r)
 
     [<Fact>]
@@ -51,7 +53,7 @@ module MaterialsTests =
             position = point 0.0 10.0 -10.0;
             intensity = color 1.0 1.0 1.0;
         } 
-        let r = lighting m s light position eyev normalv false
+        let r = lighting m identity light position eyev normalv false
         Assert.Equal(color 0.73639610306789272 0.73639610306789272 0.73639610306789272, r)
 
     [<Fact>]
@@ -66,7 +68,7 @@ module MaterialsTests =
             position = point 0.0 10.0 -10.0;
             intensity = color 1.0 1.0 1.0;
         } 
-        let r = lighting m s light position eyev normalv false
+        let r = lighting m identity light position eyev normalv false
         Assert.Equal(color 1.6363961030678928 1.6363961030678928 1.6363961030678928, r)
 
     [<Fact>]
@@ -80,7 +82,7 @@ module MaterialsTests =
             position = point 0.0 0.0 10.0;
             intensity = color 1.0 1.0 1.0;
         } 
-        let r = lighting m s light position eyev normalv false
+        let r = lighting m identity light position eyev normalv false
         Assert.Equal(color 0.1 0.1 0.1, r)
 
     [<Fact>]
@@ -95,7 +97,7 @@ module MaterialsTests =
             intensity = color 1.0 1.0 1.0;
         } 
         let in_shadow = true
-        let result = lighting m s light position eyev normalv in_shadow
+        let result = lighting m identity light position eyev normalv in_shadow
         Assert.Equal(color 0.1 0.1 0.1, result)
 
     [<Fact>]
@@ -105,7 +107,7 @@ module MaterialsTests =
         let eyev = vector 0.0 0.0 -1.0
         let normalv = vector 0.0 0.0 -1.0
         let light = point_light (point 0.0 0.0 -10.0) white
-        let c1 = lighting m s light (point 0.9 0.0 0.0) eyev normalv false
-        let c2 = lighting m s light (point 1.1 0.0 0.0) eyev normalv false
+        let c1 = lighting m identity light (point 0.9 0.0 0.0) eyev normalv false
+        let c2 = lighting m identity light (point 1.1 0.0 0.0) eyev normalv false
         Assert.Equal(white, c1)
         Assert.Equal(black, c2)
