@@ -41,7 +41,7 @@ module Worlds =
             match shapes with
             | [] -> xs
             | shape :: shapes ->
-                let xs_p = Shapes2.intersect shape shapes ray
+                let xs_p = Shapes2.intersect shape [] ray
                 match xs_p with
                 | [] -> aux xs shapes
                 | _ -> aux ((List.concat [xs;xs_p;]) |> List.sortBy (fun (i) -> i.t)) shapes

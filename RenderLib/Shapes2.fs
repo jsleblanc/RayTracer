@@ -89,7 +89,7 @@ module Shapes2 =
 
     let hit (xs:intersection list) =
         let sorted = sort_intersection xs
-        sorted |> List.tryFind (fun (i) -> i.t > 0.0)
+        sorted |> List.tryFind (fun (i) -> i.t >= 0.0)
 
     let transform transform shape =
         let inverse_transform = inverse transform
