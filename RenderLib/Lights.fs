@@ -5,8 +5,6 @@ open Common
 open Tuple
 open Color
 open Material
-open Patterns
-open Shapes2
 
 module Lights =
 
@@ -19,10 +17,6 @@ module Lights =
         position = p;
         intensity = i;
     }
-
-    let pattern_at_object (pattern:pattern) (transform:tuple->tuple) (world_point:tuple) =
-        let local_point = transform world_point
-        pattern_at pattern local_point
 
     let lighting m transform light point eyev normalv inShadow =
         let c = match m.pattern with
