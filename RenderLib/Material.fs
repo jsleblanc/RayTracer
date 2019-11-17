@@ -31,3 +31,6 @@ module Material =
 
     let glass = 
         { material.Default with transparency = 1.0; refractive_index = 1.5; }
+
+    let colored color =
+        { material.Default with color = color }

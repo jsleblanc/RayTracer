@@ -9,5 +9,6 @@ open RayTracer.Perf.RayIntersections
 let main argv =
     BenchmarkRunner.Run<RayIntersectionBenchmarks>() |> ignore
     BenchmarkRunner.Run<RayIntersectionPatternsBenchmarks>() |> ignore
+    BenchmarkRunner.Run<RayIntersectionBoundingBoxBenchmarks>() |> ignore
     //let summary = defaultSwitch().Run argv
     0 // return an integer exit code

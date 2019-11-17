@@ -11,6 +11,7 @@ open RenderLib.Patterns
 open RenderLib.Lights
 open RenderLib.Worlds
 open RenderLib.Camera
+open RenderLib.Ray
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 open SixLabors.ImageSharp.Formats.Jpeg
@@ -90,7 +91,7 @@ let main argv =
 
     //let cylinder = Cylinder({ material.Default with color = green; },(translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)),None,1.0,3.0,true)
     //((rotation_z (Math.PI / -3.0)) * (rotation_x (Math.PI/2.0)))
-    
+    (*
     let vt = view_transform (point 0.0 1.5 -3.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)    
     let camera = { create_default_camera 640 480 with transform = vt; }
     let light = { position = point 0.0 10.0 -10.0; intensity = color 1.0 1.0 1.0; }
@@ -100,9 +101,9 @@ let main argv =
 
     let world = Worlds.build [left;right;middle;cube;plane;] light
     let canvas = render camera world
-    canvas_to_jpg "output.jpg" canvas
-
+    canvas_to_jpg "output.jpg" canvas    
     printfn "Calculations completed in %s" (sw.Elapsed.ToString())
+    *)
         (*
     let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
     let vt = view_transform (point 0.0 2.5 0.0) (point 0.0 0.0 0.0) (vector 1.0 0.0 0.0)
@@ -149,4 +150,54 @@ let main argv =
         r <- float x * radians
     *)
     
+    let spheres = [
+        ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 3.0);
+        ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 6.0);
+        ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 9.0);
+
+        ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 3.0);
+        ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 6.0);
+        ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 9.0);
+
+        ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 3.0);
+        ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 6.0);
+        ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 9.0);
+
+        ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 3.0);
+        ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 6.0);
+        ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 9.0);
+
+        ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 3.0);
+        ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 6.0);
+        ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 9.0);
+
+        ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 3.0);
+        ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 6.0);
+        ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 9.0);
+
+        ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 3.0);
+        ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 6.0);
+        ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 9.0);
+
+        ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 3.0);
+        ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 6.0);
+        ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 9.0);
+
+        ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 3.0);
+        ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 6.0);
+        ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 9.0);
+    ]
+    let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
+    let vt = view_transform (point 0.0 1.5 -3.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
+    let camera = { create_default_camera 1027 768 with field_of_view = Math.PI; transform = vt; }
+    let world = Worlds.build spheres light
+    //let canvas = render camera world
+    //canvas_to_jpg "output.jpg" canvas
+
+    let ray = {
+        origin = point 4.0 4.0 4.0;
+        direction = vector 0.0 1.0 0.0;
+    }
+    let x = color_at world ray 5
+
     0 // return an integer exit code
