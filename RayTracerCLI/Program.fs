@@ -103,7 +103,7 @@ let main argv =
     canvas_to_jpg "output.jpg" canvas
 
     printfn "Calculations completed in %s" (sw.Elapsed.ToString())
-        
+        (*
     let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
     let vt = view_transform (point 0.0 2.5 0.0) (point 0.0 0.0 0.0) (vector 1.0 0.0 0.0)
     let camera = { create_default_camera 640 480 with field_of_view = Math.PI / 3.0; transform = vt; }
@@ -122,19 +122,20 @@ let main argv =
     let world = default_world
     let canvas = render camera world
     canvas_to_jpg "output.jpg" canvas
-
+    *)
     (*
     //sphere inside a sphere 
-    let pt = checkers_pattern (translation 0.0 0.1 0.0) blue white
-    let plane = Plane({ material.Default with pattern = Some pt; },translation 0.0 -10.1 0.0,None)
-    let s1 = Sphere({glass with diffuse = 0.1; shininess = 300.0; reflective = 1.0; },scaling 1.25 1.25 1.25,None)
-    let s2 = Sphere({glass with diffuse = 0.1; shininess = 300.0; reflective = 1.0; refractive_index = 1.0;},scaling 0.75 0.75 0.75,None)
+    let pt = Patterns.checkers (solid_c blue) (solid_c white) |> Patterns.transform (translation 0.0 0.1 0.0)
+    let plane = ShapePlane.build |> Shapes2.texture { Material.material.Default with pattern = Some pt; } |> Shapes2.transform (translation 0.0 -10.1 0.0)
+    let s1 = ShapeSphere.build |> Shapes2.texture { glass with diffuse = 0.1; shininess = 300.0; reflective = 1.0; } |> Shapes2.transform (scaling 1.25 1.25 1.25)
+    let s2 = ShapeSphere.build |> Shapes2.texture { glass with diffuse = 0.1; shininess = 300.0; reflective = 1.0; refractive_index = 1.0;} |> Shapes2.transform (scaling 0.75 0.75 0.75)
     let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
     let vt = view_transform (point 0.0 2.5 0.0) (point 0.0 0.0 0.0) (vector 1.0 0.0 0.0)
     let camera = { create_default_camera 3840 2160 with field_of_view = Math.PI / 3.0; transform = vt; }
-    let world = { world.Default with light = light; objs = [plane;s1;s2;];}
+    let world = Worlds.build [plane;s1;s2;] light
+    let canvas = render camera world
+    canvas_to_jpg "output.jpg" canvas
     *)
-    
     (*
     printfn "Generating Hexagon Rotations..."
     let radians = Math.PI / 180.0
