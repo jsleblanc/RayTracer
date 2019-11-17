@@ -114,23 +114,18 @@ let main argv =
     let camera = { create_default_camera 3840 2160 with field_of_view = Math.PI / 3.0; transform = vt; }
     let world = { world.Default with light = light; objs = [plane;s1;s2;];}
     *)
-
+    
     (*
+    printfn "Generating Hexagon Rotations..."
     let radians = Math.PI / 180.0
     let mutable r = 1.0 * radians
     for x in 1 .. 360 do
-        let world = { world.Default with light = light; objs = [ hexagon (rotation_x r); ]; }    
+        let world =  Worlds.build [hexagon (rotation_x r)] light
         let canvas = render camera world
         let filename = sprintf "Test_%03i.jpg" x
         canvas_to_jpg filename canvas
         printfn "%s done in %s" filename (sw.Elapsed.ToString())
         r <- float x * radians
-        *)
-    //let canvas = render camera world
-
-    
-    //canvas_to_jpg canvas
-    //printfn "Written to canvas"
-
+    *)
     
     0 // return an integer exit code
