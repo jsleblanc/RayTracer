@@ -48,11 +48,12 @@ module RayIntersections =
         let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
         let vt = view_transform (point 0.0 2.5 0.0) (point 0.0 0.0 0.0) (vector 1.0 0.0 0.0)
         let camera = { create_default_camera 640 480 with field_of_view = Math.PI / 3.0; transform = vt; }
+        let pt = Patterns.checkers (solid_c blue) (solid_c white) |> Patterns.transform (translation 0.0 0.1 0.0)
         let default_world = 
             let plane = 
                 ShapePlane.build
                 |> Shapes2.transform (translation 0.0 -10.1 0.0)
-                |> Shapes2.texture { Material.material.Default with pattern = Some (checkers_pattern (translation 0.0 0.1 0.0) blue white); }
+                |> Shapes2.texture { Material.material.Default with pattern = Some pt; }
             let s2 = 
                 ShapeSphere.build
                 |> Shapes2.texture Material.material.Default

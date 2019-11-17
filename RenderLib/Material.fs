@@ -16,7 +16,7 @@ module Material =
         reflective: float;
         transparency: float;
         refractive_index: float;
-        pattern: pattern option;
+        pattern: pattern_t option;
     } with static member Default = {
             color = white;
             ambient = 0.1;

@@ -62,9 +62,10 @@ let main argv =
     //let p = Blended(stripe_pattern_default white blue, stripe_pattern (rotation_y(-Math.PI/2.0)) white blue)
     //let planeMaterial = { material.Default with color = color 1.0 0.9 0.9; specular = 0.0; pattern = Some p; }
 
+    let pt = Patterns.checkers (solid_c blue) (solid_c white) |> Patterns.transform (scaling 0.5 0.5 0.5)
     let plane = 
         ShapePlane.build
-        |> Shapes2.texture { Material.material.Default with color = color 1.0 0.9 0.9; specular = 0.0; pattern = Some (checkers_pattern (scaling 0.5 0.5 0.5) white blue); }
+        |> Shapes2.texture { Material.material.Default with color = color 1.0 0.9 0.9; specular = 0.0; pattern = Some pt; }
         //|> Shapes2.transform ((translation 0.0 0.0 10.0) * (rotation_x (Math.PI/2.0)))
 
     let middle = 
@@ -103,6 +104,25 @@ let main argv =
 
     printfn "Calculations completed in %s" (sw.Elapsed.ToString())
         
+    let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
+    let vt = view_transform (point 0.0 2.5 0.0) (point 0.0 0.0 0.0) (vector 1.0 0.0 0.0)
+    let camera = { create_default_camera 640 480 with field_of_view = Math.PI / 3.0; transform = vt; }
+    let pt = Patterns.checkers (solid_c blue) (solid_c white) |> Patterns.transform (translation 0.0 0.1 0.0)
+    let default_world = 
+        let plane = 
+            ShapePlane.build
+            |> Shapes2.transform (translation 0.0 -10.1 0.0)
+            |> Shapes2.texture { Material.material.Default with pattern = Some pt; }
+        let s2 = 
+            ShapeSphere.build
+            |> Shapes2.texture Material.material.Default
+            |> Shapes2.transform (scaling 0.5 0.5 0.5)
+        let w = Worlds.build_default [s2; plane;]
+        w
+    let world = default_world
+    let canvas = render camera world
+    canvas_to_jpg "output.jpg" canvas
+
     (*
     //sphere inside a sphere 
     let pt = checkers_pattern (translation 0.0 0.1 0.0) blue white

@@ -295,8 +295,11 @@ module WorldTests =
 
     [<Fact>]
     let ``The refracted color with a refracted ray``() =
+        let test_pattern =
+            let fn point = Patterns.Solid (color point.x point.y point.z)
+            Patterns.build fn
         let (s1,s2,w) = default_world
-        let s1 = s1 |> Shapes2.texture { s1.material.Value with ambient = 1.0; pattern = Some pattern.Test; }
+        let s1 = s1 |> Shapes2.texture { s1.material.Value with ambient = 1.0; pattern = Some test_pattern; }
         let s2 = s2 |> Shapes2.texture glass
         let w = { w with objs = [s1; s2]; }
         let r = {
