@@ -18,6 +18,7 @@
     <Compile Include="CubeTests.fs" />
     <Compile Include="PlaneTests.fs" />
     <Compile Include="CylinderTests.fs" />
+    <Compile Include="GroupTests.fs" />
     <Compile Include="CameraTests.fs" />
     <Compile Include="WorldTests.fs" />
     <Compile Include="PatternsTests.fs" />

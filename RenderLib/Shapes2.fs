@@ -57,7 +57,7 @@ module Shapes2 =
     | Cylinder of Minimum:float * Maximum:float * Closed:bool
     | Cone of Minimum:float * Maximum:float * Closed:bool
     | Triangle of tri_data
-    | Group of Children:seq<shape>
+    | Group of Children:shape list
     and intersection = {
         t:float;
         obj:shape;
