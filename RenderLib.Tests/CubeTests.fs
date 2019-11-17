@@ -2,12 +2,9 @@
 
 open Xunit
 open System
-open RenderLib.Common
 open RenderLib.Tuple
-open RenderLib.Matrix
 open RenderLib.Ray
 open RenderLib.Shapes2
-open RenderLib.Translations
 
 module CubeTests = 
 

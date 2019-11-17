@@ -84,7 +84,7 @@ module Shapes2 =
     let build_intersection t shape trail =
         { t = t; obj = shape; trail = trail; u = 0.0; v = 0.0; }
 
-    let private sort_intersection (xs:intersection list) =
+    let sort_intersection (xs:intersection list) =
         xs |> List.sortBy (fun (a) -> a.t)
 
     let hit (xs:intersection list) =

@@ -367,67 +367,6 @@ module Shapes =
         let local_point = world_to_object shape world_point
         let local_normal = local_normal_at shape local_point
         normal_to_world shape local_normal
-
-    //not happy with this, still an "imperative" algorithm, need to figure out how to do it functionally
-    let rec private func (hit:intersection) pos (xs:seq<intersection>) (container:list<shape>) n1 n2 =
-        let mutable c = container
-        let mutable exit = false
-        let i = xs |> Seq.item pos
-        let isHit = i = hit
-        let n1 = 
-            if isHit then
-                if Seq.isEmpty container then
-                    1.0
-                else
-                    let sm = shapeMaterial (Seq.last c)
-                    sm.refractive_index
-            else
-                n1
-        c <- if c |> List.contains i.obj then
-                List.filter (fun (s) -> (s = i.obj) |> not) c
-             else
-                List.append c [i.obj]
-        let n2 = 
-            if isHit then
-                exit <- true
-                if Seq.isEmpty c then
-                    1.0
-                else
-                    let sm = shapeMaterial (Seq.last c)
-                    sm.refractive_index
-            else
-                n2
-        if exit |> not && pos < (Seq.length xs) then
-            func hit (pos+1) xs c n1 n2
-        else
-            (n1, n2)
-
-    let prepare_computations (hit:intersection) ray (xs:seq<intersection>) = 
-        let p = position ray hit.t
-        let zero_point = point 0.0 0.0 0.0
-        let comps = {
-            t = hit.t;
-            obj = hit.obj;
-            point = p;
-            eyev = -ray.direction;
-            normalv = normal_at hit.obj p;
-            reflectv = vector 0.0 0.0 0.0;
-            inside = false;
-            over_point = zero_point;
-            under_point = zero_point;
-            n1 = 0.0;
-            n2 = 0.0;
-        }
-        let newComps =
-            if comps.normalv.dotProduct comps.eyev < 0.0 then
-                { comps with inside = true; normalv = -comps.normalv; }
-            else
-                comps
-        let over_point = newComps.point + newComps.normalv * epsilon
-        let under_point = newComps.point - newComps.normalv * epsilon
-        let reflectv = reflect ray.direction newComps.normalv
-        let (n1,n2) = func hit 0 xs List.empty<shape> 1.0 1.0
-        { newComps with over_point = over_point; under_point = under_point; reflectv = reflectv; n1 = n1; n2 = n2; }
     
     let add_child g c =
         match g with

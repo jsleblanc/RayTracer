@@ -3,68 +3,71 @@
 open System
 open Common
 open Tuple
-open Matrix
 open Ray
-open Material
 open Shapes2
 
 module ShapeConic =
 
-    let parameters_of shape =
-        match shape with
+    let parameters_of (shape:shape) =
+        match shape.shape with
         | Cylinder (minimum,maximum,closed) -> (minimum,maximum,closed)
         | Cone (minimum,maximum,closed) -> (minimum,maximum,closed)
         | _ -> raise (Exception("expected a cylinder or a cone"))
-
-    (*
-    module Cylinder =
     
-    let build minimum maximum closed = 
-        let local_normal_at shape pt = 
-            let dist = pt.x**2.0 + pt.z**2.0
-            if dist < 1.0 && pt.y >= (max - epsilon) then
-                vector 0.0 1.0 0.0
-            else 
-                if dist < 1.0 && pt.y <= (min + epsilon) then
-                    vector 0.0 -1.0 0.0
-                else
-                    vector pt.x 0.0 pt.z
-        let local_intersect shape ray =
-            let check_cap t =
-                let x = ray.origin.x + t * ray.direction.x
-                let z = ray.origin.z + t * ray.direction.z
-                (x**2.0 + z**2.0) <= 1.0
-            let intersect_caps =
-                if not closed || (areEqualFloat ray.direction.y 0.0) then
-                    Seq.empty<intersection>
-                else
-                    let calc v =
-                        let t = (v - ray.origin.y) / ray.direction.y
-                        if check_cap t then
-                            Some { t = t; obj = shape;}
-                        else
-                            None
-                    seq { calc cmin; calc cmax; } |> Seq.choose id
-            let a = ray.direction.x**2.0 + ray.direction.z**2.0
-            if areEqualFloat a 0.0 then
-                intersect_caps
-            else
-                let b = 2.0 * ray.origin.x * ray.direction.x + 2.0 * ray.origin.z * ray.direction.z
-                let c = ray.origin.x**2.0 + ray.origin.z**2.0 - 1.0
-                let disc = b**2.0 - 4.0 * a * c
-                if disc < 0.0 then
-                    Seq.empty<intersection>
-                else
-                    let (t0,t1) = swapIfGreater ((-b - Math.Sqrt(disc)) / (2.0 * a)) ((-b + Math.Sqrt(disc)) / (2.0 * a))
-                    let calc t =
-                        let y = ray.origin.y + t * ray.direction.y
-                        if cmin < y && y < cmax then
-                            Some { t = t; obj = shape; }
-                        else
-                            None
-                    let s1 = seq { calc t0; calc t1; } |> Seq.choose id 
-                    let s2 = intersect_caps
-                    s1 |> Seq.append s2
-        let bounds_of shape = { minimum = point -1.0 min -1.0; maximum = point 1.0 max 1.0; }
-        build (Cylinder(minimum,maximum,closed)) local_intersect local_normal_at bounds_of
-    *)  
+    let intersect_caps trail shape min max closed ray radius_at xs =
+        let check_cap t radius =
+            let x = ray.origin.x + t * ray.direction.x
+            let z = ray.origin.z + t * ray.direction.z in
+            (x ** 2.0 + z ** 2.0) <= radius ** 2.0
+        in
+        if (not closed) || ((Math.Abs ray.direction.y) < epsilon) then
+            xs
+        else
+        let xs' =
+            let t = (min - ray.origin.y) / ray.direction.y in
+            if check_cap t (radius_at min) then (build_intersection t shape trail) :: xs else xs
+        in
+        let t = (max - ray.origin.y) / ray.direction.y in
+        if check_cap t (radius_at max) then (build_intersection t shape trail) :: xs' else xs'
+    
+    let intersect (shape:shape) trail r (afn:ray->float) (bfn:ray->float) (cfn:ray->float) radius_at =
+      let (minimum, maximum, closed) = parameters_of shape in
+      let a = afn r in
+      let b = bfn r in
+      let xs =
+        if (Math.Abs(a)) < epsilon then
+          if (Math.Abs(b)) < epsilon then
+            []
+          else
+            let c = cfn r in
+            let t = (-c) / (2.0 * b) in
+            [ build_intersection t shape trail ]
+        else
+          let c = cfn r in
+          let disc = b ** 2.0 - 4.0 * a * c in
+          if disc < 0. then
+            []
+          else
+            let root = sqrt disc in
+            let t0 = (-b - root) / (2.0 * a)
+            let t1 = (-b + root) / (2.0 * a) in
+            let xs =
+              let y = r.origin.y + t1 * r.direction.y in
+              if minimum < y && y < maximum then [ build_intersection t1 shape trail ] else []
+            in
+            let y = r.origin.y + t0 * r.direction.y in
+            if minimum < y && y < maximum then
+              (build_intersection t0 shape trail) :: xs
+            else xs
+      in
+      sort_intersection (intersect_caps trail shape minimum maximum closed r radius_at xs)
+    
+    let normal_at shape (point:tuple) nfn =
+      let (minimum, maximum, _) = parameters_of shape in
+      let dist = point.x ** 2. + point.z ** 2. in
+      if dist < 1. && point.y >= maximum - epsilon then
+        vector 0.0 1.0 0.0
+      else if dist < 1. && point.y <= minimum + epsilon then
+        vector 0.0 (-1.0) 0.0
+      else
+        nfn point
