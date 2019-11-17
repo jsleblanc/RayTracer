@@ -3,9 +3,11 @@
 open BenchmarkDotNet.Running
 open RayTracer.Perf.RayIntersections
 
-let defaultSwitch () = BenchmarkSwitcher [|typeof<RayIntersectionBenchmarks>;|]
+//let defaultSwitch () = BenchmarkSwitcher [|typeof<RayIntersectionBenchmarks>;|]
 
 [<EntryPoint>]
 let main argv =
-    let summary = defaultSwitch().Run argv
+    BenchmarkRunner.Run<RayIntersectionBenchmarks>() |> ignore
+    BenchmarkRunner.Run<RayIntersectionPatternsBenchmarks>() |> ignore
+    //let summary = defaultSwitch().Run argv
     0 // return an integer exit code
