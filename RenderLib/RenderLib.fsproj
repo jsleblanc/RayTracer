@@ -22,6 +22,7 @@
     <Compile Include="ShapeCube.fs" />
     <Compile Include="ShapeConic.fs" />
     <Compile Include="ShapeCylinder.fs" />
+    <Compile Include="ShapeCone.fs" />
     <Compile Include="ShapeGroup.fs" />
     <Compile Include="Lights.fs" />
     <Compile Include="Worlds.fs" />
