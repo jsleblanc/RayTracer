@@ -16,7 +16,6 @@ open SixLabors.ImageSharp.PixelFormats
 open SixLabors.ImageSharp.Formats.Jpeg
 open System.Diagnostics
 open RenderLib.Matrix
-open System.Collections.Generic
 
 [<EntryPoint>]
 let main argv =
@@ -40,7 +39,6 @@ let main argv =
                 image.[x,y] <- pixel
         image.Save(fileName, encoder)
 
-        (*
     let hexagon_corner =
         ShapeSphere.build
         |> Shapes2.transform ((translation 0.0 0.0 -1.0) * (scaling 0.25 0.25 0.25))
@@ -50,19 +48,14 @@ let main argv =
         |> Shapes2.transform ((translation 0.0 0.0 -1.0) * (rotation_y (-Math.PI/6.0)) * (rotation_z (-Math.PI/2.0)) * (scaling 0.25 1.0 0.25))
 
     let hexagon_side t =
-        let side = Group(None,t,None,new HashSet<shape>())
-        side
-        |> with_child hexagon_corner
-        |> with_child hexagon_edge
+        ShapeGroup.build [hexagon_corner;hexagon_edge;] |> Shapes2.transform t
 
     let hexagon t = 
-        let hex = Group(None,t,None,new HashSet<shape>())
+        let mutable sides = []
         for x in 0 .. 5 do
-            let v = float x
-            let side = hexagon_side (rotation_y (v*Math.PI/3.0))
-            with_child side hex
-        hex
-        *)
+            let side = hexagon_side (rotation_y (float x * Math.PI / 3.0))
+            sides <- side::sides
+        ShapeGroup.build sides |> Shapes2.transform t
 
     //let p = Solid(red)// blue
     
@@ -95,7 +88,6 @@ let main argv =
         |> Shapes2.transform ((translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)))
 
     //let cylinder = Cylinder({ material.Default with color = green; },(translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)),None,1.0,3.0,true)
-
     //((rotation_z (Math.PI / -3.0)) * (rotation_x (Math.PI/2.0)))
     
     let vt = view_transform (point 0.0 1.5 -3.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)    
