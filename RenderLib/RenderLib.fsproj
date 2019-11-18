@@ -15,6 +15,7 @@
     <Compile Include="Patterns.fs" />
     <Compile Include="Material.fs" />
     <Compile Include="Shapes.fs" />
+    <Compile Include="BoundingBoxes.fs" />
     <Compile Include="Shapes2.fs" />
     <Compile Include="PreparedComputations.fs" />
     <Compile Include="ShapeSphere.fs" />

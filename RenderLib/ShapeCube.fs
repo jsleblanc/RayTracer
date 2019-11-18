@@ -47,5 +47,5 @@ module ShapeCube =
                     Shapes2.build_intersection tmin shape trail;
                     Shapes2.build_intersection tmax shape trail;
                 ]
-        let bounds_of shape = { minimum = point -1.0 -1.0 -1.0; maximum = point 1.0 1.0 1.0; }
+        let bounds_of shape = BoundingBoxes.build (point -1.0 -1.0 -1.0) (point 1.0 1.0 1.0)
         build Cube local_intersect local_normal_at bounds_of

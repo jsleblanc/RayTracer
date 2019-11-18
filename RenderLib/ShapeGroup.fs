@@ -25,5 +25,5 @@ module ShapeGroup =
                     loop (List.append xs_p xs) children
             Shapes2.sort_intersection (loop [] (get_children shape))
         let local_normal_at hit shape pt = raise (Exception "Groups do not have normals!")
-        let bounds_of shape = Shapes2.boundingBox.Default //TODO - implement
+        let bounds_of shape = BoundingBoxes.build_default //TODO - implement
         build (Group(children)) local_intersect local_normal_at bounds_of

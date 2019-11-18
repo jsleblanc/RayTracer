@@ -27,5 +27,5 @@ module ShapeSphere =
                     Shapes2.build_intersection t1 shape trail;
                     Shapes2.build_intersection t2 shape trail;
                 ]
-        let bounds_of shape = { minimum = point -1.0 -1.0 -1.0; maximum = point 1.0 1.0 1.0; }
+        let bounds_of shape = BoundingBoxes.build (point -1.0 -1.0 -1.0) (point 1.0 1.0 1.0)
         build Sphere local_intersect local_normal_at bounds_of

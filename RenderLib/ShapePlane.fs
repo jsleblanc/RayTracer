@@ -17,5 +17,5 @@ module ShapePlane =
                 []
             else
                 [Shapes2.build_intersection (-ray.origin.y / ray.direction.y) shape trail;]
-        let bounds_of shape = { minimum = point Double.NegativeInfinity 0.0 Double.NegativeInfinity; maximum = point Double.PositiveInfinity 0.0 Double.PositiveInfinity; }
+        let bounds_of shape = BoundingBoxes.build (point Double.NegativeInfinity 0.0 Double.NegativeInfinity) (point Double.PositiveInfinity 0.0 Double.PositiveInfinity)
         build Plane local_intersect local_normal_at bounds_of

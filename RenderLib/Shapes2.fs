@@ -6,16 +6,9 @@ open Tuple
 open Matrix
 open Ray
 open Material
+open BoundingBoxes
 
 module Shapes2 = 
-
-    type boundingBox = {
-        minimum: tuple;
-        maximum: tuple;
-    } with static member Default = {
-            minimum = point Double.PositiveInfinity Double.PositiveInfinity Double.PositiveInfinity;
-            maximum = point Double.NegativeInfinity Double.NegativeInfinity Double.NegativeInfinity;
-        }
 
     type tri_data = {
         p1: tuple;
@@ -67,7 +60,7 @@ module Shapes2 =
     }
     and intersect_t = shape -> shape list -> ray -> intersection list
     and normal_t = intersection option -> shape -> tuple -> tuple
-    and bounds_of_t = shape -> boundingBox
+    and bounds_of_t = shape -> boundingBox_t
 
     let build (shape:shape_t) (isect:intersect_t) (normal:normal_t) (bounds_of:bounds_of_t) = {
         shape = shape;
