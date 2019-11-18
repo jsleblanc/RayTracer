@@ -28,7 +28,7 @@ module BoundingBoxes =
     }
 
     let add_boxes box1 box2 =
-        add_point box2.minimum box1 |> add_point box2.maximum        
+        box1 |> add_point box2.minimum |> add_point box2.maximum        
 
     let contains_point box point =
         point.x >= box.minimum.x && point.x <= box.maximum.x &&

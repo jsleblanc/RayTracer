@@ -88,14 +88,14 @@ module BoudningBoxTests =
             |> BoundingBoxes.transform (rotation_x (Math.PI/4.0) * rotation_y (Math.PI/4.0))
         Assert.Equal(point -1.414213562 -1.707106781 -1.707106781, box.minimum)
         Assert.Equal(point 1.414213562 1.707106781 1.707106781, box.maximum)
-        (*
+
     [<Fact>]
     let ``Querying a shape's bounding box in its parents's space``() =
         let s = ShapeSphere.build |> Shapes2.transform ((translation 1.0 -3.0 5.0) * (scaling 0.5 2.0 4.0))
         let box = parent_space_bounds_of s
         Assert.Equal(point 0.5 -5.0 1.0, box.minimum)
         Assert.Equal(point 1.5 -1.0 9.0, box.maximum)
-        *)
+
     [<Fact>]
     let ``A group has a bounding box that contains its children``() =
         let s = ShapeSphere.build |> Shapes2.transform ((translation 2.0 5.0 -3.0) * (scaling 2.0 2.0 2.0))
@@ -152,4 +152,4 @@ module BoudningBoxTests =
         Assert.False(func (point 4.0 0.0 9.0) (vector 0.0 0.0 -1.0))
         Assert.False(func (point 8.0 6.0 -1.0) (vector 0.0 -1.0 0.0))
         Assert.False(func (point 12.0 5.0 4.0) (vector -1.0 0.0 0.0))
-
+        

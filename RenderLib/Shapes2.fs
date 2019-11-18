@@ -87,7 +87,7 @@ module Shapes2 =
     let transform transform shape =
         let inverse_transform = inverse transform
         let inverse_transpose = inverse_transform.Transpose
-        { shape with inverse_transform = inverse_transform; inverse_transpose_transform = inverse_transpose; }
+        { shape with transform = transform; inverse_transform = inverse_transform; inverse_transpose_transform = inverse_transpose; }
 
     let texture material shape =
         { shape with material = Some material; }
@@ -135,3 +135,6 @@ module Shapes2 =
         let object_point = world_to_object shape trail wpoint in
         let object_normal = shape.local_normal_at hit shape object_point in
         normal_to_world shape trail object_normal
+
+    let parent_space_bounds_of (shape:shape) =
+        BoundingBoxes.transform (shape.transform) (shape.bounds_of shape)
