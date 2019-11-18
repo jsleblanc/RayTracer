@@ -70,8 +70,12 @@ module BoundingBoxes =
 
     let intersects box ray = 
         let (xtmin, xtmax) = check_axis ray.origin.x ray.direction.x box.minimum.x box.maximum.x
+        let mutable tmin = xtmin
+        let mutable tmax = xtmax
         let (ytmin, ytmax) = check_axis ray.origin.y ray.direction.y box.minimum.y box.maximum.y
+        tmin <- if ytmin > tmin then ytmin else tmin
+        tmax <- if ytmax < tmax then ytmax else tmax
         let (ztmin, ztmax) = check_axis ray.origin.z ray.direction.z box.minimum.z box.maximum.z
-        let tmin = [ xtmin; ytmin; ztmin; ] |> List.max
-        let tmax = [ xtmax; ytmax; ztmax; ] |> List.min
+        tmin <- if ztmin > tmin then ztmin else tmin
+        tmax <- if ztmax < tmax then ztmax else tmax        
         if tmin > tmax then false else true
