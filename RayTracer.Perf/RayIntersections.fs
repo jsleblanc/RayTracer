@@ -73,59 +73,72 @@ module RayIntersections =
             color_at world (ray_for_pixel camera 430 330) 5 |> ignore
             color_at world (ray_for_pixel camera 130 330) 5 |> ignore
 
+    [<SimpleJob(launchCount = 3, warmupCount = 10, targetCount = 50)>]
     type RayIntersectionBoundingBoxBenchmarks () =
         let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
-        let default_world = 
-            let spheres = [
-                ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 3.0);
-                ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 6.0);
-                ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 9.0);
+        let spheres = [
+            ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 3.0);
+            ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 6.0);
+            ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 9.0);
 
-                ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 3.0);
-                ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 6.0);
-                ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 9.0);
+            ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 3.0);
+            ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 6.0);
+            ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 9.0);
 
-                ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 3.0);
-                ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 6.0);
-                ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 9.0);
+            ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 3.0);
+            ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 6.0);
+            ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 9.0);
 
-                ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 3.0);
-                ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 6.0);
-                ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 9.0);
+            ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 3.0);
+            ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 6.0);
+            ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 9.0);
 
-                ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 3.0);
-                ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 6.0);
-                ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 9.0);
+            ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 3.0);
+            ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 6.0);
+            ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 9.0);
 
-                ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 3.0);
-                ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 6.0);
-                ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 9.0);
+            ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 3.0);
+            ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 6.0);
+            ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 9.0);
 
-                ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 3.0);
-                ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 6.0);
-                ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 9.0);
+            ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 3.0);
+            ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 6.0);
+            ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 9.0);
 
-                ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 3.0);
-                ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 6.0);
-                ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 9.0);
+            ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 3.0);
+            ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 6.0);
+            ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 9.0);
 
-                ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 3.0);
-                ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 6.0);
-                ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 9.0);
-            ]
+            ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 3.0);
+            ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 6.0);
+            ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 9.0);
+        ]
+        let default_world_group =             
             let g = ShapeGroup.build spheres
-            let w = Worlds.build [g;] light
-            w
-        let mutable world = Worlds.build_default []
+            Worlds.build [g;] light
+        let default_world_without_group =
+            Worlds.build spheres light
+
+        let mutable world_with_group = Worlds.build_default []
+        let mutable world_without_group = Worlds.build_default []
 
         [<GlobalSetup>]
         member self.GlobalSetup() =
-            world <- default_world
+            world_with_group <- default_world_group
+            world_without_group <- default_world_without_group
 
-        [<Benchmark>]
-        member self.IntersectWorldWithRayMissesAllShapes () =
+        [<Benchmark(Baseline = true)>]
+        member self.IntersectWorldWithRayMissesAllShapesWithoutGroup () =
             let ray = {
                 origin = point 4.0 4.0 4.0;
                 direction = vector 0.0 1.0 0.0;
             }
-            color_at world ray 5
+            color_at world_without_group ray 5
+
+        [<Benchmark>]
+        member self.IntersectWorldWithRayMissesAllShapesWithGroup () =
+            let ray = {
+                origin = point 4.0 4.0 4.0;
+                direction = vector 0.0 1.0 0.0;
+            }
+            color_at world_with_group ray 5
