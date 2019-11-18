@@ -69,3 +69,15 @@ module SphereTests =
         let s = ShapeSphere.build |> Shapes2.transform (translation 5.0 0.0 0.0)
         let xs = intersect s [] r
         Assert.True(List.isEmpty xs)
+
+    [<Fact>]
+    let ``Building sphere should calculate and cache bounding box``() =
+        let s = ShapeSphere.build
+        let expected = s.bounds_of s
+        Assert.Equal(expected, s.bounding_box)
+
+    [<Fact>]
+    let ``Building sphere should calculate and cache bounding box with transformation``() =
+        let s = ShapeSphere.build |> Shapes2.transform (scaling 5.0 5.0 5.0)
+        let expected = s.bounds_of s
+        Assert.Equal(expected, s.bounding_box)

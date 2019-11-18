@@ -73,7 +73,6 @@ module RayIntersections =
             color_at world (ray_for_pixel camera 430 330) 5 |> ignore
             color_at world (ray_for_pixel camera 130 330) 5 |> ignore
 
-    [<SimpleJob(launchCount = 3, warmupCount = 10, targetCount = 50)>]
     type RayIntersectionBoundingBoxBenchmarks () =
         let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
         let spheres = [

@@ -30,6 +30,7 @@ module Shapes2 =
         local_intersect:intersect_t;
         local_normal_at:normal_t;
         bounds_of:bounds_of_t;
+        bounding_box:boundingBox_t;
         shadow: bool;
     } with 
         override this.Equals(other) = 
@@ -62,17 +63,20 @@ module Shapes2 =
     and normal_t = intersection option -> shape -> tuple -> tuple
     and bounds_of_t = shape -> boundingBox_t
 
-    let build (shape:shape_t) (isect:intersect_t) (normal:normal_t) (bounds_of:bounds_of_t) = {
-        shape = shape;
-        transform = matrix.identity_matrix;
-        inverse_transform = matrix.identity_matrix;
-        inverse_transpose_transform = matrix.identity_matrix;
-        material = None;
-        local_intersect = isect;
-        local_normal_at = normal;
-        bounds_of = bounds_of;
-        shadow = true;
-    }
+    let build (shape:shape_t) (isect:intersect_t) (normal:normal_t) (bounds_of:bounds_of_t) = 
+        let shape = {
+            shape = shape;
+            transform = matrix.identity_matrix;
+            inverse_transform = matrix.identity_matrix;
+            inverse_transpose_transform = matrix.identity_matrix;
+            material = None;
+            local_intersect = isect;
+            local_normal_at = normal;
+            bounds_of = bounds_of;
+            bounding_box = BoundingBoxes.build_default;
+            shadow = true;
+        }
+        { shape with bounding_box = shape.bounds_of shape; }
 
     let build_intersection t shape trail =
         { t = t; obj = shape; trail = trail; u = 0.0; v = 0.0; }
@@ -87,7 +91,8 @@ module Shapes2 =
     let transform transform shape =
         let inverse_transform = inverse transform
         let inverse_transpose = inverse_transform.Transpose
-        { shape with transform = transform; inverse_transform = inverse_transform; inverse_transpose_transform = inverse_transpose; }
+        let shape = { shape with transform = transform; inverse_transform = inverse_transform; inverse_transpose_transform = inverse_transpose; }
+        { shape with bounding_box = shape.bounds_of shape; }
 
     let texture material shape =
         { shape with material = Some material; }

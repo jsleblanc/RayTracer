@@ -17,7 +17,7 @@ module ShapeGroup =
 
     let build children = 
         let local_intersect shape trail ray =
-            if BoundingBoxes.intersects (shape.bounds_of shape) ray then
+            if BoundingBoxes.intersects shape.bounding_box ray then
                 let rec loop xs children =
                     match children with
                     | [] -> xs
