@@ -17,6 +17,9 @@ module Shapes =
         n1: tuple;
         n2: tuple;
         n3: tuple;
+        e1: tuple;
+        e2: tuple;
+        normal: tuple;
         smooth: bool;
     }
     
@@ -80,6 +83,9 @@ module Shapes =
 
     let build_intersection t shape trail =
         { t = t; obj = shape; trail = trail; u = 0.0; v = 0.0; }
+
+    let build_intersection_triangle u v t shape trail =
+        { t = t; obj = shape; trail = trail; u = u; v = v; }
 
     let sort_intersection (xs:intersection list) =
         xs |> List.sortBy (fun (a) -> a.t)

@@ -19,6 +19,7 @@
     <Compile Include="PlaneTests.fs" />
     <Compile Include="CylinderTests.fs" />
     <Compile Include="ConeTests.fs" />
+    <Compile Include="TriangleTests.fs" />
     <Compile Include="GroupTests.fs" />
     <Compile Include="CameraTests.fs" />
     <Compile Include="WorldTests.fs" />
