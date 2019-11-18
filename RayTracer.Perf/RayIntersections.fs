@@ -129,7 +129,7 @@ module RayIntersections =
         [<Benchmark(Baseline = true)>]
         member self.IntersectWorldWithRayMissesAllShapesWithoutGroup () =
             let ray = {
-                origin = point 4.0 4.0 4.0;
+                origin = point 5.0 5.0 10.0;
                 direction = vector 0.0 1.0 0.0;
             }
             color_at world_without_group ray 5
@@ -137,7 +137,7 @@ module RayIntersections =
         [<Benchmark>]
         member self.IntersectWorldWithRayMissesAllShapesWithGroup () =
             let ray = {
-                origin = point 4.0 4.0 4.0;
+                origin = point 5.0 5.0 10.0;
                 direction = vector 0.0 1.0 0.0;
             }
             color_at world_with_group ray 5

@@ -190,12 +190,13 @@ let main argv =
     let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
     let vt = view_transform (point 0.0 1.5 -3.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
     let camera = { create_default_camera 1027 768 with field_of_view = Math.PI; transform = vt; }
-    let world = Worlds.build spheres light
+    let g = ShapeGroup.build spheres
+    let world = Worlds.build [g;] light
     //let canvas = render camera world
     //canvas_to_jpg "output.jpg" canvas
 
     let ray = {
-        origin = point 4.0 4.0 4.0;
+        origin = point 5.0 5.0 10.0;
         direction = vector 0.0 1.0 0.0;
     }
     let x = color_at world ray 5
