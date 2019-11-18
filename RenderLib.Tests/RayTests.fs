@@ -4,7 +4,7 @@ open Xunit
 open RenderLib.Tuple
 open RenderLib.Ray
 open RenderLib.Translations
-open RenderLib.Shapes2
+open RenderLib.Shapes
 
 module RayTests = 
     

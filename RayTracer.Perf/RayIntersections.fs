@@ -19,11 +19,11 @@ module RayIntersections =
         let default_world = 
             let s1 = 
                 ShapeSphere.build
-                |> Shapes2.texture { Material.material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }
+                |> Shapes.texture { Material.material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }
             let s2 = 
                 ShapeSphere.build
-                |> Shapes2.texture Material.material.Default
-                |> Shapes2.transform (scaling 0.5 0.5 0.5)
+                |> Shapes.texture Material.material.Default
+                |> Shapes.transform (scaling 0.5 0.5 0.5)
             let w = Worlds.build_default [s1; s2;]
             (s1,s2,w)
         let mutable world = Worlds.build_default []
@@ -52,12 +52,12 @@ module RayIntersections =
         let default_world = 
             let plane = 
                 ShapePlane.build
-                |> Shapes2.transform (translation 0.0 -10.1 0.0)
-                |> Shapes2.texture { Material.material.Default with pattern = Some pt; }
+                |> Shapes.transform (translation 0.0 -10.1 0.0)
+                |> Shapes.texture { Material.material.Default with pattern = Some pt; }
             let s2 = 
                 ShapeSphere.build
-                |> Shapes2.texture Material.material.Default
-                |> Shapes2.transform (scaling 0.5 0.5 0.5)
+                |> Shapes.texture Material.material.Default
+                |> Shapes.transform (scaling 0.5 0.5 0.5)
             let w = Worlds.build [s2; plane;] light
             w
         let mutable world = Worlds.build_default []
@@ -76,41 +76,41 @@ module RayIntersections =
     type RayIntersectionBoundingBoxBenchmarks () =
         let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
         let spheres = [
-            ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 3.0);
-            ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 6.0);
-            ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 9.0);
+            ShapeSphere.build |> Shapes.transform (translation -3.0 -3.0 3.0);
+            ShapeSphere.build |> Shapes.transform (translation -3.0 -3.0 6.0);
+            ShapeSphere.build |> Shapes.transform (translation -3.0 -3.0 9.0);
 
-            ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 3.0);
-            ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 6.0);
-            ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 9.0);
+            ShapeSphere.build |> Shapes.transform (translation -3.0 0.0 3.0);
+            ShapeSphere.build |> Shapes.transform (translation -3.0 0.0 6.0);
+            ShapeSphere.build |> Shapes.transform (translation -3.0 0.0 9.0);
 
-            ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 3.0);
-            ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 6.0);
-            ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 9.0);
+            ShapeSphere.build |> Shapes.transform (translation -3.0 3.0 3.0);
+            ShapeSphere.build |> Shapes.transform (translation -3.0 3.0 6.0);
+            ShapeSphere.build |> Shapes.transform (translation -3.0 3.0 9.0);
 
-            ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 3.0);
-            ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 6.0);
-            ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 9.0);
+            ShapeSphere.build |> Shapes.transform (translation 0.0 -3.0 3.0);
+            ShapeSphere.build |> Shapes.transform (translation 0.0 -3.0 6.0);
+            ShapeSphere.build |> Shapes.transform (translation 0.0 -3.0 9.0);
 
-            ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 3.0);
-            ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 6.0);
-            ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 9.0);
+            ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 3.0);
+            ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 6.0);
+            ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 9.0);
 
-            ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 3.0);
-            ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 6.0);
-            ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 9.0);
+            ShapeSphere.build |> Shapes.transform (translation 0.0 3.0 3.0);
+            ShapeSphere.build |> Shapes.transform (translation 0.0 3.0 6.0);
+            ShapeSphere.build |> Shapes.transform (translation 0.0 3.0 9.0);
 
-            ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 3.0);
-            ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 6.0);
-            ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 9.0);
+            ShapeSphere.build |> Shapes.transform (translation 3.0 -3.0 3.0);
+            ShapeSphere.build |> Shapes.transform (translation 3.0 -3.0 6.0);
+            ShapeSphere.build |> Shapes.transform (translation 3.0 -3.0 9.0);
 
-            ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 3.0);
-            ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 6.0);
-            ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 9.0);
+            ShapeSphere.build |> Shapes.transform (translation 3.0 0.0 3.0);
+            ShapeSphere.build |> Shapes.transform (translation 3.0 0.0 6.0);
+            ShapeSphere.build |> Shapes.transform (translation 3.0 0.0 9.0);
 
-            ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 3.0);
-            ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 6.0);
-            ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 9.0);
+            ShapeSphere.build |> Shapes.transform (translation 3.0 3.0 3.0);
+            ShapeSphere.build |> Shapes.transform (translation 3.0 3.0 6.0);
+            ShapeSphere.build |> Shapes.transform (translation 3.0 3.0 9.0);
         ]
         let default_world_group =             
             let g = ShapeGroup.build spheres

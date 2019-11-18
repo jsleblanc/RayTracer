@@ -3,7 +3,7 @@
 open System
 open Tuple
 open Ray
-open Shapes2
+open Shapes
 
 module ShapeCone = 
     

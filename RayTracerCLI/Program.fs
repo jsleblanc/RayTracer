@@ -4,7 +4,7 @@ open System
 open RenderLib
 open RenderLib.Tuple
 open RenderLib.Color
-open RenderLib.Shapes2
+open RenderLib.Shapes
 open RenderLib.Translations
 open RenderLib.Material
 open RenderLib.Patterns
@@ -42,21 +42,21 @@ let main argv =
 
     let hexagon_corner =
         ShapeSphere.build
-        |> Shapes2.transform ((translation 0.0 0.0 -1.0) * (scaling 0.25 0.25 0.25))
+        |> Shapes.transform ((translation 0.0 0.0 -1.0) * (scaling 0.25 0.25 0.25))
 
     let hexagon_edge =
         ShapeCylinder.build 0.0 1.0 false
-        |> Shapes2.transform ((translation 0.0 0.0 -1.0) * (rotation_y (-Math.PI/6.0)) * (rotation_z (-Math.PI/2.0)) * (scaling 0.25 1.0 0.25))
+        |> Shapes.transform ((translation 0.0 0.0 -1.0) * (rotation_y (-Math.PI/6.0)) * (rotation_z (-Math.PI/2.0)) * (scaling 0.25 1.0 0.25))
 
     let hexagon_side t =
-        ShapeGroup.build [hexagon_corner;hexagon_edge;] |> Shapes2.transform t
+        ShapeGroup.build [hexagon_corner;hexagon_edge;] |> Shapes.transform t
 
     let hexagon t = 
         let mutable sides = []
         for x in 0 .. 5 do
             let side = hexagon_side (rotation_y (float x * Math.PI / 3.0))
             sides <- side::sides
-        ShapeGroup.build sides |> Shapes2.transform t
+        ShapeGroup.build sides |> Shapes.transform t
 
     //let p = Solid(red)// blue
     
@@ -66,28 +66,28 @@ let main argv =
     let pt = Patterns.checkers (solid_c blue) (solid_c white) |> Patterns.transform (scaling 0.5 0.5 0.5)
     let plane = 
         ShapePlane.build
-        |> Shapes2.texture { Material.material.Default with color = color 1.0 0.9 0.9; specular = 0.0; pattern = Some pt; }
+        |> Shapes.texture { Material.material.Default with color = color 1.0 0.9 0.9; specular = 0.0; pattern = Some pt; }
         //|> Shapes2.transform ((translation 0.0 0.0 10.0) * (rotation_x (Math.PI/2.0)))
 
     let middle = 
         ShapeSphere.build
-        |> Shapes2.texture { glass with diffuse = 0.01; ambient = 0.02; reflective = 0.9; specular = 1.0; shininess = 300.0; }
-        |> Shapes2.transform (translation -0.5 1.0 0.5)
+        |> Shapes.texture { glass with diffuse = 0.01; ambient = 0.02; reflective = 0.9; specular = 1.0; shininess = 300.0; }
+        |> Shapes.transform (translation -0.5 1.0 0.5)
 
     let right =
         ShapeSphere.build
-        |> Shapes2.texture { Material.material.Default with color = red; diffuse = 0.7; specular = 0.3; }
-        |> Shapes2.transform ((translation -0.75 1.5 5.0) * (scaling 0.75 0.75 0.75))
+        |> Shapes.texture { Material.material.Default with color = red; diffuse = 0.7; specular = 0.3; }
+        |> Shapes.transform ((translation -0.75 1.5 5.0) * (scaling 0.75 0.75 0.75))
 
     let left = 
         ShapeSphere.build
-        |> Shapes2.texture { Material.material.Default with color = yellow; diffuse = 0.7; specular = 0.3; }
-        |> Shapes2.transform ((translation -1.5 0.33 -0.75) * (scaling 0.33 0.33 0.33))
+        |> Shapes.texture { Material.material.Default with color = yellow; diffuse = 0.7; specular = 0.3; }
+        |> Shapes.transform ((translation -1.5 0.33 -0.75) * (scaling 0.33 0.33 0.33))
 
     let cube =
         ShapeCube.build
-        |> Shapes2.texture { Material.material.Default with color = green; }
-        |> Shapes2.transform ((translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)))
+        |> Shapes.texture { Material.material.Default with color = green; }
+        |> Shapes.transform ((translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)))
 
     //let cylinder = Cylinder({ material.Default with color = green; },(translation -3.5 1.0 0.5) * (scaling 0.75 0.75 0.75) * (rotation_y (Math.PI/3.5)),None,1.0,3.0,true)
     //((rotation_z (Math.PI / -3.0)) * (rotation_x (Math.PI/2.0)))
@@ -151,41 +151,41 @@ let main argv =
     *)
     
     let spheres = [
-        ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 3.0);
-        ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 6.0);
-        ShapeSphere.build |> Shapes2.transform (translation -3.0 -3.0 9.0);
+        ShapeSphere.build |> Shapes.transform (translation -3.0 -3.0 3.0);
+        ShapeSphere.build |> Shapes.transform (translation -3.0 -3.0 6.0);
+        ShapeSphere.build |> Shapes.transform (translation -3.0 -3.0 9.0);
 
-        ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 3.0);
-        ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 6.0);
-        ShapeSphere.build |> Shapes2.transform (translation -3.0 0.0 9.0);
+        ShapeSphere.build |> Shapes.transform (translation -3.0 0.0 3.0);
+        ShapeSphere.build |> Shapes.transform (translation -3.0 0.0 6.0);
+        ShapeSphere.build |> Shapes.transform (translation -3.0 0.0 9.0);
 
-        ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 3.0);
-        ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 6.0);
-        ShapeSphere.build |> Shapes2.transform (translation -3.0 3.0 9.0);
+        ShapeSphere.build |> Shapes.transform (translation -3.0 3.0 3.0);
+        ShapeSphere.build |> Shapes.transform (translation -3.0 3.0 6.0);
+        ShapeSphere.build |> Shapes.transform (translation -3.0 3.0 9.0);
 
-        ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 3.0);
-        ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 6.0);
-        ShapeSphere.build |> Shapes2.transform (translation 0.0 -3.0 9.0);
+        ShapeSphere.build |> Shapes.transform (translation 0.0 -3.0 3.0);
+        ShapeSphere.build |> Shapes.transform (translation 0.0 -3.0 6.0);
+        ShapeSphere.build |> Shapes.transform (translation 0.0 -3.0 9.0);
 
-        ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 3.0);
-        ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 6.0);
-        ShapeSphere.build |> Shapes2.transform (translation 0.0 0.0 9.0);
+        ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 3.0);
+        ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 6.0);
+        ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 9.0);
 
-        ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 3.0);
-        ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 6.0);
-        ShapeSphere.build |> Shapes2.transform (translation 0.0 3.0 9.0);
+        ShapeSphere.build |> Shapes.transform (translation 0.0 3.0 3.0);
+        ShapeSphere.build |> Shapes.transform (translation 0.0 3.0 6.0);
+        ShapeSphere.build |> Shapes.transform (translation 0.0 3.0 9.0);
 
-        ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 3.0);
-        ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 6.0);
-        ShapeSphere.build |> Shapes2.transform (translation 3.0 -3.0 9.0);
+        ShapeSphere.build |> Shapes.transform (translation 3.0 -3.0 3.0);
+        ShapeSphere.build |> Shapes.transform (translation 3.0 -3.0 6.0);
+        ShapeSphere.build |> Shapes.transform (translation 3.0 -3.0 9.0);
 
-        ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 3.0);
-        ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 6.0);
-        ShapeSphere.build |> Shapes2.transform (translation 3.0 0.0 9.0);
+        ShapeSphere.build |> Shapes.transform (translation 3.0 0.0 3.0);
+        ShapeSphere.build |> Shapes.transform (translation 3.0 0.0 6.0);
+        ShapeSphere.build |> Shapes.transform (translation 3.0 0.0 9.0);
 
-        ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 3.0);
-        ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 6.0);
-        ShapeSphere.build |> Shapes2.transform (translation 3.0 3.0 9.0);
+        ShapeSphere.build |> Shapes.transform (translation 3.0 3.0 3.0);
+        ShapeSphere.build |> Shapes.transform (translation 3.0 3.0 6.0);
+        ShapeSphere.build |> Shapes.transform (translation 3.0 3.0 9.0);
     ]
     let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
     let vt = view_transform (point 0.0 1.5 -3.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)

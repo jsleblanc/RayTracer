@@ -8,7 +8,7 @@ open Ray
 open Material
 open BoundingBoxes
 
-module Shapes2 = 
+module Shapes = 
 
     type tri_data = {
         p1: tuple;

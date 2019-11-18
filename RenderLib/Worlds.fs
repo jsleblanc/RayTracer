@@ -8,7 +8,7 @@ open Matrix
 open Ray
 open Lights
 open PreparedComputations
-open Shapes2
+open Shapes
 
 module Worlds = 
 
@@ -41,7 +41,7 @@ module Worlds =
             match shapes with
             | [] -> xs
             | shape :: shapes ->
-                let xs_p = Shapes2.intersect shape [] ray
+                let xs_p = Shapes.intersect shape [] ray
                 match xs_p with
                 | [] -> aux xs shapes
                 | _ -> aux ((List.concat [xs;xs_p;]) |> List.sortBy (fun (i) -> i.t)) shapes

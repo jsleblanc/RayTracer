@@ -6,7 +6,7 @@ open Tuple
 open Matrix
 open Ray
 open Material
-open Shapes2
+open Shapes
 
 module ShapePlane =
 
@@ -16,6 +16,6 @@ module ShapePlane =
             if Math.Abs(ray.direction.y) < epsilon then
                 []
             else
-                [Shapes2.build_intersection (-ray.origin.y / ray.direction.y) shape trail;]
+                [Shapes.build_intersection (-ray.origin.y / ray.direction.y) shape trail;]
         let bounds_of shape = BoundingBoxes.build (point Double.NegativeInfinity 0.0 Double.NegativeInfinity) (point Double.PositiveInfinity 0.0 Double.PositiveInfinity)
         build Plane local_intersect local_normal_at bounds_of

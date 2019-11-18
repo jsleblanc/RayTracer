@@ -4,7 +4,7 @@ open Xunit
 open System
 open RenderLib.Tuple
 open RenderLib.Ray
-open RenderLib.Shapes2
+open RenderLib.Shapes
 
 module CubeTests = 
 

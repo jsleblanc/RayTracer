@@ -6,7 +6,7 @@ open Tuple
 open Matrix
 open Ray
 open Material
-open Shapes2
+open Shapes
 
 module ShapeSphere = 
 
@@ -24,8 +24,8 @@ module ShapeSphere =
                 let t1 = (-b - Math.Sqrt(discriminant)) / (2.0 * a)
                 let t2 = (-b + Math.Sqrt(discriminant)) / (2.0 * a)
                 [
-                    Shapes2.build_intersection t1 shape trail;
-                    Shapes2.build_intersection t2 shape trail;
+                    Shapes.build_intersection t1 shape trail;
+                    Shapes.build_intersection t2 shape trail;
                 ]
         let bounds_of shape = BoundingBoxes.build (point -1.0 -1.0 -1.0) (point 1.0 1.0 1.0)
         build Sphere local_intersect local_normal_at bounds_of

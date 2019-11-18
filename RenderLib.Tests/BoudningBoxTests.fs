@@ -7,7 +7,7 @@ open RenderLib
 open RenderLib.Common
 open RenderLib.Tuple
 open RenderLib.Matrix
-open RenderLib.Shapes2
+open RenderLib.Shapes
 open RenderLib.Translations
 open RenderLib.Ray
 open RenderLib.Material
@@ -91,15 +91,15 @@ module BoudningBoxTests =
 
     [<Fact>]
     let ``Querying a shape's bounding box in its parents's space``() =
-        let s = ShapeSphere.build |> Shapes2.transform ((translation 1.0 -3.0 5.0) * (scaling 0.5 2.0 4.0))
+        let s = ShapeSphere.build |> Shapes.transform ((translation 1.0 -3.0 5.0) * (scaling 0.5 2.0 4.0))
         let box = parent_space_bounds_of s
         Assert.Equal(point 0.5 -5.0 1.0, box.minimum)
         Assert.Equal(point 1.5 -1.0 9.0, box.maximum)
 
     [<Fact>]
     let ``A group has a bounding box that contains its children``() =
-        let s = ShapeSphere.build |> Shapes2.transform ((translation 2.0 5.0 -3.0) * (scaling 2.0 2.0 2.0))
-        let c = ShapeCylinder.build -2.0 2.0 false |> Shapes2.transform ((translation -4.0 -1.0 4.0) * (scaling 0.5 1.0 0.5))
+        let s = ShapeSphere.build |> Shapes.transform ((translation 2.0 5.0 -3.0) * (scaling 2.0 2.0 2.0))
+        let c = ShapeCylinder.build -2.0 2.0 false |> Shapes.transform ((translation -4.0 -1.0 4.0) * (scaling 0.5 1.0 0.5))
         let g = ShapeGroup.build [s;c;]
         let box = g.bounds_of g
         Assert.Equal(point -4.5 -3.0 -5.0, box.minimum)

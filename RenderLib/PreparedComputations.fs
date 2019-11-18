@@ -6,7 +6,7 @@ open Tuple
 open Matrix
 open Ray
 open Material
-open Shapes2
+open Shapes
 
 module PreparedComputations =
 
@@ -28,7 +28,7 @@ module PreparedComputations =
     let prepare (i:intersection) r xs =
         let point = Ray.position r i.t
         let eyev = -r.direction
-        let normalv = Shapes2.normal_at (Some i) i.obj i.trail point in
+        let normalv = Shapes.normal_at (Some i) i.obj i.trail point in
         let inside = normalv.dotProduct(eyev) < 0.0
         let normalv_p = if inside then -normalv else normalv
         let reflectv = Tuple.reflect r.direction normalv_p
@@ -53,7 +53,7 @@ module PreparedComputations =
                         if x = i then 
                             match containers with
                             | [] -> 1.
-                            | s :: _ -> (Shapes2.material i.trail s).refractive_index
+                            | s :: _ -> (Shapes.material i.trail s).refractive_index
                         else n1
                     in
                     let containers' = 
@@ -61,7 +61,7 @@ module PreparedComputations =
                         if x = i then 
                             match containers' with
                             | [] -> (n1', 1.)
-                            | s :: _ -> (n1', (Shapes2.material i.trail s).refractive_index)
+                            | s :: _ -> (n1', (Shapes.material i.trail s).refractive_index)
                         else n1n2 containers' n1' n2 xlist
             let (n1, n2) = n1n2 [] 1. 1. xs in
             {
@@ -96,5 +96,5 @@ module PreparedComputations =
             f cos comps
 
     let material comps = 
-        Shapes2.material comps.trail comps.shape
+        Shapes.material comps.trail comps.shape
     

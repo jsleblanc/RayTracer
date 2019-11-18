@@ -3,7 +3,7 @@
 open Xunit
 open RenderLib
 open RenderLib.Tuple
-open RenderLib.Shapes2
+open RenderLib.Shapes
 open RenderLib.Ray
 
 module CylinderTests =

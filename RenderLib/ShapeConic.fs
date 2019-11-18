@@ -4,7 +4,7 @@ open System
 open Common
 open Tuple
 open Ray
-open Shapes2
+open Shapes
 
 module ShapeConic =
 

@@ -9,7 +9,7 @@ open RenderLib.Matrix
 open RenderLib.Color
 open RenderLib.Translations
 open RenderLib.Material
-open RenderLib.Shapes2
+open RenderLib.Shapes
 open RenderLib.Worlds
 open RenderLib.Camera
 
@@ -18,11 +18,11 @@ module CameraTests =
     let default_world = 
         let s1 = 
             ShapeSphere.build
-            |> Shapes2.texture { Material.material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }
+            |> Shapes.texture { Material.material.Default with color = color 0.8 1.0 0.6; diffuse = 0.7; specular = 0.2; }
         let s2 = 
             ShapeSphere.build
-            |> Shapes2.texture Material.material.Default
-            |> Shapes2.transform (scaling 0.5 0.5 0.5)
+            |> Shapes.texture Material.material.Default
+            |> Shapes.transform (scaling 0.5 0.5 0.5)
         let w = Worlds.build_default [s1; s2;]
         (s1,s2,w)
 

@@ -6,7 +6,7 @@ open Tuple
 open Matrix
 open Ray
 open Material
-open Shapes2
+open Shapes
 
 module ShapeGroup =
 
@@ -22,9 +22,9 @@ module ShapeGroup =
                     match children with
                     | [] -> xs
                     | child :: children ->
-                        let xs_p = Shapes2.intersect child (shape :: trail) ray
+                        let xs_p = Shapes.intersect child (shape :: trail) ray
                         loop (List.append xs_p xs) children
-                Shapes2.sort_intersection (loop [] (get_children shape))
+                Shapes.sort_intersection (loop [] (get_children shape))
             else []
         let local_normal_at hit shape pt = raise (Exception "Groups do not have normals!")
         let bounds_of shape = 

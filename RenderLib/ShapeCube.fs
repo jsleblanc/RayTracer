@@ -6,7 +6,7 @@ open Tuple
 open Matrix
 open Ray
 open Material
-open Shapes2
+open Shapes
 
 module ShapeCube =
 
@@ -44,8 +44,8 @@ module ShapeCube =
                 []
             else
                 [
-                    Shapes2.build_intersection tmin shape trail;
-                    Shapes2.build_intersection tmax shape trail;
+                    Shapes.build_intersection tmin shape trail;
+                    Shapes.build_intersection tmax shape trail;
                 ]
         let bounds_of shape = BoundingBoxes.build (point -1.0 -1.0 -1.0) (point 1.0 1.0 1.0)
         build Cube local_intersect local_normal_at bounds_of

@@ -5,7 +5,7 @@ open System
 open RenderLib
 open RenderLib.Common
 open RenderLib.Tuple
-open RenderLib.Shapes2
+open RenderLib.Shapes
 open RenderLib.Ray
 
 module ConeTests =

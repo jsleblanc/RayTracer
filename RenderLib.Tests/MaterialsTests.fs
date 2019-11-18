@@ -8,7 +8,7 @@ open RenderLib.Material
 open RenderLib.Patterns
 open RenderLib.Color
 open RenderLib.Lights
-open RenderLib.Shapes2
+open RenderLib.Shapes
 
 module MaterialsTests = 
 
