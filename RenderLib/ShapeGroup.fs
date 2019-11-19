@@ -30,4 +30,4 @@ module ShapeGroup =
         let bounds_of shape = 
             let func box shape = BoundingBoxes.add_boxes box (parent_space_bounds_of shape)
             get_children shape |> List.fold func BoundingBoxes.build_default
-        build (Group(children)) local_intersect local_normal_at bounds_of
+        build (Group(children)) local_intersect local_normal_at bounds_of        

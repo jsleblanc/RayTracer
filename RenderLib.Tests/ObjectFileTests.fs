@@ -98,7 +98,7 @@ module ObjectFileTests =
         let g1_children = ShapeGroup.get_children result.namedGroups.["FirstGroup"]
         let g2_children = ShapeGroup.get_children result.namedGroups.["SecondGroup"]       
         let t1 = ShapeTriangle.data g1_children.[0]
-        let t2 = ShapeTriangle.data g2_children.[1]
+        let t2 = ShapeTriangle.data g2_children.[0]
         Assert.Equal(result.vertices.[1], t1.p1)
         Assert.Equal(result.vertices.[2], t1.p2)
         Assert.Equal(result.vertices.[3], t1.p3)
