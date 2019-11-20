@@ -25,6 +25,12 @@ module BoudningBoxTests =
         Assert.Equal(point 7.0 2.0 0.0, b.maximum)
 
     [<Fact>]
+    let ``A sphere has a bounding box``() =
+        let s = ShapeSphere.build
+        Assert.Equal(point -1.0 -1.0 -1.0, s.bounding_box.minimum)
+        Assert.Equal(point 1.0 1.0 1.0, s.bounding_box.maximum)
+
+    [<Fact>]
     let ``An unbounded cylinder has a bouding box`` () =
         let c = ShapeCylinder.build_default
         let b = c.bounds_of c
