@@ -101,15 +101,15 @@ module GroupTests =
     let ``Partitioning a group's children``() =
         let s1 = ShapeSphere.build |> Shapes.transform (translation -2.0 0.0 0.0)
         let s2 = ShapeSphere.build |> Shapes.transform (translation 2.0 0.0 0.0)
-        let s3 = ShapeSphere.build
+        let s3 = ShapeSphere.build 
         let g = ShapeGroup.build [s1;s2;s3;]
-        let (left,right,other) = ShapeGroup.partition_children g
-        Assert.Equal(1, List.length (ShapeGroup.get_children left))
-        Assert.True(List.contains s1 (ShapeGroup.get_children left))
-        Assert.Equal(1, List.length (ShapeGroup.get_children right))
-        Assert.True(List.contains s2 (ShapeGroup.get_children right))
-        Assert.Equal(1, List.length (ShapeGroup.get_children other))
-        Assert.True(List.contains s3 (ShapeGroup.get_children other))
+        let g_d = g.divide g 1
+        let g_s1 = ShapeGroup.build [s1;]
+        let g_s2 = ShapeGroup.build [s2;]
+        let children = ShapeGroup.get_children g_d
+        Assert.True(List.contains s3 children)
+        Assert.True(List.contains g_s1 children)
+        Assert.True(List.contains g_s2 children)
 
     [<Fact>]
     let ``Subdividing a group partitions its children``() =
@@ -120,5 +120,7 @@ module GroupTests =
         let g_d = g.divide g 1
         let g_s1 = ShapeGroup.build [s1;]
         let g_s2 = ShapeGroup.build [s2;]
-        Assert.True(List.contains g_s1 (ShapeGroup.get_children g_d))
-        Assert.True(List.contains g_s2 (ShapeGroup.get_children g_d))
+        let children = ShapeGroup.get_children g_d
+        Assert.True(List.contains s3 children)
+        Assert.True(List.contains g_s1 children)
+        Assert.True(List.contains g_s2 children)

@@ -32,5 +32,3 @@ module ShapeGroup =
             get_children shape |> List.fold func BoundingBoxes.build_default
         build (Group(children)) local_intersect local_normal_at bounds_of        
 
-    let partition_children group =
-        (group,group,group)
