@@ -2,47 +2,49 @@
 
 open System
 open System.IO
-open System.Text
-open System.Text.RegularExpressions
 open Tuple
 open Shapes
 
 module ObjectFiles = 
     
     type parsed_obj_t = {
-        defaultGroup:shape;
-        namedGroups:Map<string,shape>;
-        vertices:tuple list;
-        ignoredLines:int;
+        defaultGroup:shape list;
+        namedGroups:Map<string,shape list>;
+        vertices:tuple[];
         inGroup:bool;
         currentGroup:string;
     }
 
-    let private parse_vertice (line:string) state =
+    let private parse_vertice (line:string) =
         if line.StartsWith "v" then
             let i = line.Split ' '
-            let p = point (float i.[1]) (float i.[2]) (float i.[3])
-            { state with vertices = state.vertices @ [p]; }
-        else state
+            Some (point (float i.[1]) (float i.[2]) (float i.[3]))
+        else None
+
+    let private parse_vertices lines state =
+        let vertices = 
+            lines 
+            |> Array.map parse_vertice
+            |> Array.choose id
+        { state with vertices = Array.concat [| state.vertices; vertices |]; }
 
     let private fan_triangulation vertices =
         [| 1 .. (Array.length vertices) - 2 |]
         |> Array.map (fun (i) -> ShapeTriangle.build vertices.[0] vertices.[i] vertices.[i+1] false)
 
-    let private add_shapes_to_group shapes group =
-        let current = ShapeGroup.get_children group
-        ShapeGroup.build (current @ shapes);
+    let private merge left right =
+        right @ left
 
     let private add_shapes_to_default_group shapes state =
-        { state with defaultGroup = add_shapes_to_group shapes state.defaultGroup; }
+        { state with defaultGroup = state.defaultGroup @ shapes; }
 
     let private add_shapes_to_named_group shapes state = 
-        let group = 
+        let mergedShapes = 
             match state.namedGroups.TryFind state.currentGroup with
             | Some group -> group
-            | None -> ShapeGroup.build []
-            |> add_shapes_to_group shapes
-        let updatedMap = state.namedGroups.Add(state.currentGroup,group)
+            | None -> []
+            |> merge shapes
+        let updatedMap = state.namedGroups.Add(state.currentGroup, mergedShapes)
         { state with namedGroups = updatedMap; }
 
     let private parse_face (line:string) (state:parsed_obj_t) =
@@ -58,44 +60,36 @@ module ObjectFiles =
         else state
 
     let private parse_group_enter (line:string) state =
-        if line.StartsWith "g" && state.inGroup = false then
+        if line.StartsWith "g" then
             let name = (line.Split ' ').[1]
             { state with inGroup = true; currentGroup = name; }
         else state
 
-    let private parse_group_leave (line:string) state =
-        if not (line.StartsWith "g") && state.inGroup = true then
-            { state with inGroup = false; currentGroup = ""; }
-        else state
-
-    let private parse_lines lines =
+    let private parse_lines (lines:string[]) =
         let empty = {
-            defaultGroup = ShapeGroup.build []; 
+            defaultGroup = []; 
             namedGroups = Map.empty; 
-            vertices = [(point 0.0 0.0 0.0)]; 
-            ignoredLines = 0;
+            vertices = [|(point 0.0 0.0 0.0)|];
             inGroup = false;
             currentGroup = "";
-        }        
-        let func state (line:string) = 
+        }
+        let lines_filtered = 
+            lines |> Array.map (fun (s) -> s.Trim())
+        let state = parse_vertices lines_filtered empty
+        let parse_groups state (line:string) = 
             state
             |> parse_group_enter line
-            |> parse_vertice line
             |> parse_face line
-            |> parse_group_leave line
-        lines |> Array.except [|""|] |> Array.map (fun (s) -> s.Trim()) |> Array.fold func empty
+        lines_filtered |> Array.fold parse_groups state
 
     let parse_text (text:string) =
         let lines = text.Split (Environment.NewLine.ToCharArray())
         parse_lines lines
 
     let result_to_group result =
-        let default_group_children = ShapeGroup.get_children result.defaultGroup
-        let named_groups = result.namedGroups |> Map.toSeq |> Seq.map snd |> Seq.toList
-        ShapeGroup.build (default_group_children @ named_groups)
-
-    let parse_to_group text =
-        parse_text text |> result_to_group
+        let default_group_children = ShapeGroup.build result.defaultGroup
+        let named_groups = result.namedGroups |> Map.toSeq |> Seq.map snd |> Seq.map ShapeGroup.build |> Seq.toList
+        ShapeGroup.build ([default_group_children] @ named_groups)
 
     let parse_file fileName  =
         File.ReadAllLines fileName |> parse_lines |> result_to_group
