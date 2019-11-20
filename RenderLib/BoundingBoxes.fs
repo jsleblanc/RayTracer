@@ -79,3 +79,28 @@ module BoundingBoxes =
         tmin <- if ztmin > tmin then ztmin else tmin
         tmax <- if ztmax < tmax then ztmax else tmax        
         if tmin > tmax then false else true
+
+    let split box =
+        let dx = Math.Abs(box.maximum.x - box.minimum.x)
+        let dy = Math.Abs(box.maximum.y - box.minimum.y)
+        let dz = Math.Abs(box.maximum.z - box.minimum.z)
+        let greatest = [|dx;dy;dz;|] |> Array.max
+        let mutable (x0,y0,z0) = (box.minimum.x,box.minimum.y,box.minimum.z)
+        let mutable (x1,y1,z1) = (box.maximum.x,box.maximum.y,box.maximum.z)
+        if greatest = dx then
+            let a = x0 + dx / 2.0
+            x0 <- a
+            x1 <- a
+        else if greatest = dy then
+            let a = y0 + dy / 2.0
+            y0 <- a
+            y1 <- a
+        else 
+            let a = z0 + dz / 2.0
+            z0 <- a
+            z1 <- a
+        let mid_min = point x0 y0 z0
+        let mid_max = point x1 y1 z1
+        let left = build box.minimum mid_max
+        let right = build mid_min box.maximum
+        (left,right)

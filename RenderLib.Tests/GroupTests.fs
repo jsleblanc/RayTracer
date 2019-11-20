@@ -96,3 +96,17 @@ module GroupTests =
         let g2 = ShapeGroup.build [g1;] |> Shapes.transform (rotation_z (Math.PI/4.0))
         let v = normal_to_world s [g2;g1;] (vector 0.4101209687 0.7832576841 -0.4672346213)
         Assert.Equal(vector -0.428749814 -0.7525625233 -0.4998232143, v)
+    
+    [<Fact>]
+    let ``Partitioning a group's children``() =
+        let s1 = ShapeSphere.build |> Shapes.transform (translation -2.0 0.0 0.0)
+        let s2 = ShapeSphere.build |> Shapes.transform (translation 2.0 0.0 0.0)
+        let s3 = ShapeSphere.build
+        let g = ShapeGroup.build [s1;s2;s3;]
+        let (left,right,other) = ShapeGroup.partition_children g
+        Assert.Equal(1, List.length (ShapeGroup.get_children left))
+        Assert.True(List.contains s1 (ShapeGroup.get_children left))
+        Assert.Equal(1, List.length (ShapeGroup.get_children right))
+        Assert.True(List.contains s2 (ShapeGroup.get_children right))
+        Assert.Equal(1, List.length (ShapeGroup.get_children other))
+        Assert.True(List.contains s3 (ShapeGroup.get_children other))

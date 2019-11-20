@@ -31,3 +31,6 @@ module ShapeGroup =
             let func box shape = BoundingBoxes.add_boxes box (parent_space_bounds_of shape)
             get_children shape |> List.fold func BoundingBoxes.build_default
         build (Group(children)) local_intersect local_normal_at bounds_of        
+
+    let partition_children group =
+        (group,group,group)

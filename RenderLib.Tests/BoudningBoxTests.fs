@@ -153,3 +153,38 @@ module BoudningBoxTests =
         Assert.False(func (point 8.0 6.0 -1.0) (vector 0.0 -1.0 0.0))
         Assert.False(func (point 12.0 5.0 4.0) (vector -1.0 0.0 0.0))
         
+    [<Fact>]
+    let ``Splitting a perfect cube``() =
+        let box = BoundingBoxes.build (point -1.0 -4.0 -5.0) (point 9.0 6.0 5.0)
+        let (left,right) = BoundingBoxes.split box
+        Assert.Equal(point -1.0 -4.0 -5.0, left.minimum)
+        Assert.Equal(point 4.0 6.0 5.0, left.maximum)
+        Assert.Equal(point 4.0 -4.0 -5.0, right.minimum)
+        Assert.Equal(point 9.0 6.0 5.0, right.maximum)
+
+    [<Fact>]
+    let ``Splitting an x-wide box``() =
+        let box = BoundingBoxes.build (point -1.0 -2.0 -3.0) (point 9.0 5.5 3.0)
+        let (left,right) = BoundingBoxes.split box
+        Assert.Equal(point -1.0 -2.0 -3.0, left.minimum)
+        Assert.Equal(point 4.0 5.5 3.0, left.maximum)
+        Assert.Equal(point 4.0 -2.0 -3.0, right.minimum)
+        Assert.Equal(point 9.0 5.5 3.0, right.maximum)
+
+    [<Fact>]
+    let ``Splitting an y-wide box``() =
+        let box = BoundingBoxes.build (point -1.0 -2.0 -3.0) (point 5.0 8.0 3.0)
+        let (left,right) = BoundingBoxes.split box
+        Assert.Equal(point -1.0 -2.0 -3.0, left.minimum)
+        Assert.Equal(point 5.0 3.0 3.0, left.maximum)
+        Assert.Equal(point -1.0 3.0 -3.0, right.minimum)
+        Assert.Equal(point 5.0 8.0 3.0, right.maximum)
+
+    [<Fact>]
+    let ``Splitting an z-wide box``() =
+        let box = BoundingBoxes.build (point -1.0 -2.0 -3.0) (point 5.0 3.0 7.0)
+        let (left,right) = BoundingBoxes.split box
+        Assert.Equal(point -1.0 -2.0 -3.0, left.minimum)
+        Assert.Equal(point 5.0 3.0 2.0, left.maximum)
+        Assert.Equal(point -1.0 -2.0 2.0, right.minimum)
+        Assert.Equal(point 5.0 3.0 7.0, right.maximum)
