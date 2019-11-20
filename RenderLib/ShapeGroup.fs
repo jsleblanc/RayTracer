@@ -21,7 +21,7 @@ module ShapeGroup =
             | Group g -> g
             | _ -> [shape]
         let test_box box shape =
-            match BoundingBoxes.contains_box box shape.bounding_box with
+            match BoundingBoxes.contains_box box (parent_space_bounds_of shape) with
             | true -> Some shape
             | false -> None
         let make_subgroup shapes =
