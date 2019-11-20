@@ -89,7 +89,9 @@ module ObjectFiles =
     let result_to_group result =
         let default_group_children = ShapeGroup.build result.defaultGroup
         let named_groups = result.namedGroups |> Map.toSeq |> Seq.map snd |> Seq.map ShapeGroup.build |> Seq.toList
-        ShapeGroup.build ([default_group_children] @ named_groups)
+        match named_groups with
+        | [] -> default_group_children
+        | g -> ShapeGroup.build ([default_group_children] @ g)        
 
     let parse_file fileName  =
         File.ReadAllLines fileName |> parse_lines |> result_to_group
