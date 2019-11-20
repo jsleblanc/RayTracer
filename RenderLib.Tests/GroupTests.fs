@@ -110,3 +110,15 @@ module GroupTests =
         Assert.True(List.contains s2 (ShapeGroup.get_children right))
         Assert.Equal(1, List.length (ShapeGroup.get_children other))
         Assert.True(List.contains s3 (ShapeGroup.get_children other))
+
+    [<Fact>]
+    let ``Subdividing a group partitions its children``() =
+        let s1 = ShapeSphere.build |> Shapes.transform (translation -2.0 -2.0 0.0)
+        let s2 = ShapeSphere.build |> Shapes.transform (translation 2.0 2.0 0.0)
+        let s3 = ShapeSphere.build |> Shapes.transform (scaling 4.0 4.0 4.0)
+        let g = ShapeGroup.build [s1;s2;s3;]
+        let g_d = g.divide g 1
+        let g_s1 = ShapeGroup.build [s1;]
+        let g_s2 = ShapeGroup.build [s2;]
+        Assert.True(List.contains g_s1 (ShapeGroup.get_children g_d))
+        Assert.True(List.contains g_s2 (ShapeGroup.get_children g_d))
