@@ -153,4 +153,4 @@ module Shapes =
         normal_to_world shape trail object_normal
 
     let parent_space_bounds_of (shape:shape) =
-        BoundingBoxes.transform (shape.transform) (shape.bounds_of shape)
+        BoundingBoxes.transform shape.transform shape.bounding_box
