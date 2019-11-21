@@ -15,7 +15,7 @@ module ShapeGroup =
         | Group cs -> cs
         | _ -> raise (Exception "Only groups can have children!")
 
-    let rec divide (threshold:int) (shape:shape) (build_fn:shape list -> shape) =
+    let rec private divide_internal (threshold:int) (shape:shape) (build_fn:shape list -> shape) =
         let get_children shape = 
             match shape.shape with
             | Group g -> g
@@ -29,7 +29,7 @@ module ShapeGroup =
             | [] -> None
             | s -> Some (build_fn s)
         let divide_if_above_threshold shape =
-            if List.length (get_children shape) > threshold then divide threshold shape build_fn
+            if List.length (get_children shape) > threshold then divide_internal threshold shape build_fn
             else shape
         let (left_box,right_box) = BoundingBoxes.split shape.bounding_box
         let children = get_children shape
@@ -58,3 +58,5 @@ module ShapeGroup =
             get_children shape |> List.fold func BoundingBoxes.build_default
         build (Group(children)) local_intersect local_normal_at bounds_of        
 
+    let divide shape =
+        divide_internal 1 shape build
