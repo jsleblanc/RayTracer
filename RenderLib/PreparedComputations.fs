@@ -49,20 +49,20 @@ module PreparedComputations =
                 match xlist with
                 | [] -> (n1, n2)
                 | x :: xlist ->
-                    let n1' = 
+                    let n1_p = 
                         if x = i then 
                             match containers with
                             | [] -> 1.
                             | s :: _ -> (Shapes.material i.trail s).refractive_index
                         else n1
                     in
-                    let containers' = 
+                    let containers_p = 
                         append_or_remove x.obj containers in
                         if x = i then 
-                            match containers' with
-                            | [] -> (n1', 1.)
-                            | s :: _ -> (n1', (Shapes.material i.trail s).refractive_index)
-                        else n1n2 containers' n1' n2 xlist
+                            match containers_p with
+                            | [] -> (n1_p, 1.)
+                            | s :: _ -> (n1_p, (Shapes.material i.trail s).refractive_index)
+                        else n1n2 containers_p n1_p n2 xlist
             let (n1, n2) = n1n2 [] 1. 1. xs in
             {
                 t = i.t;
