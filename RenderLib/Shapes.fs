@@ -25,6 +25,7 @@ module Shapes =
     
     [<CustomEquality; NoComparison>]
     type shape = {
+        id:Guid;
         shape:shape_t;
         transform:matrix;
         inverse_transform:matrix;
@@ -40,12 +41,7 @@ module Shapes =
         override this.Equals(other) = 
             match other with
             | :? shape as other ->
-                this.shape = other.shape &&
-                this.transform = other.transform &&
-                this.inverse_transform = other.inverse_transform &&
-                this.inverse_transpose_transform = other.inverse_transpose_transform &&
-                this.material = other.material &&
-                this.shadow = other.shadow
+                (LanguagePrimitives.PhysicalEquality this other) || this.id = other.id
             | _ -> Object.Equals(this, other)
         override this.GetHashCode() = 0
     and shape_t =
@@ -72,6 +68,7 @@ module Shapes =
 
     let build (shape:shape_t) (isect:intersect_t) (normal:normal_t) (bounds_of:bounds_of_t) = 
         let shape = {
+            id = Guid.NewGuid();
             shape = shape;
             transform = matrix.identity_matrix;
             inverse_transform = matrix.identity_matrix;
@@ -103,10 +100,10 @@ module Shapes =
         let inverse_transform = inverse transform
         let inverse_transpose = inverse_transform.Transpose
         let shape = { shape with transform = transform; inverse_transform = inverse_transform; inverse_transpose_transform = inverse_transpose; }
-        { shape with bounding_box = shape.bounds_of shape; }
+        { shape with id = Guid.NewGuid(); bounding_box = shape.bounds_of shape; }
 
     let texture material shape =
-        { shape with material = Some material; }
+        { shape with id = Guid.NewGuid(); material = Some material; }
 
     let materialOrDefault shape = 
         match shape.material with
