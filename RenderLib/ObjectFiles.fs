@@ -91,7 +91,7 @@ module ObjectFiles =
         let named_groups = result.namedGroups |> Map.toSeq |> Seq.map snd |> Seq.map ShapeGroup.build |> Seq.toList
         match named_groups with
         | [] -> default_group_children
-        | g -> ShapeGroup.build ([default_group_children] @ g)        
+        | g -> ShapeGroup.build ([default_group_children] @ g) //TODO add testing for unnecessary nesting
 
     let parse_file fileName  =
         File.ReadAllLines fileName |> parse_lines |> result_to_group
