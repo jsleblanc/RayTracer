@@ -90,3 +90,29 @@ module TriangleTests =
         let t = ShapeTriangle.build (point -3.0 7.0 2.0) (point 6.0 2.0 -4.0) (point 2.0 -1.0 -1.0) false
         Assert.Equal(point -3.0 -1.0 -4.0, t.bounding_box.minimum)
         Assert.Equal(point 6.0 7.0 2.0, t.bounding_box.maximum)
+   
+    [<Fact>]
+    let ``Constructing a smooth triangle``() =
+        let t = ShapeTriangle.build (point 0.0 1.0 0.0) (point -1.0 0.0 0.0) (point 1.0 0.0 0.0) true
+        let data = ShapeTriangle.data t
+        Assert.True(data.smooth)
+
+    [<Fact>]
+    let ``An intersection with a smooth triangle stores u/v``() =
+        let t = ShapeTriangle.build (point 0.0 1.0 0.0) (point -1.0 0.0 0.0) (point 1.0 0.0 0.0) true
+        let r = {
+            origin = point -0.2 0.3 -2.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let xs = t.local_intersect t [] r
+        Assert.False(List.isEmpty xs)
+        let i = List.item(0) xs
+        Assert.True(areEqualFloat 0.45 i.u)
+        Assert.True(areEqualFloat 0.25 i.v)
+
+    [<Fact>]
+    let ``A smooth triangle uses u/v to interpolate the normal``() =
+        let t = ShapeTriangle.build (point 0.0 1.0 0.0) (point -1.0 0.0 0.0) (point 1.0 0.0 0.0) true
+        let i = Shapes.build_intersection_triangle 1.0 t 0.45 0.25 []
+        let n = Shapes.normal_at (Some i) t [] (point 0.0 0.0 0.0)
+        Assert.Equal(vector -0.5547 0.83205 0.0, n)

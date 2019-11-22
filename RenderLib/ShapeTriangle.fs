@@ -43,7 +43,7 @@ module ShapeTriangle =
                         []
                     else
                         let t = f * tri.e2.dotProduct(origin_cross_e1)
-                        [build_intersection_triangle u v t shape trail;]
+                        [build_intersection_triangle t shape u v trail;]
         let bounds_of shape = 
             BoundingBoxes.build_default
             |> BoundingBoxes.add_point p1

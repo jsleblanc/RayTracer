@@ -206,3 +206,10 @@ module IntersectionTests =
         let comps = prepare (Seq.item(0) xs) r xs
         let reflectance = schlick comps
         Assert.Equal(0.48873081012212183, reflectance)
+
+    [<Fact>]
+    let ``An intersection can encapsulate u and v``() =
+        let t = ShapeTriangle.build (point 0.0 1.0 0.0) (point -1.0 0.0 0.0) (point 1.0 0.0 0.0) true
+        let i = Shapes.build_intersection_triangle 3.5 t 0.2 0.4 []
+        Assert.Equal(0.2, i.u)
+        Assert.Equal(0.4, i.v)

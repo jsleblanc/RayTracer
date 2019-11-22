@@ -35,7 +35,6 @@ module Shapes =
         local_normal_at:normal_t;
         bounds_of:bounds_of_t;
         bounding_box:boundingBox_t;
-        divide:divide_t;
         shadow: bool;
     } with 
         override this.Equals(other) = 
@@ -64,8 +63,6 @@ module Shapes =
     and bounds_of_t = shape -> boundingBox_t
     and divide_t = shape -> int -> shape
 
-    let private divide_default shape threshold = shape
-
     let build (shape:shape_t) (isect:intersect_t) (normal:normal_t) (bounds_of:bounds_of_t) = 
         let shape = {
             id = Guid.NewGuid();
@@ -78,7 +75,6 @@ module Shapes =
             local_normal_at = normal;
             bounds_of = bounds_of;
             bounding_box = BoundingBoxes.build_default;
-            divide = divide_default;
             shadow = true;
         }
         { shape with bounding_box = shape.bounds_of shape; }
@@ -86,7 +82,7 @@ module Shapes =
     let build_intersection t shape trail =
         { t = t; obj = shape; trail = trail; u = 0.0; v = 0.0; }
 
-    let build_intersection_triangle u v t shape trail =
+    let build_intersection_triangle t shape u v trail =
         { t = t; obj = shape; trail = trail; u = u; v = v; }
 
     let sort_intersection (xs:intersection list) =
