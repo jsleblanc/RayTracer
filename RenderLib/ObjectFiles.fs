@@ -22,12 +22,25 @@ module ObjectFiles =
             Some (point (float i.[1]) (float i.[2]) (float i.[3]))
         else None
 
+    let private parse_normal (line:string) =
+        if line.StartsWith "vn" then
+            let i = line.Split ' '
+            Some (vector (float i.[1]) (float i.[2]) (float i.[3]))
+        else None
+
     let private parse_vertices lines state =
         let vertices = 
             lines 
             |> Array.map parse_vertice
             |> Array.choose id
         { state with vertices = Array.concat [| state.vertices; vertices |]; }
+
+    let private parse_vertex_normals lines state =
+        let normals =
+            lines
+            |> Array.map parse_normal
+            |> Array.choose id
+        { state with normals = Array.concat [| state.normals; normals |]; }
 
     let private fan_triangulation vertices =
         [| 1 .. (Array.length vertices) - 2 |]
@@ -77,7 +90,10 @@ module ObjectFiles =
         }
         let lines_filtered = 
             lines |> Array.map (fun (s) -> s.Trim())
-        let state = parse_vertices lines_filtered empty
+        let state = 
+            empty
+            |> parse_vertices lines_filtered
+            |> parse_vertex_normals lines_filtered
         let parse_groups state (line:string) = 
             state
             |> parse_group_enter line
