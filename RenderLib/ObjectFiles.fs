@@ -30,7 +30,7 @@ module ObjectFiles =
 
     let private fan_triangulation vertices =
         [| 1 .. (Array.length vertices) - 2 |]
-        |> Array.map (fun (i) -> ShapeTriangle.build vertices.[0] vertices.[i] vertices.[i+1] false)
+        |> Array.map (fun (i) -> ShapeTriangle.build vertices.[0] vertices.[i] vertices.[i+1])
 
     let private merge left right =
         right @ left
