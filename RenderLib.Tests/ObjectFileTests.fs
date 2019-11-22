@@ -111,3 +111,39 @@ module ObjectFileTests =
         let children = ShapeGroup.get_children g
         Assert.True(List.contains (ShapeGroup.build result.namedGroups.["FirstGroup"]) children)
         Assert.True(List.contains (ShapeGroup.build result.namedGroups.["SecondGroup"]) children)
+
+    [<Fact>]
+    let ``Vertex normal records``() =
+        let text = 
+            "vn 0 0 1
+            vn 0.707 0 -0.707
+            vn 1 2 3"
+        let result = parse_text text
+        Assert.Equal(vector 0.0 0.0 1.0, result.normals.[1])
+        Assert.Equal(vector 0.707 0.0 -0.707, result.normals.[2])
+        Assert.Equal(vector 1.0 2.0 3.0, result.normals.[3])
+
+    [<Fact>]
+    let ``Faces with normals``() =
+        let text = 
+            "v 0 1 0
+            v -1.0 0 0
+            v 1 0 0
+            vn -1 0 0
+            vn 1 0 0
+            vn 0 1 0
+            f 1//3 2//3 3//2
+            f 1/0/3 2/102/1 3/14/2"
+        let result = parse_text text
+        let g = result_to_group result
+        let s1 = List.item(0) (ShapeGroup.get_children g)
+        let s2 = List.item(1) (ShapeGroup.get_children g)
+        let t1 = ShapeTriangle.data s1
+        let t2 = ShapeTriangle.data s2
+        Assert.Equal(result.vertices.[1], t1.p1)
+        Assert.Equal(result.vertices.[2], t1.p2)
+        Assert.Equal(result.vertices.[3], t1.p3)
+        Assert.Equal(result.normals.[3], t1.n1)
+        Assert.Equal(result.normals.[1], t1.n2)
+        Assert.Equal(result.normals.[2], t1.n3)
+        Assert.Equal(t1,t2)

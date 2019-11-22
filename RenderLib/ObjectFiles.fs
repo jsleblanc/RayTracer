@@ -11,6 +11,7 @@ module ObjectFiles =
         defaultGroup:shape list;
         namedGroups:Map<string,shape list>;
         vertices:tuple[];
+        normals:tuple[];
         inGroup:bool;
         currentGroup:string;
     }
@@ -70,6 +71,7 @@ module ObjectFiles =
             defaultGroup = []; 
             namedGroups = Map.empty; 
             vertices = [|(point 0.0 0.0 0.0)|];
+            normals = [|(vector 0.0 0.0 0.0)|];
             inGroup = false;
             currentGroup = "";
         }
