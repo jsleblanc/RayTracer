@@ -22,7 +22,7 @@ module ShapeTests =
             | TestShape data -> data.ray <- Some ray
             | _ -> failwith "shouldn't ever get here"
             []
-        let normal_at (hit:intersection option) shape pt =
+        let normal_at hit shape pt =
             vector pt.x pt.y pt.z
         let bounds_of shape = 
             BoundingBoxes.build (point -1.0 -1.0 -1.0) (point 1.0 1.0 1.0)

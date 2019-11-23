@@ -161,3 +161,15 @@ module CSGTests =
         let xs = Shapes.intersect shape [] r
         Assert.True((ShapeTests.test_shape_data left).ray.IsSome)
         Assert.True((ShapeTests.test_shape_data right).ray.IsSome)
+
+    [<Fact>]
+    let ``Subdividing a CSG shape subdivides its children``() =
+        let s1 = ShapeSphere.build |> Shapes.transform (translation -1.5 0.0 0.0)
+        let s2 = ShapeSphere.build |> Shapes.transform (translation 1.5 0.0 0.0)
+        let left = ShapeGroup.build [s1;s2;]
+        let s3 = ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 -1.5)
+        let s4 = ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 1.5)
+        let right = ShapeGroup.build [s3;s4;]
+        let shape = ShapeCSG.difference left right
+        let shape_d = ShapeGroup.divide shape
+        Assert.True(false)
