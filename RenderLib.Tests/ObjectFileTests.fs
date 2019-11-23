@@ -132,7 +132,7 @@ module ObjectFileTests =
             vn -1 0 0
             vn 1 0 0
             vn 0 1 0
-            f 1//3 2//3 3//2
+            f 1//3 2//1 3//2
             f 1/0/3 2/102/1 3/14/2"
         let result = parse_text text
         let g = result_to_group result

@@ -16,6 +16,12 @@ module ObjectFiles =
         currentGroup:string;
     }
 
+    type face_t = {
+        vertice_indexes:int[];
+        normal_indexes:int[];
+        smooth:bool;
+    }
+
     let private parse_vertice (line:string) =
         if line.StartsWith "v" then
             let i = line.Split ' '
@@ -42,9 +48,15 @@ module ObjectFiles =
             |> Array.choose id
         { state with normals = Array.concat [| state.normals; normals |]; }
 
-    let private fan_triangulation vertices =
-        [| 1 .. (Array.length vertices) - 2 |]
-        |> Array.map (fun (i) -> ShapeTriangle.build vertices.[0] vertices.[i] vertices.[i+1])
+    let private fan_triangulation face state =
+        let vertice x = state.vertices.[face.vertice_indexes.[x]]
+        let normal x = state.normals.[face.normal_indexes.[x]]
+        let triangle i =
+            match face.smooth with
+            | true -> ShapeTriangle.build_smooth (vertice 0) (vertice i) (vertice (i+1)) (normal 0) (normal i) (normal (i+1))
+            | false -> ShapeTriangle.build (vertice 0) (vertice i) (vertice (i+1))
+        [| 1 .. (Array.length face.vertice_indexes) - 2 |]
+        |> Array.map triangle
 
     let private merge left right =
         right @ left
@@ -62,13 +74,31 @@ module ObjectFiles =
         { state with namedGroups = updatedMap; }
 
     let private parse_face (line:string) (state:parsed_obj_t) =
+        let face (line:string) =
+            let empty = {
+                vertice_indexes = Array.empty;
+                normal_indexes = Array.empty;
+                smooth = false;
+            }
+            let func state (v,n) =
+                let vi = Array.append state.vertice_indexes [|v|]
+                let (ni, s) = 
+                    match n with
+                    | n when n > 0 -> (Array.append state.normal_indexes [|n|], true)
+                    | _ -> (state.normal_indexes, false)
+                { state with vertice_indexes = vi; normal_indexes = ni; smooth = s; }
+            line.Split ' '
+            |> Array.skip 1
+            |> Array.map (fun (s) -> s.Split '/')
+            |> Array.map (fun (entries) ->
+                match entries with
+                | [|v|] -> (int v, 0)
+                | [|v;_;n|] -> (int v, int n)
+                | _ -> (0, 0))
+            |> Array.fold func empty
         if line.StartsWith "f" then
-            let triangles = 
-                line.Split ' '
-                |> Array.skip 1
-                |> Array.map (fun (i) -> state.vertices.[int i])
-                |> fan_triangulation
-                |> Array.toList
+            let f = face line 
+            let triangles = fan_triangulation f state |> Array.toList
             if state.inGroup then add_shapes_to_named_group triangles state
             else add_shapes_to_default_group triangles state
         else state
