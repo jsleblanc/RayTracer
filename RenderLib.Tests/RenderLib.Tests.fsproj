@@ -14,6 +14,7 @@
     <Compile Include="IntersectionTests.fs" />
     <Compile Include="MaterialsTests.fs" />
     <Compile Include="BoudningBoxTests.fs" />
+    <Compile Include="ShapeTests.fs" />
     <Compile Include="SphereTests.fs" />
     <Compile Include="CubeTests.fs" />
     <Compile Include="PlaneTests.fs" />

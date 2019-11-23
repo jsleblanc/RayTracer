@@ -61,7 +61,6 @@ module Shapes =
     and intersect_t = shape -> shape list -> ray -> intersection list
     and normal_t = intersection option -> shape -> tuple -> tuple
     and bounds_of_t = shape -> boundingBox_t
-    and divide_t = shape -> int -> shape
 
     let build (shape:shape_t) (isect:intersect_t) (normal:normal_t) (bounds_of:bounds_of_t) = 
         let shape = {
@@ -100,6 +99,13 @@ module Shapes =
 
     let texture material shape =
         { shape with id = Guid.NewGuid(); material = Some material; }
+
+    let pattern pattern shape =
+        let m = 
+            match shape.material with
+            | Some m -> { m with pattern = Some pattern; }
+            | None -> { material.Default with pattern = Some pattern; }
+        { shape with id = Guid.NewGuid(); material = Some m; }
 
     let materialOrDefault shape = 
         match shape.material with

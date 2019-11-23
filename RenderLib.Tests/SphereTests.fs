@@ -16,18 +16,6 @@ module SphereTests =
         Assert.False(s.id = Guid.Empty)
 
     [<Fact>]
-    let ``Transforming a shape generates a new shape id``() =
-        let s1 = ShapeSphere.build
-        let s2 = ShapeSphere.build |> Shapes.transform (scaling 2.0 2.0 2.0)
-        Assert.False(s1.id = s2.id)
-
-    [<Fact>]
-    let ``Texturing a shape generates a new shape id``() =
-        let s1 = ShapeSphere.build
-        let s2 = ShapeSphere.build |> Shapes.texture Material.material.Default
-        Assert.False(s1.id = s2.id)
-
-    [<Fact>]
     let ``The normal on a sphere at a point on the x axis``() =
         let s = ShapeSphere.build
         let n = s.local_normal_at None s (point 1.0 0.0 0.0)
