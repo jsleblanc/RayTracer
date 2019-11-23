@@ -22,6 +22,7 @@
     <Compile Include="ConeTests.fs" />
     <Compile Include="TriangleTests.fs" />
     <Compile Include="GroupTests.fs" />
+    <Compile Include="CSGTests.fs" />
     <Compile Include="ObjectFileTests.fs" />
     <Compile Include="CameraTests.fs" />
     <Compile Include="WorldTests.fs" />

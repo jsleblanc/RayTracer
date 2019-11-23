@@ -23,6 +23,8 @@ module Shapes =
         smooth: bool;
     }
     
+    type csg_rule_fn = bool -> bool -> bool -> bool
+
     [<CustomEquality; NoComparison>]
     type shape = {
         id:Guid;
@@ -51,6 +53,9 @@ module Shapes =
     | Cone of Minimum:float * Maximum:float * Closed:bool
     | Triangle of tri_data
     | Group of Children:shape list
+    | Union of shape * shape * csg_rule_fn
+    | Intersect of shape * shape * csg_rule_fn
+    | Difference of shape * shape * csg_rule_fn
     and intersection = {
         t:float;
         obj:shape;
