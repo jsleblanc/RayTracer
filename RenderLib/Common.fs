@@ -36,4 +36,7 @@ module Common =
         if min > max then
             (max, min)
         else
-            (min, max)     
+            (min, max)
+
+    let degrees a =
+        a * (Math.PI/180.0)

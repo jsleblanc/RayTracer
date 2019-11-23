@@ -112,6 +112,15 @@ module BoudningBoxTests =
         Assert.Equal(point 4.0 7.0 4.5, box.maximum)
 
     [<Fact>]
+    let ``A CSG shape has a bounding box that contains its children``() =
+        let left = ShapeSphere.build
+        let right = ShapeSphere.build |> Shapes.transform (translation 2.0 3.0 4.0)
+        let shape = ShapeCSG.difference left right
+        let box = shape.bounds_of shape
+        Assert.Equal(point -1.0 -1.0 -1.0, box.minimum)
+        Assert.Equal(point 3.0 4.0 5.0, box.maximum)
+
+    [<Fact>]
     let ``Intersecting a ray with a bounding box at the origin``() =
         let func o (d:tuple) =
             let box = BoundingBoxes.build (point -1.0 -1.0 -1.0) (point 1.0 1.0 1.0)

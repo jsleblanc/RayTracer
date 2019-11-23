@@ -136,4 +136,28 @@ module CSGTests =
         Assert.Equal(6.5, i2.t)
         Assert.Equal(s2, i2.obj)
 
+    [<Fact>]
+    let ``Intersecting ray+csg doesn't test children if box is missed``() =
+        let left = ShapeTests.test_shape()
+        let right = ShapeTests.test_shape()
+        let shape = ShapeCSG.difference left right
+        let r = {
+            origin = point 0.0 0.0 -5.0;
+            direction = vector 0.0 1.0 0.0;
+        }
+        let xs = Shapes.intersect shape [] r
+        Assert.True((ShapeTests.test_shape_data left).ray.IsNone)
+        Assert.True((ShapeTests.test_shape_data right).ray.IsNone)
 
+    [<Fact>]
+    let ``Intersecting ray+csg tests children if box is hit``() =
+        let left = ShapeTests.test_shape()
+        let right = ShapeTests.test_shape()
+        let shape = ShapeCSG.difference left right
+        let r = {
+            origin = point 0.0 0.0 -5.0;
+            direction = vector 0.0 0.0 1.0;
+        }
+        let xs = Shapes.intersect shape [] r
+        Assert.True((ShapeTests.test_shape_data left).ray.IsSome)
+        Assert.True((ShapeTests.test_shape_data right).ray.IsSome)

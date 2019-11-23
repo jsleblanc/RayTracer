@@ -10,6 +10,13 @@ open Shapes
 
 module ShapeCSG =
 
+    let private get_children shape = 
+        match shape.shape with
+        | Union (l,r,_) -> [l;r;]
+        | Intersect (l,r,_) -> [l;r;]
+        | Difference (l,r,_) -> [l;r;]
+        | _ -> failwith "expected a CSG operation to get_children"
+
     let private intersection_allowed_union lhit inl inr =
         (lhit && not inr) || (not lhit && not inl)
 
@@ -46,18 +53,22 @@ module ShapeCSG =
     let private build operation =
         let local_normal_at hit shape pt = failwith "should not calculate normal on CSG shape itself!"
         let local_intersect shape trail ray = 
-            let (left,right) =
-                match shape.shape with
-                | Union (l,r,_) -> (l,r)
-                | Intersect (l,r,_) -> (l,r)
-                | Difference (l,r,_) -> (l,r)
-                | _ -> failwith "expected a CSG operation to local_intersect"
-            let trail = (shape :: trail)
-            let leftxs = Shapes.intersect left trail ray
-            let rightxs = Shapes.intersect right trail ray
-            let xs = Shapes.sort_intersection (List.append (List.rev leftxs) rightxs)
-            filter_intersections shape xs
-        let bounds_of shape = BoundingBoxes.build_default
+            if BoundingBoxes.intersects shape.bounding_box ray then
+                let (left,right) =
+                    match shape.shape with
+                    | Union (l,r,_) -> (l,r)
+                    | Intersect (l,r,_) -> (l,r)
+                    | Difference (l,r,_) -> (l,r)
+                    | _ -> failwith "expected a CSG operation to local_intersect"
+                let trail = (shape :: trail)
+                let leftxs = Shapes.intersect left trail ray
+                let rightxs = Shapes.intersect right trail ray
+                let xs = Shapes.sort_intersection (List.append (List.rev leftxs) rightxs)
+                filter_intersections shape xs
+            else []
+        let bounds_of shape = 
+            let func box shape = BoundingBoxes.add_boxes box (parent_space_bounds_of shape)
+            get_children shape |> List.fold func BoundingBoxes.build_default
         build operation local_intersect local_normal_at bounds_of
 
     let union left right = 

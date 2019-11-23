@@ -10,6 +10,8 @@ open BoundingBoxes
 
 module Shapes = 
 
+    type test_shape_data = { mutable ray : ray option }
+
     type tri_data = {
         p1: tuple;
         p2: tuple;
@@ -56,6 +58,7 @@ module Shapes =
     | Union of shape * shape * csg_rule_fn
     | Intersect of shape * shape * csg_rule_fn
     | Difference of shape * shape * csg_rule_fn
+    | TestShape of test_shape_data
     and intersection = {
         t:float;
         obj:shape;
