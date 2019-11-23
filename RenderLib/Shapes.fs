@@ -42,7 +42,7 @@ module Shapes =
             | :? shape as other ->
                 (LanguagePrimitives.PhysicalEquality this other) || this.id = other.id
             | _ -> Object.Equals(this, other)
-        override this.GetHashCode() = 0
+        override this.GetHashCode() = this.id.GetHashCode()
     and shape_t =
     | Plane
     | Sphere
