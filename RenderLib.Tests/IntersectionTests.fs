@@ -25,7 +25,7 @@ module IntersectionTests =
         let i1 = Shapes.build_intersection 1.0 s []
         let i2 = Shapes.build_intersection 2.0 s []
         let xs = [ i1; i2; ]
-        match hit xs with
+        match hit_d xs with
         | Some i -> Assert.Equal(i1, i)
         | None -> Assert.True(false, "Should have returned a value")
 
@@ -35,7 +35,7 @@ module IntersectionTests =
         let i1 = Shapes.build_intersection -1.0 s []
         let i2 = Shapes.build_intersection 1.0 s []
         let xs = [ i1; i2; ]
-        match hit xs with
+        match hit_d xs with
         | Some i -> Assert.Equal(i2, i)
         | None -> Assert.True(false, "Should have returned a value")
 
@@ -45,7 +45,7 @@ module IntersectionTests =
         let i1 = Shapes.build_intersection -1.0 s []
         let i2 = Shapes.build_intersection -2.0 s []
         let xs = [ i1; i2; ]
-        match hit xs with
+        match hit_d xs with
         | None -> Assert.True(true)
         | Some i -> Assert.True(false, "Should not have returned a value")
 
@@ -57,7 +57,7 @@ module IntersectionTests =
         let i3 = Shapes.build_intersection -3.0 s []
         let i4 = Shapes.build_intersection 2.0 s []
         let xs = [ i1; i2; i3; i4; ]
-        match hit xs with
+        match hit_d xs with
         | Some i -> Assert.Equal(i4, i)
         | None -> Assert.True(false, "Should have returned a value")
 

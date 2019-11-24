@@ -56,8 +56,9 @@ module Worlds =
             origin = p;
             direction = direction;
         }
-        let intersections = intersect_world w ray
-        match hit intersections with
+        let xs = intersect_world w ray
+        let allow i = i.obj.shadow
+        match hit xs allow with
         | Some i when i.t < distance -> true
         | _ -> false
 
@@ -91,7 +92,7 @@ module Worlds =
 
     and color_at world ray remaining =
         let i = intersect_world world ray
-        match hit i with 
+        match hit_d i with 
         | Some hit -> 
             let comp = prepare hit ray i
             shade_hit world comp remaining

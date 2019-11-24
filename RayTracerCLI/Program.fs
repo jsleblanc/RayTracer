@@ -43,23 +43,7 @@ let main argv =
                 image.[x,y] <- pixel
         image.Save(fileName, encoder)
 
-    let hexagon_corner =
-        ShapeSphere.build
-        |> Shapes.transform ((translation 0.0 0.0 -1.0) * (scaling 0.25 0.25 0.25))
 
-    let hexagon_edge =
-        ShapeCylinder.build 0.0 1.0 false
-        |> Shapes.transform ((translation 0.0 0.0 -1.0) * (rotation_y (-Math.PI/6.0)) * (rotation_z (-Math.PI/2.0)) * (scaling 0.25 1.0 0.25))
-
-    let hexagon_side t =
-        ShapeGroup.build [hexagon_corner;hexagon_edge;] |> Shapes.transform t
-
-    let hexagon t = 
-        let mutable sides = []
-        for x in 0 .. 5 do
-            let side = hexagon_side (rotation_y (float x * Math.PI / 3.0))
-            sides <- side::sides
-        ShapeGroup.build sides |> Shapes.transform t
 
     //let p = Solid(red)// blue
     
@@ -105,26 +89,46 @@ let main argv =
     canvas_to_jpg "output.jpg" canvas    
     printfn "Calculations completed in %s" (sw.Elapsed.ToString())
     *)
-        (*
+    
     let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
-    let vt = view_transform (point 0.0 2.5 0.0) (point 0.0 0.0 0.0) (vector 1.0 0.0 0.0)
-    let camera = { create_default_camera 640 480 with field_of_view = Math.PI / 3.0; transform = vt; }
-    let pt = Patterns.checkers (solid_c blue) (solid_c white) |> Patterns.transform (translation 0.0 0.1 0.0)
+    //let vt = view_transform (point 0.0 2.5 0.0) (point 0.0 0.0 0.0) (vector 1.0 0.0 0.0)
+    let vt = view_transform (point 2.0 2.0 -3.0) (point 0.0 0.0 0.0) (vector 0.0 1.0 0.0)
+    let camera = { create_default_camera 1024 768 with field_of_view = Math.PI / 2.0; transform = vt; }
+    let pt = Patterns.solid_color blue //|> Patterns.transform (translation 0.0 0.1 0.0)
+    (*
+    let teapot = 
+        ObjectFiles.parse_file @"C:\Users\josep\Source\Repos\RayTracer\RayTracerCLI\Scenes\teapot.obj"
+        |> Shapes.transform (scaling 0.75 0.75 0.75)
+        |> Shapes.pattern pt
+    let dragon =
+        ObjectFiles.parse_file @"C:\Users\josep\Source\Repos\RayTracer\RayTracerCLI\Scenes\dragon.obj"
+        |> Shapes.transform (scaling 0.75 0.75 0.75)
+    printfn "Loading OBJ files took %s" (sw.Elapsed.ToString())
+    *)
+
+    let shapes = [    
+        FunShapes.csb_cube { glass with diffuse = 0.1; shininess = 300.0; reflective = 1.0; }
+        ShapePlane.build |> Shapes.transform (translation 0.0 -10.1 0.0) |> Shapes.texture { Material.material.Default with pattern = Some pt; }
+    ]
+
+    //let u = ShapeCSG.union c1 c2
+
     let default_world = 
         let plane = 
             ShapePlane.build
-            |> Shapes2.transform (translation 0.0 -10.1 0.0)
-            |> Shapes2.texture { Material.material.Default with pattern = Some pt; }
+            |> Shapes.transform (translation 0.0 -10.1 0.0)
+            |> Shapes.texture { Material.material.Default with pattern = Some pt; }
         let s2 = 
             ShapeSphere.build
-            |> Shapes2.texture Material.material.Default
-            |> Shapes2.transform (scaling 0.5 0.5 0.5)
-        let w = Worlds.build_default [s2; plane;]
+            |> Shapes.texture Material.material.Default
+            |> Shapes.transform (scaling 0.5 0.5 0.5)
+        let w = Worlds.build_default [plane;s2;]
         w
-    let world = default_world
+    let world = Worlds.build_default shapes
     let canvas = render camera world
+    //let color = color_at world { origin = point 0.0 0.0 0.0; direction = vector  } 5
     canvas_to_jpg "output.jpg" canvas
-    *)
+    
     (*
     //sphere inside a sphere 
     let pt = Patterns.checkers (solid_c blue) (solid_c white) |> Patterns.transform (translation 0.0 0.1 0.0)

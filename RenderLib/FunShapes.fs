@@ -26,17 +26,17 @@ module FunShapes =
             sides <- side::sides
         ShapeGroup.build sides |> Shapes.transform t
         
-    let csg_test =
+    let csb_cube t =
         let plus = 
-            let c1 = ShapeCylinder.build -2.0 2.0 true |> Shapes.transform ((scaling 0.5 0.5 1.0) * rotation_z (Common.degrees 90.0))
-            let c2 = ShapeCylinder.build -2.0 2.0 true |> Shapes.transform ((scaling 0.5 0.5 1.0) * rotation_y (Common.degrees 90.0))
-            let c3 = ShapeCylinder.build -2.0 2.0 true |> Shapes.transform ((scaling 0.5 0.5 1.0) * rotation_x (Common.degrees 90.0))
-            let u = ShapeCSG.union c1 c2
-            ShapeCSG.union u c3
+            let c1 = ShapeCylinder.build -2.0 2.0 true |> Shapes.transform (rotation_z (Common.degrees 90.0) * (scaling 0.5 0.5 0.5)) |> Shapes.texture t 
+            let c2 = ShapeCylinder.build -2.0 2.0 true |> Shapes.transform (rotation_y (Common.degrees 90.0) * (scaling 0.5 0.5 0.5)) |> Shapes.texture t 
+            let c3 = ShapeCylinder.build -2.0 2.0 true |> Shapes.transform (rotation_x (Common.degrees 90.0) * (scaling 0.5 0.5 0.5)) |> Shapes.texture t 
+            let u1 = ShapeCSG.union c1 c2 
+            let u2 = ShapeCSG.union u1 c3 
+            u2 |> Shapes.transform (scaling 1.1 1.1 1.1) |> Shapes.texture t
         let cube =
-            let s1 = ShapeSphere.build |> Shapes.transform (scaling 0.75 0.75 0.75)
-            let s2 = ShapeCube.build |> Shapes.transform (scaling 1.25 1.25 1.25)
-            ShapeCSG.intersect s1 s2
-        //ShapeCSG.difference cube plus
-        cube
+            let sphere = ShapeSphere.build |> Shapes.transform (scaling 1.5 1.5 1.5) |> Shapes.texture t 
+            let cube = ShapeCube.build |> Shapes.texture t 
+            ShapeCSG.intersect cube sphere 
+        ShapeCSG.difference cube plus 
             

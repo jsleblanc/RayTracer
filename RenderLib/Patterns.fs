@@ -72,3 +72,7 @@ module Patterns =
             let disc = int distance % 2
             if disc = 0 then a else b
         build fn
+
+    let solid_color c =
+        let fn point = Solid(c)
+        build fn

@@ -17,57 +17,53 @@ module ShapeConic =
     let intersect_caps trail shape min max closed ray radius_at xs =
         let check_cap t radius =
             let x = ray.origin.x + t * ray.direction.x
-            let z = ray.origin.z + t * ray.direction.z in
+            let z = ray.origin.z + t * ray.direction.z
             (x ** 2.0 + z ** 2.0) <= radius ** 2.0
-        in
         if (not closed) || ((Math.Abs ray.direction.y) < epsilon) then
             xs
         else
-        let xs' =
-            let t = (min - ray.origin.y) / ray.direction.y in
+        let xs_p =
+            let t = (min - ray.origin.y) / ray.direction.y
             if check_cap t (radius_at min) then (build_intersection t shape trail) :: xs else xs
-        in
-        let t = (max - ray.origin.y) / ray.direction.y in
-        if check_cap t (radius_at max) then (build_intersection t shape trail) :: xs' else xs'
+        let t = (max - ray.origin.y) / ray.direction.y
+        if check_cap t (radius_at max) then (build_intersection t shape trail) :: xs_p else xs_p
     
     let intersect (shape:shape) trail r (afn:ray->float) (bfn:ray->float) (cfn:ray->float) radius_at =
-      let (minimum, maximum, closed) = parameters_of shape in
-      let a = afn r in
-      let b = bfn r in
+      let (minimum, maximum, closed) = parameters_of shape
+      let a = afn r
+      let b = bfn r
       let xs =
         if (Math.Abs(a)) < epsilon then
           if (Math.Abs(b)) < epsilon then
             []
           else
-            let c = cfn r in
-            let t = (-c) / (2.0 * b) in
+            let c = cfn r
+            let t = (-c) / (2.0 * b)
             [ build_intersection t shape trail ]
         else
-          let c = cfn r in
-          let disc = b ** 2.0 - 4.0 * a * c in
-          if disc < 0. then
+          let c = cfn r
+          let disc = b ** 2.0 - 4.0 * a * c
+          if disc < 0.0 then
             []
           else
-            let root = sqrt disc in
+            let root = sqrt disc
             let t0 = (-b - root) / (2.0 * a)
-            let t1 = (-b + root) / (2.0 * a) in
+            let t1 = (-b + root) / (2.0 * a)
             let xs =
-              let y = r.origin.y + t1 * r.direction.y in
+              let y = r.origin.y + t1 * r.direction.y
               if minimum < y && y < maximum then [ build_intersection t1 shape trail ] else []
-            in
-            let y = r.origin.y + t0 * r.direction.y in
+            let y = r.origin.y + t0 * r.direction.y
             if minimum < y && y < maximum then
               (build_intersection t0 shape trail) :: xs
             else xs
-      in
       sort_intersection (intersect_caps trail shape minimum maximum closed r radius_at xs)
     
     let normal_at shape (point:tuple) nfn =
-      let (minimum, maximum, _) = parameters_of shape in
-      let dist = point.x ** 2. + point.z ** 2. in
-      if dist < 1. && point.y >= maximum - epsilon then
+      let (minimum, maximum, _) = parameters_of shape
+      let dist = point.x ** 2.0 + point.z ** 2.0
+      if dist < 1.0 && point.y >= (maximum - epsilon) then
         vector 0.0 1.0 0.0
-      else if dist < 1. && point.y <= minimum + epsilon then
-        vector 0.0 (-1.0) 0.0
+      else if dist < 1.0 && point.y <= (minimum + epsilon) then
+        vector 0.0 -1.0 0.0
       else
         nfn point

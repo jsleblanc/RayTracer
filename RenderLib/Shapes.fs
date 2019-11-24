@@ -86,19 +86,6 @@ module Shapes =
         }
         { shape with bounding_box = shape.bounds_of shape; }
 
-    let build_intersection t shape trail =
-        { t = t; obj = shape; trail = trail; u = 0.0; v = 0.0; }
-
-    let build_intersection_triangle t shape u v trail =
-        { t = t; obj = shape; trail = trail; u = u; v = v; }
-
-    let sort_intersection (xs:intersection list) =
-        xs |> List.sortBy (fun (a) -> a.t)
-
-    let hit (xs:intersection list) =
-        let sorted = sort_intersection xs
-        sorted |> List.tryFind (fun (i) -> i.t >= 0.0)
-
     let transform transform shape =
         let inverse_transform = inverse transform
         let inverse_transpose = inverse_transform.Transpose
@@ -114,6 +101,25 @@ module Shapes =
             | Some m -> { m with pattern = Some pattern; }
             | None -> { material.Default with pattern = Some pattern; }
         { shape with id = Guid.NewGuid(); material = Some m; }
+
+    let no_shadow shape =
+        { shape with id = Guid.NewGuid(); shadow = false; }
+
+    let build_intersection t shape trail =
+        { t = t; obj = shape; trail = trail; u = 0.0; v = 0.0; }
+
+    let build_intersection_triangle t shape u v trail =
+        { t = t; obj = shape; trail = trail; u = u; v = v; }
+
+    let sort_intersection (xs:intersection list) =
+        xs |> List.sortBy (fun (a) -> a.t)
+
+    let hit (xs:intersection list) (allow:intersection -> bool) =
+        let sorted = sort_intersection xs
+        sorted |> List.tryFind (fun (i) -> i.t >= 0.0 && (allow i))
+
+    let hit_d (xs:intersection list) =
+        hit xs (fun _ -> true)
 
     let materialOrDefault shape = 
         match shape.material with
