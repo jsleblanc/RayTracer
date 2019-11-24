@@ -115,7 +115,7 @@ module WorldTests =
         let r = {
             origin = point 0.0 0.0 -5.0;
             direction = vector 0.0 0.0 1.0;
-        }
+        } 
         let c = color_at w r 5
         Assert.Equal(color 0.38066119308103435 0.47582649135129296 0.28549589481077575, c)
 
@@ -145,6 +145,14 @@ module WorldTests =
         let p = point 10.0 -10.0 10.0
         let result = is_shadowed w p
         Assert.True(result)
+
+    [<Fact>]
+    let ``No shadow when an object is between the point and the light but the shape disabled shadows``() =
+        let (s1,s2,w) = default_world
+        let w = Worlds.build [s1 |> Shapes.no_shadow; s2 |> Shapes.no_shadow; ] w.light
+        let p = point 10.0 -10.0 10.0
+        let result = is_shadowed w p
+        Assert.False(result)
         
     [<Fact>]
     let ``There is no shadow when an object is behind the light``() =
