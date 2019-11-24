@@ -32,5 +32,8 @@ module Material =
     let glass = 
         { material.Default with transparency = 1.0; refractive_index = 1.5; }
 
+    let metal = 
+        { material.Default with ambient = 0.1; diffuse = 0.7; specular = 0.8; reflective = 0.8; }
+
     let colored color =
         { material.Default with color = color }
