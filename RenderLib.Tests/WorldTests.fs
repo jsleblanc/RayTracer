@@ -149,7 +149,7 @@ module WorldTests =
     [<Fact>]
     let ``No shadow when an object is between the point and the light but the shape disabled shadows``() =
         let (s1,s2,w) = default_world
-        let w = Worlds.build [s1 |> Shapes.no_shadow; s2 |> Shapes.no_shadow; ] w.light
+        let w = Worlds.build [s1 |> Shapes.shadow false; s2 |> Shapes.shadow false; ] w.light
         let p = point 10.0 -10.0 10.0
         let result = is_shadowed w p
         Assert.False(result)

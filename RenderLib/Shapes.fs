@@ -102,8 +102,8 @@ module Shapes =
             | None -> { material.Default with pattern = Some pattern; }
         { shape with id = Guid.NewGuid(); material = Some m; }
 
-    let no_shadow shape =
-        { shape with id = Guid.NewGuid(); shadow = false; }
+    let shadow shadow shape =
+        { shape with id = Guid.NewGuid(); shadow = shadow; }
 
     let build_intersection t shape trail =
         { t = t; obj = shape; trail = trail; u = 0.0; v = 0.0; }

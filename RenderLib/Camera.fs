@@ -10,7 +10,7 @@ open FSharp.Collections.ParallelSeq
 
 module Camera = 
 
-    type camera = {
+    type camera_t = {
         hsize: int;
         vsize: int;
         field_of_view: float;
