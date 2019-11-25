@@ -6,6 +6,15 @@ open Tuple
 
 module Translations =
 
+    type translation_t =
+    | Translation of x:float * y:float * z:float
+    | Scaling of x:float * y:float * z:float
+    | Rotation_X of radians:float
+    | Rotation_Y of radians:float
+    | Rotation_Z of radians:float
+    | Shearing of xy:float * xz:float * yx:float * yz:float * zx:float * zy:float
+    | View of from_point:tuple * to_point:tuple * up_direction:tuple
+
     let translation x y z =
         let i = identity_matrix ()
         i.[0,3] <- x

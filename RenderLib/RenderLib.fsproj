@@ -31,10 +31,12 @@
     <Compile Include="Lights.fs" />
     <Compile Include="Worlds.fs" />
     <Compile Include="Camera.fs" />
+    <Compile Include="Scenes.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FSharp.Collections.ParallelSeq" Version="1.1.2" />
+    <PackageReference Include="YamlDotNet" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
