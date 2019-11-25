@@ -367,3 +367,68 @@ module SceneTests =
         }
         let scene = Scenes.parse_text yaml
         Assert.True(List.contains group scene.shapes)
+
+    [<Fact>]
+    let ``Group transformation should augment nested childrens transformations``() =
+        let yaml = 
+            "
+            - define: dragon
+              value:
+                add: obj
+                file: dragon.obj
+                transform:
+                  - [ translate, 0, 0.1217, 0]
+                  - [ scale, 0.268, 0.268, 0.268 ]
+
+            - define: pedestal
+              value:
+                add: cylinder
+                min: -0.15
+                max: 0
+                closed: true
+                material:
+                  color: [ 0.2, 0.2, 0.2 ]
+                  ambient: 0
+                  diffuse: 0.8
+                  specular: 0
+                  reflective: 0.2
+
+            - add: group
+              transform:
+                - [ translate, 0, 0.5, -4 ]
+              children:
+                - add: pedestal
+                - add: dragon
+                  material:
+                    color: [ 1, 1, 1 ]
+                    ambient: 0.1
+                    diffuse: 0.6
+                    specular: 0.3
+                    shininess: 15
+                  transform:
+                    - [ rotate-y, 3.1415 ]
+            "
+        let dragon = {
+            shape = ObjectFile("dragon.obj");
+            material = Some { Material.material.Default with color = color 1.0 1.0 1.0; ambient = 0.1; diffuse = 0.6; specular = 0.3; shininess = 15.0; }
+            shadow = true;
+            transformations = [
+                Translation(0.0,0.1217,0.0);
+                Scaling(0.268,0.268,0.268);
+                Rotation_Y(3.1415);
+            ];
+        }
+        let pedestal = {
+            shape = Cylinder(-0.15,0.0,true);
+            shadow = true;
+            material = Some { Material.material.Default with color = color 0.2 0.2 0.2; ambient = 0.0; diffuse = 0.8; specular = 0.0; reflective = 0.2; };
+            transformations = [];
+        }
+        let expected = {
+            shape = Group([pedestal;dragon;]);
+            shadow = true;
+            material = None;
+            transformations = [Translation(0.0, 0.5,-4.0);];
+        }
+        let scene = Scenes.parse_text yaml
+        Assert.True(List.contains expected scene.shapes)
