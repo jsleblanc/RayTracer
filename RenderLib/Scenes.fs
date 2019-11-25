@@ -16,13 +16,23 @@ open Worlds
 module Scenes = 
 
     type shape_definition_t = {
-        //shape:shape_t;
+        shape:shape_template_t;
         material:material option;
-        shadow:bool;
-        shapeObj:string;
+        shadow:bool;        
         transformations:translation_t list;
     }
-
+    and shape_template_t =
+    | Plane
+    | Sphere
+    | Cube
+    | Cylinder of Minimum:float * Maximum:float * Closed:bool
+    | Cone of Minimum:float * Maximum:float * Closed:bool
+    | Group of Children:shape_definition_t list
+    | ObjectFile of shapeObj:string
+    //| Union of shape_definition_t * shape_definition_t
+    //| Intersect of shape_definition_t * shape_definition_t
+    //| Difference of shape_definition_t * shape_definition_t
+    
     type scene_t = {
         camera:camera_t;
         lights:point_light list;
@@ -41,9 +51,9 @@ module Scenes =
             shapes = [];
             shape_templates = Map.empty;
         }
-        (*
+        
     let parse_file file =
-        null
-        *)
+        File.ReadAllText(file) |> parse_text
+        
     let scene_to_world scene =
         Worlds.build_default []
