@@ -12,6 +12,8 @@ open Material
 open Lights
 open Camera
 open Worlds
+open YamlDotNet.Core;
+open YamlDotNet.Serialization;
 
 module Scenes = 
 
@@ -42,7 +44,13 @@ module Scenes =
         shape_templates:Map<string,shape_definition_t>;
     }
 
-    let parse_text text =
+    let private yaml_deserializer = 
+        let d = new YamlDotNet.Serialization.DeserializerBuilder()
+        d.Build()
+
+    let parse_text (text:string) =
+        let deserializer = yaml_deserializer
+        let x = deserializer.Deserialize(text)
         {
             camera = create_default_camera 100 100;
             lights = [];
