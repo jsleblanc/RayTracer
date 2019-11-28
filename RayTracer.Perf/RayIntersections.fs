@@ -101,9 +101,9 @@ module RayIntersections =
             world_without_group <- default_world_without_group
 
         [<Benchmark(Baseline = true)>]
-        member self.IntersectWorldWithRayMissesAllShapesWithoutGroup () =
+        member self.IntersectWorldWithoutGroup () =
             render camera world_without_group
 
         [<Benchmark>]
-        member self.IntersectWorldWithRayMissesAllShapesWithGroup () =
+        member self.IntersectWorldWithGroup () =
             render camera world_with_group
