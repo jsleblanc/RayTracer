@@ -20,5 +20,5 @@ let main argv =
     BenchmarkRunner.Run<RayIntersectionPatternsBenchmarks>() |> ignore
     BenchmarkRunner.Run<RayIntersectionBoundingBoxBenchmarks>() |> ignore
     *)
-    let summary = defaultSwitch().Run argv
+    let summary = defaultSwitch().RunAllJoined()
     0 // return an integer exit code
