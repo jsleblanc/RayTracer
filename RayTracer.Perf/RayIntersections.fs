@@ -74,44 +74,18 @@ module RayIntersections =
             color_at world (ray_for_pixel camera 130 330) 5 |> ignore
 
     type RayIntersectionBoundingBoxBenchmarks () =
-        let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
-        let spheres = [
-            ShapeSphere.build |> Shapes.transform (translation -3.0 -3.0 3.0);
-            ShapeSphere.build |> Shapes.transform (translation -3.0 -3.0 6.0);
-            ShapeSphere.build |> Shapes.transform (translation -3.0 -3.0 9.0);
-
-            ShapeSphere.build |> Shapes.transform (translation -3.0 0.0 3.0);
-            ShapeSphere.build |> Shapes.transform (translation -3.0 0.0 6.0);
-            ShapeSphere.build |> Shapes.transform (translation -3.0 0.0 9.0);
-
-            ShapeSphere.build |> Shapes.transform (translation -3.0 3.0 3.0);
-            ShapeSphere.build |> Shapes.transform (translation -3.0 3.0 6.0);
-            ShapeSphere.build |> Shapes.transform (translation -3.0 3.0 9.0);
-
-            ShapeSphere.build |> Shapes.transform (translation 0.0 -3.0 3.0);
-            ShapeSphere.build |> Shapes.transform (translation 0.0 -3.0 6.0);
-            ShapeSphere.build |> Shapes.transform (translation 0.0 -3.0 9.0);
-
-            ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 3.0);
-            ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 6.0);
-            ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 9.0);
-
-            ShapeSphere.build |> Shapes.transform (translation 0.0 3.0 3.0);
-            ShapeSphere.build |> Shapes.transform (translation 0.0 3.0 6.0);
-            ShapeSphere.build |> Shapes.transform (translation 0.0 3.0 9.0);
-
-            ShapeSphere.build |> Shapes.transform (translation 3.0 -3.0 3.0);
-            ShapeSphere.build |> Shapes.transform (translation 3.0 -3.0 6.0);
-            ShapeSphere.build |> Shapes.transform (translation 3.0 -3.0 9.0);
-
-            ShapeSphere.build |> Shapes.transform (translation 3.0 0.0 3.0);
-            ShapeSphere.build |> Shapes.transform (translation 3.0 0.0 6.0);
-            ShapeSphere.build |> Shapes.transform (translation 3.0 0.0 9.0);
-
-            ShapeSphere.build |> Shapes.transform (translation 3.0 3.0 3.0);
-            ShapeSphere.build |> Shapes.transform (translation 3.0 3.0 6.0);
-            ShapeSphere.build |> Shapes.transform (translation 3.0 3.0 9.0);
-        ]
+        let spheres = 
+            let c = 3
+            seq {
+                for x in -c .. c do
+                    for y in -c .. c do
+                        for z in -c .. c do
+                            yield ShapeSphere.build |> Shapes.transform ((translation (float x) (float y) (float z)) * (scaling 0.5 0.5 0.5))
+            } 
+            |> Seq.toList
+        let light = { position = point 0.0 0.0 -10.0; intensity = color 0.7 0.7 0.7; }
+        let vt = view_transform (point 0.0 -2.0 -10.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
+        let camera = { create_default_camera 640 480 with field_of_view = Math.PI; transform = vt; }
         let default_world_group =             
             let g = ShapeGroup.build spheres
             Worlds.build [g;] light
@@ -128,16 +102,8 @@ module RayIntersections =
 
         [<Benchmark(Baseline = true)>]
         member self.IntersectWorldWithRayMissesAllShapesWithoutGroup () =
-            let ray = {
-                origin = point 5.0 5.0 10.0;
-                direction = vector 0.0 1.0 0.0;
-            }
-            color_at world_without_group ray 5
+            render camera world_without_group
 
         [<Benchmark>]
         member self.IntersectWorldWithRayMissesAllShapesWithGroup () =
-            let ray = {
-                origin = point 5.0 5.0 10.0;
-                direction = vector 0.0 1.0 0.0;
-            }
-            color_at world_with_group ray 5
+            render camera world_with_group
