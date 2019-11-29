@@ -13,7 +13,9 @@ open Lights
 open Camera
 open Worlds
 open Legivel.Parser
+open Legivel.RepresentationGraph
 open Legivel.TagResolution
+open System.Text
 
 module Scenes = 
 
@@ -79,10 +81,21 @@ module Scenes =
     let parse_yaml s =
         let parser = Yaml12Parser(YamlExtended.Schema)
         let repr = (parser.``l-yaml-stream`` s)
-        repr.Head
+        match repr.Head with
+        | CompleteRepresentaton cr -> cr.Document
+        | NoRepresentation nr -> failwith "error!"
+        | _ -> failwith "Unexpected return type"
+
+    let parse_node n =
+        match n with
+        | ScalarNode sn -> sn.Data
+        | SeqNode sn -> sn.Data.ToString()
+        | MapNode mn -> mn.Data.ToString()
 
     let parse_text (text:string) =
         let x = parse_yaml text
+        let z = parse_node x
+
         {
             camera = create_default_camera 100 100;
             lights = [];
