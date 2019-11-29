@@ -12,8 +12,8 @@ open Material
 open Lights
 open Camera
 open Worlds
-open YamlDotNet.Core;
-open YamlDotNet.Serialization;
+open Legivel.Parser
+open Legivel.TagResolution
 
 module Scenes = 
 
@@ -44,13 +44,45 @@ module Scenes =
         shape_templates:Map<string,shape_definition_t>;
     }
 
-    let private yaml_deserializer = 
-        let d = new YamlDotNet.Serialization.DeserializerBuilder()
-        d.Build()
+
+
+
+    let parse_transform (items:string list) =
+        match items with
+        | ["translate"; x; y; z;] -> Some (Translation(float x,float y,float z))
+        | ["scale"; x; y; z;] -> Some (Scaling(float x,float y,float z))
+        | ["rotate-x"; r;] -> Some (Rotation_X(float r))
+        | ["rotate-y"; r;] -> Some (Rotation_Y(float r))
+        | ["rotate-z"; r;] -> Some (Rotation_Z(float r))
+        | _ -> None
+        
+        
+    let parse_material_attribute (key:string,value:string list) material =
+        match (key,value) with
+        | ("color", [r;g;b;]) -> { material with color = Color.color (float r) (float g) (float b); }
+        | ("ambient", [v;]) -> { material with ambient = float v; }
+        | ("diffuse", [v;]) -> { material with diffuse = float v; }
+        | ("specular", [v;]) -> { material with specular = float v; }
+        | ("reflective", [v;]) -> { material with reflective = float v; }
+        | ("refractive-index", [v;]) -> { material with refractive_index = float v; }
+        | ("shininess", [v;]) -> { material with shininess = float v; }
+        | ("transparency", [v;]) -> { material with transparency = float v; }
+        | _ -> material
+
+        (*
+    let parse_color (items:string list) =
+        match items with
+        | r; g; b;] -> Some (Color (float r) (float g) (float z)
+        *)
+
+
+    let parse_yaml s =
+        let parser = Yaml12Parser(YamlExtended.Schema)
+        let repr = (parser.``l-yaml-stream`` s)
+        repr.Head
 
     let parse_text (text:string) =
-        let deserializer = yaml_deserializer
-        let x = deserializer.Deserialize(text)
+        let x = parse_yaml text
         {
             camera = create_default_camera 100 100;
             lights = [];

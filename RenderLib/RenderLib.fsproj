@@ -36,7 +36,7 @@
 
   <ItemGroup>
     <PackageReference Include="FSharp.Collections.ParallelSeq" Version="1.1.2" />
-    <PackageReference Include="YamlDotNet" Version="8.0.0" />
+    <PackageReference Include="Legivel" Version="0.4.1" />
   </ItemGroup>
 
   <ItemGroup>
