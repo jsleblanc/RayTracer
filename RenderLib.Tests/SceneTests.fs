@@ -33,8 +33,14 @@ module SceneTests =
               to: [ 6, 0, 6 ]
               up: [ -0.45, 1, 0 ]
             "
-        let vt = Translations.view_transform (point -6.0 6.0 -10.0) (point 6.0 0.0 6.0) (vector -0.45 1.0 0.0)
-        let expected = { (Camera.create_camera 100 100 0.785) with transform = vt; }
+        let expected = {
+            width = 100;
+            height = 100;
+            field_of_view = 0.785;
+            from_point = point -6.0 6.0 -10.0;
+            to_point = point 6.0 0.0 6.0;
+            up = vector -0.45 1.0 0.0;
+        }
         let scene = Scenes.parse_text yaml
         Assert.Equal(expected, scene.camera)
 

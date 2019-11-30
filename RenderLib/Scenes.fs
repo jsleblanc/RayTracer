@@ -37,8 +37,17 @@ module Scenes =
     //| Intersect of shape_definition_t * shape_definition_t
     //| Difference of shape_definition_t * shape_definition_t
     
+    type camera_definition_t = {
+        width:int;
+        height:int;
+        field_of_view:float;
+        from_point:tuple;
+        to_point:tuple;
+        up:tuple;
+    }
+
     type scene_t = {
-        camera:camera_t;
+        camera:camera_definition_t;
         lights:point_light list;
         materials:Map<string,material>;
         transformations:Map<string,translation_t list>;
@@ -86,6 +95,43 @@ module Scenes =
         | NoRepresentation nr -> failwith "error!"
         | _ -> failwith "Unexpected return type"
 
+    let list_to_coords l =
+        match l with
+        | [x;y;z;] -> (x,y,z)
+        | _ -> failwith "expected list of only 3 values"
+
+    let handle_seq_numbers nodes = 
+        let func node =
+            match node with
+            | ScalarNode n -> float n.Data
+            | _ -> failwith "expected a ScalarNode containing a float"
+        nodes |> List.map func
+
+    let handle_camera state cmd arg = 
+        match (cmd,arg) with
+        | (ScalarNode c,ScalarNode a) when c.Data = "width" -> 
+            { state with camera = { state.camera with width = int a.Data } }
+        | (ScalarNode c,ScalarNode a) when c.Data = "height" -> 
+            { state with camera = { state.camera with height = int a.Data } }
+        | (ScalarNode c,ScalarNode a) when c.Data = "field-of-view" -> 
+            { state with camera = { state.camera with field_of_view = float a.Data } }
+        | (ScalarNode c,SeqNode s) when c.Data = "from" -> 
+            let (x,y,z) = s.Data |> handle_seq_numbers |> list_to_coords
+            { state with camera = { state.camera with from_point = point x y z; }}
+        | (ScalarNode c,SeqNode s) when c.Data = "to" -> 
+            let (x,y,z) = s.Data |> handle_seq_numbers |> list_to_coords
+            { state with camera = { state.camera with to_point = point x y z; }}
+        | (ScalarNode c,SeqNode s) when c.Data = "up" -> 
+            let (x,y,z) = s.Data |> handle_seq_numbers |> list_to_coords
+            { state with camera = { state.camera with up = vector x y z; }}
+        | _ -> failwith "unexpected camera attribute"
+
+    let handle_command cmd arg nodes state = 
+        match (cmd,arg) with
+        | (ScalarNode c,ScalarNode a) when c.Data = "add" && a.Data = "camera" -> 
+            nodes |> List.fold (fun s (l,r) -> handle_camera s l r) state
+        | _ -> state
+
     let rec parse_node n (state:scene_t) =
         match n with
         | ScalarNode sn -> 
@@ -93,19 +139,30 @@ module Scenes =
         | SeqNode sn -> 
             sn.Data |> List.fold (fun s np -> parse_node np s) state
         | MapNode mn -> 
-            let func l r s = 
+            (*let func l r s = 
                 match (l,r) with
                 | (ScalarNode c, ScalarNode n) ->                     
                     printfn "%s %s" (c.Data) (n.Data)
                     s
-                | _ -> s
-            mn.Data |> List.fold (fun s (l,r) -> func l r s) state
+                | _ -> s*)
+            match mn.Data with
+            | (left,right) :: nodes -> handle_command left right nodes state                
+            | _ -> failwith "unexpected"
+            //mn.Data |> List.fold (fun s (l,r) -> func l r s) state
             
         
 
     let parse_text (text:string) =
+        let camera = {
+            width = 0;
+            height = 0;
+            field_of_view = 0.0;
+            from_point = point 0.0 0.0 0.0;
+            to_point = point 0.0 0.0 0.0;
+            up = vector 0.0 1.0 0.0;
+        }
         let empty = {
-            camera = create_default_camera 100 100;
+            camera = camera;
             lights = [];
             materials = Map.empty;
             transformations = Map.empty;
