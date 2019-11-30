@@ -86,17 +86,25 @@ module Scenes =
         | NoRepresentation nr -> failwith "error!"
         | _ -> failwith "Unexpected return type"
 
-    let parse_node n =
+    let rec parse_node n (state:scene_t) =
         match n with
-        | ScalarNode sn -> sn.Data
-        | SeqNode sn -> sn.Data.ToString()
-        | MapNode mn -> mn.Data.ToString()
+        | ScalarNode sn -> 
+            state
+        | SeqNode sn -> 
+            sn.Data |> List.fold (fun s np -> parse_node np s) state
+        | MapNode mn -> 
+            let func l r s = 
+                match (l,r) with
+                | (ScalarNode c, ScalarNode n) ->                     
+                    printfn "%s %s" (c.Data) (n.Data)
+                    s
+                | _ -> s
+            mn.Data |> List.fold (fun s (l,r) -> func l r s) state
+            
+        
 
     let parse_text (text:string) =
-        let x = parse_yaml text
-        let z = parse_node x
-
-        {
+        let empty = {
             camera = create_default_camera 100 100;
             lights = [];
             materials = Map.empty;
@@ -104,6 +112,9 @@ module Scenes =
             shapes = [];
             shape_templates = Map.empty;
         }
+        let x = parse_yaml text
+        parse_node x empty
+
         
     let parse_file file =
         File.ReadAllText(file) |> parse_text
