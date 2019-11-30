@@ -107,30 +107,33 @@ module Scenes =
             | _ -> failwith "expected a ScalarNode containing a float"
         nodes |> List.map func
 
-    let handle_camera state cmd arg = 
+    let handle_nodes_to_numbers nodes = 
+        nodes |> handle_seq_numbers |> list_to_coords
+
+    let handle_camera camera cmd arg = 
         match (cmd,arg) with
-        | (ScalarNode c,ScalarNode a) when c.Data = "width" -> { state with width = int a.Data }
-        | (ScalarNode c,ScalarNode a) when c.Data = "height" -> { state with height = int a.Data } 
-        | (ScalarNode c,ScalarNode a) when c.Data = "field-of-view" -> { state with field_of_view = float a.Data } 
+        | (ScalarNode c,ScalarNode a) when c.Data = "width" -> { camera with width = int a.Data }
+        | (ScalarNode c,ScalarNode a) when c.Data = "height" -> { camera with height = int a.Data } 
+        | (ScalarNode c,ScalarNode a) when c.Data = "field-of-view" -> { camera with field_of_view = float a.Data } 
         | (ScalarNode c,SeqNode s) when c.Data = "from" -> 
-            let (x,y,z) = s.Data |> handle_seq_numbers |> list_to_coords
-            { state with from_point = point x y z; }
+            let (x,y,z) = handle_nodes_to_numbers s.Data
+            { camera with from_point = point x y z; }
         | (ScalarNode c,SeqNode s) when c.Data = "to" -> 
-            let (x,y,z) = s.Data |> handle_seq_numbers |> list_to_coords
-            { state with to_point = point x y z; }
+            let (x,y,z) = handle_nodes_to_numbers s.Data
+            { camera with to_point = point x y z; }
         | (ScalarNode c,SeqNode s) when c.Data = "up" -> 
-            let (x,y,z) = s.Data |> handle_seq_numbers |> list_to_coords
-            { state with up = vector x y z; }
+            let (x,y,z) = handle_nodes_to_numbers s.Data
+            { camera with up = vector x y z; }
         | _ -> failwith "unexpected camera attribute"
 
-    let handle_light state cmd arg = 
+    let handle_light light cmd arg = 
         match (cmd,arg) with
         | (ScalarNode c,SeqNode s) when c.Data = "at" -> 
-            let (x,y,z) = s.Data |> handle_seq_numbers |> list_to_coords
-            { state with position = point x y z; }
+            let (x,y,z) = handle_nodes_to_numbers s.Data
+            { light with position = point x y z; }
         | (ScalarNode c,SeqNode s) when c.Data = "intensity" -> 
-            let (r,g,b) = s.Data |> handle_seq_numbers |> list_to_coords
-            { state with intensity = Color.color r g b; }
+            let (r,g,b) = handle_nodes_to_numbers s.Data
+            { light with intensity = Color.color r g b; }
         | _ -> failwith "unexpected light attribute"
 
     let handle_command cmd arg nodes state = 
