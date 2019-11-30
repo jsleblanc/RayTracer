@@ -109,27 +109,50 @@ module Scenes =
 
     let handle_camera state cmd arg = 
         match (cmd,arg) with
-        | (ScalarNode c,ScalarNode a) when c.Data = "width" -> 
-            { state with camera = { state.camera with width = int a.Data } }
-        | (ScalarNode c,ScalarNode a) when c.Data = "height" -> 
-            { state with camera = { state.camera with height = int a.Data } }
-        | (ScalarNode c,ScalarNode a) when c.Data = "field-of-view" -> 
-            { state with camera = { state.camera with field_of_view = float a.Data } }
+        | (ScalarNode c,ScalarNode a) when c.Data = "width" -> { state with width = int a.Data }
+        | (ScalarNode c,ScalarNode a) when c.Data = "height" -> { state with height = int a.Data } 
+        | (ScalarNode c,ScalarNode a) when c.Data = "field-of-view" -> { state with field_of_view = float a.Data } 
         | (ScalarNode c,SeqNode s) when c.Data = "from" -> 
             let (x,y,z) = s.Data |> handle_seq_numbers |> list_to_coords
-            { state with camera = { state.camera with from_point = point x y z; }}
+            { state with from_point = point x y z; }
         | (ScalarNode c,SeqNode s) when c.Data = "to" -> 
             let (x,y,z) = s.Data |> handle_seq_numbers |> list_to_coords
-            { state with camera = { state.camera with to_point = point x y z; }}
+            { state with to_point = point x y z; }
         | (ScalarNode c,SeqNode s) when c.Data = "up" -> 
             let (x,y,z) = s.Data |> handle_seq_numbers |> list_to_coords
-            { state with camera = { state.camera with up = vector x y z; }}
+            { state with up = vector x y z; }
         | _ -> failwith "unexpected camera attribute"
+
+    let handle_light state cmd arg = 
+        match (cmd,arg) with
+        | (ScalarNode c,SeqNode s) when c.Data = "at" -> 
+            let (x,y,z) = s.Data |> handle_seq_numbers |> list_to_coords
+            { state with position = point x y z; }
+        | (ScalarNode c,SeqNode s) when c.Data = "intensity" -> 
+            let (r,g,b) = s.Data |> handle_seq_numbers |> list_to_coords
+            { state with intensity = Color.color r g b; }
+        | _ -> failwith "unexpected light attribute"
 
     let handle_command cmd arg nodes state = 
         match (cmd,arg) with
         | (ScalarNode c,ScalarNode a) when c.Data = "add" && a.Data = "camera" -> 
-            nodes |> List.fold (fun s (l,r) -> handle_camera s l r) state
+            let empty = {
+                width = 0;
+                height = 0;
+                field_of_view = 0.0;
+                from_point = point 0.0 0.0 0.0;
+                to_point = point 0.0 0.0 0.0;
+                up = vector 0.0 0.0 0.0;
+            }
+            let camera = nodes |> List.fold (fun s (l,r) -> handle_camera s l r) empty
+            { state with camera = camera; }
+        | (ScalarNode c,ScalarNode a) when c.Data = "add" && a.Data = "light" -> 
+            let empty = {
+                position = point 0.0 0.0 0.0;
+                intensity = Color.color 0.0 0.0 0.0;
+            }
+            let light = nodes |> List.fold (fun s (l,r) -> handle_light s l r) empty        
+            { state with lights = state.lights @ [light;] }
         | _ -> state
 
     let rec parse_node n (state:scene_t) =
