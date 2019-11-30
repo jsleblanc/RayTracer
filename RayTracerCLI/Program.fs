@@ -89,12 +89,13 @@ let main argv =
     canvas_to_jpg "output.jpg" canvas    
     printfn "Calculations completed in %s" (sw.Elapsed.ToString())
     *)
-    
+    (*
     let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
     //let vt = view_transform (point 0.0 2.5 0.0) (point 0.0 0.0 0.0) (vector 1.0 0.0 0.0)
     let vt = view_transform (point 2.0 2.0 -3.0) (point 0.0 0.0 0.0) (vector 0.0 1.0 0.0)
     let camera = { create_default_camera 1024 768 with field_of_view = Math.PI / 2.0; transform = vt; }
     let pt = Patterns.solid_color blue //|> Patterns.transform (translation 0.0 0.1 0.0)
+    *)
     (*
     let teapot = 
         ObjectFiles.parse_file @"C:\Users\josep\Source\Repos\RayTracer\RayTracerCLI\Scenes\teapot.obj"
@@ -105,7 +106,7 @@ let main argv =
         |> Shapes.transform (scaling 0.75 0.75 0.75)
     printfn "Loading OBJ files took %s" (sw.Elapsed.ToString())
     *)
-
+    (*
     let shapes = [    
         FunShapes.csb_cube { glass with diffuse = 0.1; shininess = 300.0; reflective = 1.0; }
         ShapePlane.build |> Shapes.transform (translation 0.0 -10.1 0.0) |> Shapes.texture { Material.material.Default with pattern = Some pt; }
@@ -128,7 +129,7 @@ let main argv =
     let canvas = render camera world
     //let color = color_at world { origin = point 0.0 0.0 0.0; direction = vector  } 5
     canvas_to_jpg "output.jpg" canvas
-    
+    *)
     (*
     //sphere inside a sphere 
     let pt = Patterns.checkers (solid_c blue) (solid_c white) |> Patterns.transform (translation 0.0 0.1 0.0)
@@ -156,57 +157,30 @@ let main argv =
         r <- float x * radians
     *)
     (*
-    let spheres = [
-        ShapeSphere.build |> Shapes.transform (translation -3.0 -3.0 3.0);
-        ShapeSphere.build |> Shapes.transform (translation -3.0 -3.0 6.0);
-        ShapeSphere.build |> Shapes.transform (translation -3.0 -3.0 9.0);
+    let spheres = 
+        let c = 3
+        seq {
+            for x in -c .. c do
+                for y in -c .. c do
+                    for z in -c .. c do
+                        yield ShapeSphere.build |> Shapes.transform ((translation (float x) (float y) (float z)) * (scaling 0.5 0.5 0.5))
+        } 
+        |> Seq.toList
 
-        ShapeSphere.build |> Shapes.transform (translation -3.0 0.0 3.0);
-        ShapeSphere.build |> Shapes.transform (translation -3.0 0.0 6.0);
-        ShapeSphere.build |> Shapes.transform (translation -3.0 0.0 9.0);
-
-        ShapeSphere.build |> Shapes.transform (translation -3.0 3.0 3.0);
-        ShapeSphere.build |> Shapes.transform (translation -3.0 3.0 6.0);
-        ShapeSphere.build |> Shapes.transform (translation -3.0 3.0 9.0);
-
-        ShapeSphere.build |> Shapes.transform (translation 0.0 -3.0 3.0);
-        ShapeSphere.build |> Shapes.transform (translation 0.0 -3.0 6.0);
-        ShapeSphere.build |> Shapes.transform (translation 0.0 -3.0 9.0);
-
-        ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 3.0);
-        ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 6.0);
-        ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 9.0);
-
-        ShapeSphere.build |> Shapes.transform (translation 0.0 3.0 3.0);
-        ShapeSphere.build |> Shapes.transform (translation 0.0 3.0 6.0);
-        ShapeSphere.build |> Shapes.transform (translation 0.0 3.0 9.0);
-
-        ShapeSphere.build |> Shapes.transform (translation 3.0 -3.0 3.0);
-        ShapeSphere.build |> Shapes.transform (translation 3.0 -3.0 6.0);
-        ShapeSphere.build |> Shapes.transform (translation 3.0 -3.0 9.0);
-
-        ShapeSphere.build |> Shapes.transform (translation 3.0 0.0 3.0);
-        ShapeSphere.build |> Shapes.transform (translation 3.0 0.0 6.0);
-        ShapeSphere.build |> Shapes.transform (translation 3.0 0.0 9.0);
-
-        ShapeSphere.build |> Shapes.transform (translation 3.0 3.0 3.0);
-        ShapeSphere.build |> Shapes.transform (translation 3.0 3.0 6.0);
-        ShapeSphere.build |> Shapes.transform (translation 3.0 3.0 9.0);
-    ]
-    let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
-    let vt = view_transform (point 0.0 1.5 -3.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
-    let camera = { create_default_camera 1027 768 with field_of_view = Math.PI; transform = vt; }
+    let light = { position = point 0.0 0.0 -10.0; intensity = color 0.7 0.7 0.7; }
+    let vt = view_transform (point 0.0 -2.0 -10.0) (point 0.0 1.0 0.0) (vector 0.0 1.0 0.0)
+    let camera = { create_default_camera 640 480 with field_of_view = Math.PI; transform = vt; }
     let g = ShapeGroup.build spheres
     let world = Worlds.build spheres light
-    //let canvas = render camera world
-    //canvas_to_jpg "output.jpg" canvas
-
-    let ray = {
-        origin = point 5.0 5.0 10.0;
-        direction = vector 0.0 1.0 0.0;
-    }
-    let x = color_at world ray 5
+    let canvas = render camera world
+    canvas_to_jpg "output.jpg" canvas
     *)
+
+    let file = @"C:\Users\josep\Source\Repos\RayTracer\RayTracerCLI\Scenes\table.yml"
+    let scene = Scenes.parse_file file
+    let (camera,world) = Scenes.scene_to_world scene
+    let canvas = render camera world
+    canvas_to_jpg "output.jpg" canvas
 
     printfn "Calculations completed in %s" (sw.Elapsed.ToString())
     0 // return an integer exit code

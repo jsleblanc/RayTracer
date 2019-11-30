@@ -97,3 +97,15 @@ module Translations =
         orientation.[3,3] <- 1.0;
         orientation * translation -from_point.x -from_point.y -from_point.z
        
+    let combine transformations =
+        let func t m =
+            let tf = 
+                match t with
+                | Translation(x,y,z) -> translation x y z
+                | Scaling(x,y,z) -> scaling x y z
+                | Rotation_X(r) -> rotation_x r
+                | Rotation_Y(r) -> rotation_y r
+                | Rotation_Z(r) -> rotation_z r
+                | Shearing(xy,xz,yx,yz,zx,zy) -> shearing xy xz yx yz zx zy
+            m * tf
+        List.foldBack func transformations (identity_matrix())

@@ -126,6 +126,16 @@ module Scenes =
             { camera with up = vector x y z; }
         | _ -> failwith "unexpected camera attribute"
 
+    let handle_transform cmd =
+        match cmd with
+        | [ScalarNode c;ScalarNode v;] when c.Data = "rotate-x" -> Rotation_X(float v.Data)
+        | [ScalarNode c;ScalarNode v;] when c.Data = "rotate-y" -> Rotation_Y(float v.Data)
+        | [ScalarNode c;ScalarNode v;] when c.Data = "rotate-z" -> Rotation_Z(float v.Data)
+        | [ScalarNode c;ScalarNode x;ScalarNode y;ScalarNode z;] when c.Data = "scale" -> Scaling(float x.Data,float y.Data,float z.Data)
+        | [ScalarNode c;ScalarNode x;ScalarNode y;ScalarNode z;] when c.Data = "translate" -> Translation(float x.Data,float y.Data,float z.Data)
+        | _ -> failwith "unexpected transformation"
+
+
     let handle_light light cmd arg = 
         match (cmd,arg) with
         | (ScalarNode c,SeqNode s) when c.Data = "at" -> 
@@ -134,7 +144,23 @@ module Scenes =
         | (ScalarNode c,SeqNode s) when c.Data = "intensity" -> 
             let (r,g,b) = handle_nodes_to_numbers s.Data
             { light with intensity = Color.color r g b; }
-        | _ -> failwith "unexpected light attribute"
+        | _ -> failwith "unexpected light attribute"    
+
+    let handle_shape (shape:shape_definition_t) nodes state =
+        let func (s:shape_definition_t) (cmd,arg) =
+            match (cmd,arg) with
+            | (ScalarNode c,SeqNode a) when c.Data = "transform" ->
+                let func node = 
+                    match node with
+                    | SeqNode n -> handle_transform n.Data
+                let transformations = a.Data |> List.map func
+                { s with transformations = transformations; }
+            | (ScalarNode c,ScalarNode a) when c.Data = "shadow" ->
+                { s with shadow = Boolean.Parse a.Data; }
+            | (ScalarNode c,MapNode a) when c.Data = "material" ->
+                s
+            | _ -> failwith "unexpected shape property"
+        nodes |> List.fold func shape        
 
     let handle_command cmd arg nodes state = 
         match (cmd,arg) with
@@ -156,6 +182,15 @@ module Scenes =
             }
             let light = nodes |> List.fold (fun s (l,r) -> handle_light s l r) empty        
             { state with lights = state.lights @ [light;] }
+        | (ScalarNode c,ScalarNode a) when c.Data = "add" && a.Data = "cube" -> 
+            let shape = {
+                shape = Cube;
+                material = None;
+                shadow = true;
+                transformations = [];
+            }
+            let shape = nodes |> List.fold (fun s (l,r) -> handle_shape s nodes state) shape
+            { state with shapes = state.shapes @ [shape;] }
         | _ -> state
 
     let rec parse_node n (state:scene_t) =
@@ -176,8 +211,6 @@ module Scenes =
             | _ -> failwith "unexpected"
             //mn.Data |> List.fold (fun s (l,r) -> func l r s) state
             
-        
-
     let parse_text (text:string) =
         let camera = {
             width = 0;
@@ -197,10 +230,21 @@ module Scenes =
         }
         let x = parse_yaml text
         parse_node x empty
-
         
     let parse_file file =
         File.ReadAllText(file) |> parse_text
         
-    let scene_to_world scene =
-        Worlds.build_default []
+    let private shape_definition_to_shape s =
+        let sf = 
+            match s.shape with 
+            | Cube -> ShapeCube.build
+        let transforms = combine s.transformations
+        sf |> Shapes.transform transforms |> Shapes.shadow s.shadow
+
+    let scene_to_world (s:scene_t) =
+        let vt = view_transform s.camera.from_point s.camera.to_point s.camera.up
+        let camera = create_camera s.camera.height s.camera.width s.camera.field_of_view
+        let camera = { camera with transform = vt; }
+        let light = s.lights.[0]
+        let shapes = s.shapes |> List.map shape_definition_to_shape
+        (camera,Worlds.build shapes light)
