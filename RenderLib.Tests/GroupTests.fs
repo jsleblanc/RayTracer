@@ -96,6 +96,14 @@ module GroupTests =
         let g2 = ShapeGroup.build [g1;] |> Shapes.transform (rotation_z (Math.PI/4.0))
         let v = normal_to_world s [g2;g1;] (vector 0.4101209687 0.7832576841 -0.4672346213)
         Assert.Equal(vector -0.428749814 -0.7525625233 -0.4998232143, v)
+
+    let isGroup shape = 
+        match shape.shape with
+        | Group g -> true
+        | _ -> false
+
+    let groupContains shape group =
+        ShapeGroup.get_children group |> List.exists (fun e -> e = shape)
     
     [<Fact>]
     let ``Partitioning a group's children``() =
@@ -104,12 +112,11 @@ module GroupTests =
         let s3 = ShapeSphere.build 
         let g = ShapeGroup.build [s1;s2;s3;]
         let g_d = ShapeGroup.divide g
-        let g_s1 = ShapeGroup.build [s1;]
-        let g_s2 = ShapeGroup.build [s2;]
-        let children = ShapeGroup.get_children g_d
-        Assert.True(List.contains s3 children)
-        Assert.True(List.contains g_s1 children)
-        Assert.True(List.contains g_s2 children)
+        let g_d_children = ShapeGroup.get_children g_d
+        Assert.Equal(2, g_d_children |> List.filter isGroup |> List.length)
+        Assert.True(List.contains s3 g_d_children, "Divided group should contain s3")
+        Assert.True(g_d_children |> List.exists (groupContains s1), "Child group should contain s1")
+        Assert.True(g_d_children |> List.exists (groupContains s2), "Child group should contain s2")
 
     [<Fact>]
     let ``Subdividing a group partitions its children``() =
@@ -118,9 +125,8 @@ module GroupTests =
         let s3 = ShapeSphere.build |> Shapes.transform (scaling 4.0 4.0 4.0)
         let g = ShapeGroup.build [s1;s2;s3;]
         let g_d = ShapeGroup.divide g
-        let g_s1 = ShapeGroup.build [s1;]
-        let g_s2 = ShapeGroup.build [s2;]
-        let children = ShapeGroup.get_children g_d
-        Assert.True(List.contains s3 children)
-        Assert.True(List.contains g_s1 children)
-        Assert.True(List.contains g_s2 children)
+        let g_d_children = ShapeGroup.get_children g_d
+        Assert.True(List.contains s3 g_d_children)
+        Assert.Equal(2, g_d_children |> List.filter isGroup |> List.length)
+        Assert.True(g_d_children |> List.exists (groupContains s1), "Child group should contain s1")
+        Assert.True(g_d_children |> List.exists (groupContains s2), "Child group should contain s2")
