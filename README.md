@@ -9,3 +9,4 @@
 * Support multiple light sources
 * Add Torus primitive shape
 * Try Vector<T> to improve performance
+* Add global parameter to disable processing of materials to make testing scenes faster

@@ -146,6 +146,20 @@ module Scenes =
             { light with intensity = Color.color r g b; }
         | _ -> failwith "unexpected light attribute"    
 
+    let handle_material cmd arg material =
+        match (cmd,arg) with
+        | (ScalarNode c,SeqNode a) when c.Data = "color" -> 
+            let (r,g,b) = handle_nodes_to_numbers a.Data
+            { material with color = Color.color r g b; }
+        | (ScalarNode c,ScalarNode a) when c.Data = "ambient" -> { material with ambient = float a.Data; }
+        | (ScalarNode c,ScalarNode a) when c.Data = "diffuse" -> { material with diffuse = float a.Data; }
+        | (ScalarNode c,ScalarNode a) when c.Data = "specular" -> { material with specular = float a.Data; }
+        | (ScalarNode c,ScalarNode a) when c.Data = "shininess" -> { material with shininess = float a.Data; }
+        | (ScalarNode c,ScalarNode a) when c.Data = "reflective" -> { material with reflective = float a.Data; }
+        | (ScalarNode c,ScalarNode a) when c.Data = "transparency" -> { material with transparency = float a.Data; }
+        | (ScalarNode c,ScalarNode a) when c.Data = "refractive-index" -> { material with refractive_index = float a.Data; }
+        | _ -> material
+
     let handle_shape (shape:shape_definition_t) nodes state =
         let func (s:shape_definition_t) (cmd,arg) =
             match (cmd,arg) with
@@ -158,7 +172,8 @@ module Scenes =
             | (ScalarNode c,ScalarNode a) when c.Data = "shadow" ->
                 { s with shadow = Boolean.Parse a.Data; }
             | (ScalarNode c,MapNode a) when c.Data = "material" ->
-                s
+                let m = a.Data |> List.fold (fun m (cmd,arg) -> handle_material cmd arg m) Material.material.Default
+                { s with material = Some m; }
             | _ -> failwith "unexpected shape property"
         nodes |> List.fold func shape        
 
