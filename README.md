@@ -6,5 +6,6 @@
 * Constructive Solid Geometry (Bounding Volume Hierarchies)
 * Texture Mapping bonus chapter
 * Read scene from YAML file
-* Support multilpe light sources
+* Support multiple light sources
 * Add Torus primitive shape
+* Try Vector<T> to improve performance
