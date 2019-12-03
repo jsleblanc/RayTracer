@@ -72,8 +72,30 @@ module SceneTests =
                 reflective: 0.1
               "
         let expected = { Material.material.Default with color = color 1.0 1.0 1.0; diffuse = 0.7; ambient = 0.1; specular = 0.0; reflective = 0.1; }
-        let scene = Scenes.parse_text yaml        
+        let scene = Scenes.parse_text yaml
         Assert.Equal(expected, scene.materials.["white-material"])
+
+    [<Fact>]
+    let ``Should define material with pattern``() =
+        let yaml = 
+            "
+            - define: wall
+              value:
+                pattern:
+                  type: checkers
+                  colors:
+                    - [ 0.00, 0.00, 0.00 ]
+                    - [ 0.75, 0.75, 0.75 ]
+                  transform:
+                    - [ scale, 0.5, 0.5, 0.5 ]
+                specular: 0
+            "
+        let pt = 
+            Patterns.checkers (Solid(Color.color 0.0 0.0 0.0)) (Solid(Color.color 0.75 0.75 0.75))
+            |> Patterns.transform (scaling 0.5 0.5 0.5)
+        let expected = { Material.material.Default with specular = 0.0; pattern = Some pt; }
+        let scene = Scenes.parse_text yaml
+        Assert.Equal(expected, scene.materials.["wall"])
 
     [<Fact>]
     let ``Should define material that extends existing material``() =
