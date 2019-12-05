@@ -19,6 +19,60 @@ open System.Text
 
 module Scenes = 
 
+(*
+Commands
+
+Add-camera
+    returns a camera_definition_t
+
+Add-light
+    returns a point_light
+
+Add-(shape) - returns a shape_definition_t
+    plane
+    cube
+    cylinder
+    cone
+    sphere
+    group
+    obj
+    <previously defined shape via macro>
+
+define
+    material
+    transforms
+    add
+
+sub-Commands
+    extend - lookup existing value
+        materials
+        transforms
+        shapes
+
+
+
+could create a bunch of functions for handling individual small attributes
+    ie: color, transform, diffuse/ambient/specular/etc 
+
+make some functions for handling sequences of small attributes
+    ie: colors, transforms 
+
+make a shape creation function, constructed as attributes are scanned
+    ie: sphere has no properties so function is simple, cylinder/cone have min/max/closed, so look for those and update the function, return the function to be used later
+
+
+scan all nodes
+    when an "add" is found        
+        run all little functions on all sub-nodes, which will return option types
+        fold attributes to create shape-building function
+        initialize empty state objects (material, shape)
+        apply any Some values to material or shape as appropriate
+        if any sub-attribute is "children" recurse
+
+*)
+
+
+
     type shape_definition_t = {
         shape:shape_template_t;
         material:material option;
