@@ -112,14 +112,7 @@ scan all nodes
 
 
 
-    let parse_transform (items:string list) =
-        match items with
-        | ["translate"; x; y; z;] -> Some (Translation(float x,float y,float z))
-        | ["scale"; x; y; z;] -> Some (Scaling(float x,float y,float z))
-        | ["rotate-x"; r;] -> Some (Rotation_X(float r))
-        | ["rotate-y"; r;] -> Some (Rotation_Y(float r))
-        | ["rotate-z"; r;] -> Some (Rotation_Z(float r))
-        | _ -> None
+
         
         
     let parse_material_attribute (key:string,value:string list) material =
@@ -140,14 +133,196 @@ scan all nodes
         | r; g; b;] -> Some (Color (float r) (float g) (float z)
         *)
 
+    let to_color l = 
+        match l with
+        | [r;g;b;] -> Color.color r g b
+        | _ -> failwith "expected sequence of 3 floats!"
 
-    let parse_yaml s =
-        let parser = Yaml12Parser(YamlExtended.Schema)
-        let repr = (parser.``l-yaml-stream`` s)
-        match repr.Head with
-        | CompleteRepresentaton cr -> cr.Document
-        | NoRepresentation nr -> failwith "error!"
-        | _ -> failwith "Unexpected return type"
+    let to_tuple f pf =
+        match f with
+        | [x;y;z] -> pf x y z
+        | _ -> failwith "expected sequence of 3 floats!"
+
+    let get_node_children node = 
+        match node with
+        | SeqNode n -> n.Data
+        | _ -> List.empty
+
+    let parse_field_bool field cmd arg = 
+        match (cmd,arg) with
+        | (ScalarNode c,ScalarNode a) when c.Data = field -> 
+            let (success,value) = Boolean.TryParse a.Data
+            match (success,value) with
+            | (true,value) -> Some value
+            | (false,_) -> None
+        | _ -> None
+
+    let parse_field_int field cmd arg = 
+        match (cmd,arg) with
+        | (ScalarNode c,ScalarNode a) when c.Data = field -> Some (int (a.Data))
+        | _ -> None
+
+    let parse_field_float field cmd arg = 
+        match (cmd,arg) with
+        | (ScalarNode c,ScalarNode a) when c.Data = field -> Some (float (a.Data))
+        | _ -> None
+
+    let parse_field_string field cmd arg = 
+        match (cmd,arg) with
+        | (ScalarNode c,ScalarNode a) when c.Data = field -> Some (a.Data)
+        | _ -> None
+
+    let parse_field_float_seq field cmd arg =
+        let func node =
+            match node with
+            | ScalarNode n -> float n.Data
+            | _ -> failwith "expected a ScalarNode containing a float"
+        match (cmd,arg) with
+        | (ScalarNode c,SeqNode s) when c.Data = field -> Some (List.map func s.Data)
+        | _ -> None
+
+
+    let parse_shadow = parse_field_bool "shadow"
+    let parse_diffuse = parse_field_float "diffuse"
+    let parse_ambient = parse_field_float "ambient"
+    let parse_specular = parse_field_float "specular"
+    let parse_reflective = parse_field_float "reflective"
+    let parse_color cmd arg = 
+        let result = parse_field_float_seq "color" cmd arg
+        match result with
+        | Some [r;g;b;] -> Some (Color.color r g b)
+        | Some _ -> None
+        | None -> None
+
+    let parse_transform node =
+        match node with
+        | [ScalarNode c;ScalarNode v;] when c.Data = "rotate-x" -> Some (Rotation_X(float v.Data))
+        | [ScalarNode c;ScalarNode v;] when c.Data = "rotate-y" -> Some (Rotation_Y(float v.Data))
+        | [ScalarNode c;ScalarNode v;] when c.Data = "rotate-z" -> Some (Rotation_Z(float v.Data))
+        | [ScalarNode c;ScalarNode x;ScalarNode y;ScalarNode z;] when c.Data = "scale" -> Some (Scaling(float x.Data,float y.Data,float z.Data))
+        | [ScalarNode c;ScalarNode x;ScalarNode y;ScalarNode z;] when c.Data = "translate" -> Some (Translation(float x.Data,float y.Data,float z.Data))
+        | _ -> None
+
+    let parse_transforms cmd arg scene =
+        match (cmd,arg) with
+        | ScalarNode c, SeqNode a when c.Data = "transform" ->
+            a.Data
+            |> List.map get_node_children
+            |> List.map parse_transform
+            |> List.choose id
+        | ScalarNode c, ScalarNode a when c.Data = "transform" -> //macro
+            match scene.transformations.TryGetValue a.Data with
+            | (true,value) -> value
+            | _ -> List.empty
+        | _ -> List.empty
+
+    let parse_colors cmd arg scene =
+        let func nodes =
+            match nodes with
+            | [ScalarNode r;ScalarNode g;ScalarNode b;] -> Some [float r.Data;float g.Data;float b.Data;]
+            | _ -> None
+        match (cmd,arg) with
+        | ScalarNode c, SeqNode a when c.Data = "colors" ->
+            a.Data
+            |> List.map get_node_children
+            |> List.map func
+            |> List.choose id
+            |> List.map to_color
+        //| ScalarNode c, ScalarNode a when c.Data = "colors" -> None //macro //TODO
+        | _ -> List.empty
+
+
+    let parse_pattern nodes material = 
+        material
+
+    let parse_material nodes scene =
+        scene
+
+    let parse_light nodes scene = 
+        let extract field cmd arg (parse_f:string -> 'y -> 'z) (process_f:'c -> 'T -> 'U) value =
+            parse_f field cmd arg 
+            |> Option.map (process_f value)
+            |> Option.defaultValue value
+        let empty = {
+            position = point 0.0 0.0 0.0;
+            intensity = Color.color 1.0 1.0 1.0;
+        }
+        let func state (cmd,arg) =
+            state
+            |> extract "at" cmd arg parse_field_float_seq (fun l f -> { l with position = to_tuple f point; })
+            |> extract "intensity" cmd arg parse_field_float_seq (fun l f -> { l with intensity = to_color f; })
+        let light = nodes |> List.fold func empty
+        { scene with lights = scene.lights @ [light;] }
+
+    let parse_camera nodes scene =        
+        let extract field cmd arg (parse_f:string -> 'y -> 'z) (process_f:'c -> 'T -> 'U) camera =
+            parse_f field cmd arg 
+            |> Option.map (process_f camera)
+            |> Option.defaultValue camera
+
+        let func state (cmd,arg) = 
+            let camera = 
+                state.camera
+                |> extract "width" cmd arg parse_field_int (fun c i -> { c with width = i; })
+                |> extract "height" cmd arg parse_field_int (fun c i -> { c with height = i; })
+                |> extract "field-of-view" cmd arg parse_field_float (fun c f -> { c with field_of_view = f; })
+                |> extract "from" cmd arg parse_field_float_seq (fun c f -> { c with from_point = to_tuple f point; })
+                |> extract "to" cmd arg parse_field_float_seq (fun c f -> { c with to_point = to_tuple f point; })
+                |> extract "up" cmd arg parse_field_float_seq (fun c f -> { c with up = to_tuple f vector; })
+            { state with camera = camera; }
+        nodes |> List.fold func scene
+
+    let parse_add cmd nodes (scene:scene_t) =
+        match cmd with
+        | ScalarNode c when c.Data = "camera" -> parse_camera nodes scene
+        | ScalarNode c when c.Data = "light" -> parse_light nodes scene
+        | _ -> scene
+
+
+    let parse_define cmd nodes (scene:scene_t) =
+        match cmd with
+        | ScalarNode c -> scene
+        | _ -> scene
+
+
+
+
+    let parse_scene node =
+        let camera = {
+            width = 0;
+            height = 0;
+            field_of_view = 0.0;
+            from_point = point 0.0 0.0 0.0;
+            to_point = point 0.0 0.0 0.0;
+            up = vector 0.0 1.0 0.0;
+        }
+        let empty = {
+            camera = camera;
+            lights = [];
+            materials = Map.empty;
+            transformations = Map.empty;
+            shapes = [];
+            shape_templates = Map.empty;
+        }
+        let rec func node (scene:scene_t) =
+            match node with
+            | SeqNode s -> s.Data |> List.fold (fun s np -> func np s) scene
+            | MapNode mn -> 
+                match mn.Data with
+                | (left,right) :: nodes -> 
+                    match left with
+                    | ScalarNode n when n.Data = "add" -> parse_add right nodes scene
+                    | ScalarNode n when n.Data = "define" -> parse_define right nodes scene
+                    | _ -> failwith "unrecognized command!"
+                | _ -> scene
+            | _ -> scene
+        func node empty
+        
+
+
+
+
+
 
     let list_to_coords l =
         match l with
@@ -264,41 +439,32 @@ scan all nodes
 
     let rec parse_node n (state:scene_t) =
         match n with
-        | ScalarNode sn -> 
-            state
-        | SeqNode sn -> 
-            sn.Data |> List.fold (fun s np -> parse_node np s) state
         | MapNode mn -> 
-            (*let func l r s = 
-                match (l,r) with
-                | (ScalarNode c, ScalarNode n) ->                     
-                    printfn "%s %s" (c.Data) (n.Data)
-                    s
-                | _ -> s*)
             match mn.Data with
             | (left,right) :: nodes -> handle_command left right nodes state                
             | _ -> failwith "unexpected"
-            //mn.Data |> List.fold (fun s (l,r) -> func l r s) state
             
+
+
+
+
+
+
+
+
+
+
+    let parse_yaml s =
+        let parser = Yaml12Parser(YamlExtended.Schema)
+        let repr = (parser.``l-yaml-stream`` s)
+        match repr.Head with
+        | CompleteRepresentaton cr -> cr.Document
+        | NoRepresentation nr -> failwith "error!"
+        | _ -> failwith "Unexpected return type"
+
     let parse_text (text:string) =
-        let camera = {
-            width = 0;
-            height = 0;
-            field_of_view = 0.0;
-            from_point = point 0.0 0.0 0.0;
-            to_point = point 0.0 0.0 0.0;
-            up = vector 0.0 1.0 0.0;
-        }
-        let empty = {
-            camera = camera;
-            lights = [];
-            materials = Map.empty;
-            transformations = Map.empty;
-            shapes = [];
-            shape_templates = Map.empty;
-        }
-        let x = parse_yaml text
-        parse_node x empty
+        let node = parse_yaml text
+        parse_scene node
         
     let parse_file file =
         File.ReadAllText(file) |> parse_text
