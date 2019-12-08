@@ -148,6 +148,11 @@ scan all nodes
         | SeqNode n -> n.Data
         | _ -> List.empty
 
+    let extract field cmd arg (parse_f:string -> 'y -> 'z) (process_f:'c -> 'T -> 'U) value =
+        parse_f field cmd arg 
+        |> Option.map (process_f value)
+        |> Option.defaultValue value
+
     let parse_field_bool field cmd arg = 
         match (cmd,arg) with
         | (ScalarNode c,ScalarNode a) when c.Data = field -> 
@@ -239,10 +244,6 @@ scan all nodes
         scene
 
     let parse_light nodes scene = 
-        let extract field cmd arg (parse_f:string -> 'y -> 'z) (process_f:'c -> 'T -> 'U) value =
-            parse_f field cmd arg 
-            |> Option.map (process_f value)
-            |> Option.defaultValue value
         let empty = {
             position = point 0.0 0.0 0.0;
             intensity = Color.color 1.0 1.0 1.0;
@@ -255,11 +256,6 @@ scan all nodes
         { scene with lights = scene.lights @ [light;] }
 
     let parse_camera nodes scene =        
-        let extract field cmd arg (parse_f:string -> 'y -> 'z) (process_f:'c -> 'T -> 'U) camera =
-            parse_f field cmd arg 
-            |> Option.map (process_f camera)
-            |> Option.defaultValue camera
-
         let func state (cmd,arg) = 
             let camera = 
                 state.camera
@@ -272,10 +268,14 @@ scan all nodes
             { state with camera = camera; }
         nodes |> List.fold func scene
 
+    let parse_shape shape nodes scene =
+        scene
+
     let parse_add cmd nodes (scene:scene_t) =
         match cmd with
         | ScalarNode c when c.Data = "camera" -> parse_camera nodes scene
         | ScalarNode c when c.Data = "light" -> parse_light nodes scene
+        | ScalarNode c -> parse_shape c.Data nodes scene
         | _ -> scene
 
 
