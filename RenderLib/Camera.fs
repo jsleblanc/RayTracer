@@ -71,11 +71,17 @@ module Camera =
                 for x in 0 .. camera.hsize - 1 do
                     yield (x,y)
             }
+        let calc (x,y) = 
+            let ray = ray_for_pixel camera x y
+            let color = color_at world ray 5
+            (color, x, y)
+        let calc_chunk chunk =
+            chunk |> List.map calc
         coords
-        |> PSeq.map (fun (x,y) -> 
-                let ray = ray_for_pixel camera x y
-                let color = color_at world ray 5
-                (color, x, y)
-            )
+        |> Seq.toList
+        |> List.chunkBySize 250
+        |> PSeq.map calc_chunk
+        |> Seq.toList
+        |> List.collect (fun s -> s)
         |> Seq.iter (fun (c, x, y) -> write_pixel x y c image |> ignore)
         image
