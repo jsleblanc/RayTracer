@@ -109,8 +109,18 @@ scan all nodes
         shape_templates:Map<string,shape_definition_t>;
     }
 
+    type shape_attributes_t = {
+        min:float;
+        max:float;
+        closed:bool;
+        shadow:bool;
+    }
 
-
+    type pattern_attributes_t = {
+        pattern_type:string;
+        colors:Color.color list;
+        transformations:translation_t list;
+    }
 
 
         
@@ -206,7 +216,7 @@ scan all nodes
         | [ScalarNode c;ScalarNode x;ScalarNode y;ScalarNode z;] when c.Data = "translate" -> Some (Translation(float x.Data,float y.Data,float z.Data))
         | _ -> None
 
-    let parse_transforms cmd arg scene =
+    let parse_transforms cmd arg (scene:scene_t) =
         match (cmd,arg) with
         | ScalarNode c, SeqNode a when c.Data = "transform" ->
             a.Data
@@ -235,11 +245,33 @@ scan all nodes
         | _ -> List.empty
 
 
-    let parse_pattern nodes material = 
-        material
+    let parse_pattern nodes scene = 
+        let empty = {
+            pattern_type = "";
+            colors = [];
+            transformations = [];
+        }
+        let func state (cmd,arg) =            
+            let transforms = parse_transforms cmd arg scene
+            let colors = parse_colors cmd arg scene
+            let s = state |> extract "type" cmd arg parse_field_string (fun p s -> { p with pattern_type = s; })
+            { s with colors = s.colors @ colors; transformations = s.transformations @ transforms; }
+        nodes |> List.fold func empty
 
     let parse_material nodes scene =
         let func state (cmd,arg) = 
+            let pattern state = 
+                match (cmd,arg) with
+                | ScalarNode c, MapNode mn when c.Data = "pattern" -> 
+                    let pa = parse_pattern mn.Data scene
+                    let p =
+                        match pa.pattern_type with
+                        | "checkers" -> Patterns.checkers (Patterns.solid_c pa.colors.[0]) (Patterns.solid_c pa.colors.[1])
+                        | "stripes" -> Patterns.stripe (Patterns.solid_c pa.colors.[0]) (Patterns.solid_c pa.colors.[1])
+                        | _ -> failwith "unrecognized pattern type!"
+                        |> Patterns.transform (combine pa.transformations)
+                    { state with pattern = Some p; }
+                | _ -> state
             state
             |> extract "color" cmd arg parse_field_color (fun m c -> { m with color = c; })
             |> extract "ambient" cmd arg parse_field_float (fun m f -> { m with ambient = f; })
@@ -249,6 +281,7 @@ scan all nodes
             |> extract "transparency" cmd arg parse_field_float (fun m f -> { m with transparency = f; })
             |> extract "refractive-index" cmd arg parse_field_float (fun m f -> { m with refractive_index = f; })
             |> extract "shininess" cmd arg parse_field_float (fun m f -> { m with shininess = f; })
+            |> pattern
         nodes |> List.fold func Material.material.Default
 
     let parse_light nodes scene = 
@@ -276,14 +309,7 @@ scan all nodes
             { state with camera = camera; }
         nodes |> List.fold func scene
 
-    type shape_attributes_t = {
-        min:float;
-        max:float;
-        closed:bool;
-        shadow:bool;
-    }
-
-    let parse_shape shape nodes scene =
+    let parse_shape shape nodes (scene:scene_t) =
         let empty = {
             min = -1.0;
             max = 1.0;
@@ -534,6 +560,9 @@ scan all nodes
             match s.shape with 
             | Cube -> ShapeCube.build
             | Plane -> ShapePlane.build
+            | Sphere -> ShapeSphere.build
+            | Cone(min,max,closed) -> ShapeCone.build min max closed
+            | Cylinder(min,max,closed) -> ShapeCylinder.build min max closed
         let transforms = combine s.transformations
         sf 
         |> textureOpt s.material
