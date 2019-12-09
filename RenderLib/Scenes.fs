@@ -186,18 +186,16 @@ scan all nodes
         | (ScalarNode c,SeqNode s) when c.Data = field -> Some (List.map func s.Data)
         | _ -> None
 
-
-    let parse_shadow = parse_field_bool "shadow"
-    let parse_diffuse = parse_field_float "diffuse"
-    let parse_ambient = parse_field_float "ambient"
-    let parse_specular = parse_field_float "specular"
-    let parse_reflective = parse_field_float "reflective"
     let parse_color cmd arg = 
         let result = parse_field_float_seq "color" cmd arg
         match result with
         | Some [r;g;b;] -> Some (Color.color r g b)
-        | Some _ -> None
-        | None -> None
+        | _ -> None
+
+    let parse_field_color field cmd arg = 
+        match cmd with
+        | ScalarNode c when c.Data = field -> parse_color cmd arg
+        | _ -> None
 
     let parse_transform node =
         match node with
@@ -241,7 +239,17 @@ scan all nodes
         material
 
     let parse_material nodes scene =
-        scene
+        let func state (cmd,arg) = 
+            state
+            |> extract "color" cmd arg parse_field_color (fun m c -> { m with color = c; })
+            |> extract "ambient" cmd arg parse_field_float (fun m f -> { m with ambient = f; })
+            |> extract "diffuse" cmd arg parse_field_float (fun m f -> { m with diffuse = f; })
+            |> extract "specular" cmd arg parse_field_float (fun m f -> { m with specular = f; })
+            |> extract "reflective" cmd arg parse_field_float (fun m f -> { m with reflective = f; })
+            |> extract "transparency" cmd arg parse_field_float (fun m f -> { m with transparency = f; })
+            |> extract "refractive-index" cmd arg parse_field_float (fun m f -> { m with refractive_index = f; })
+            |> extract "shininess" cmd arg parse_field_float (fun m f -> { m with shininess = f; })
+        nodes |> List.fold func Material.material.Default
 
     let parse_light nodes scene = 
         let empty = {
@@ -268,8 +276,56 @@ scan all nodes
             { state with camera = camera; }
         nodes |> List.fold func scene
 
+    type shape_attributes_t = {
+        min:float;
+        max:float;
+        closed:bool;
+        shadow:bool;
+    }
+
     let parse_shape shape nodes scene =
-        scene
+        let empty = {
+            min = -1.0;
+            max = 1.0;
+            closed = false;
+            shadow = true;
+        }
+        let shapeAttributesFunc (state:shape_attributes_t) (cmd,arg) = 
+            state
+            |> extract "min" cmd arg parse_field_float (fun s f -> { s with min = f; })
+            |> extract "max" cmd arg parse_field_float (fun s f -> { s with max = f; })
+            |> extract "closed" cmd arg parse_field_bool (fun s b -> { s with closed = b; })
+            |> extract "shadow" cmd arg parse_field_bool (fun s b -> { s with shadow = b; })
+        let shapeAttributes = nodes |> List.fold shapeAttributesFunc empty
+        let transformsFunc state (cmd,arg) = 
+            let translations = parse_transforms cmd arg scene
+            state @ translations;
+        let transformations = nodes |> List.fold transformsFunc []
+        let materialFunc (cmd,arg) =
+            match (cmd,arg) with
+            | ScalarNode c, MapNode s when c.Data = "material" -> Some (parse_material s.Data scene)
+            | _ -> None
+        let material = 
+            nodes 
+            |> List.map materialFunc
+            |> List.choose id
+            |> List.tryExactlyOne
+        let shape = 
+            match shape with
+            | "cube" -> Cube
+            | "plane" -> Plane
+            | "cylinder" -> Cylinder(shapeAttributes.min, shapeAttributes.max, shapeAttributes.closed)
+            | "cone" -> Cone(shapeAttributes.min, shapeAttributes.max, shapeAttributes.closed)
+            | "sphere" -> Sphere
+            | "group" -> Group([])
+            | _ -> failwith "unrecognized shape!"
+        let shapedef = {
+            shape = shape;
+            material = material;
+            shadow = shapeAttributes.shadow;
+            transformations = transformations;
+        }
+        { scene with shapes = scene.shapes @ [shapedef;] }
 
     let parse_add cmd nodes (scene:scene_t) =
         match cmd with
