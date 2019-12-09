@@ -76,12 +76,12 @@ module Camera =
             let color = color_at world ray 5
             (color, x, y)
         let calc_chunk chunk =
-            chunk |> List.map calc
+            chunk |> Array.map calc
         coords
-        |> Seq.toList
-        |> List.chunkBySize 250
+        |> Seq.toArray
+        |> Array.chunkBySize 250
         |> PSeq.map calc_chunk
-        |> Seq.toList
-        |> List.collect (fun s -> s)
+        |> Seq.toArray
+        |> Array.collect (fun s -> s)
         |> Seq.iter (fun (c, x, y) -> write_pixel x y c image |> ignore)
         image
