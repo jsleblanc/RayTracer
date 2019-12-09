@@ -26,7 +26,7 @@ module SceneTests =
         let yaml = 
             "
             - add: camera
-              width: 100
+              width: 120
               height: 100
               field-of-view: 0.785
               from: [ -6, 6, -10 ]
@@ -34,7 +34,7 @@ module SceneTests =
               up: [ -0.45, 1, 0 ]
             "
         let expected = {
-            width = 100;
+            width = 120;
             height = 100;
             field_of_view = 0.785;
             from_point = point -6.0 6.0 -10.0;
