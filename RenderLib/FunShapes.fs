@@ -40,3 +40,20 @@ module FunShapes =
             ShapeCSG.intersect cube sphere 
         ShapeCSG.difference cube plus 
             
+    let turner_cube t = 
+        let cube = 
+            let scale = scaling 0.9 0.9 0.9
+            let cylinder = ShapeCylinder.build -2.0 2.0 true
+            let plus = 
+                let c1 = cylinder |> Shapes.transform (rotation_z (Common.degrees 90.0) * (scale)) |> Shapes.texture t 
+                let c2 = cylinder |> Shapes.transform (rotation_y (Common.degrees 90.0) * (scale)) |> Shapes.texture t 
+                let c3 = cylinder |> Shapes.transform (rotation_x (Common.degrees 90.0) * (scale)) |> Shapes.texture t 
+                let u1 = ShapeCSG.union c1 c2 
+                ShapeCSG.union u1 c3
+            let cube = ShapeCube.build |> Shapes.texture t 
+            ShapeCSG.difference cube plus 
+        let c1 = cube
+        let c2 = cube |> Shapes.transform (scaling 0.75 0.75 0.75)
+        let c3 = cube |> Shapes.transform (scaling 0.5 0.5 0.5)
+        let c4 = ShapeCube.build |> Shapes.transform (scaling 0.35 0.35 0.35) |> Shapes.texture t
+        ShapeGroup.build [c1;c2;c3;c4;]
