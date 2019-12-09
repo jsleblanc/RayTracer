@@ -197,6 +197,44 @@ module SceneTests =
         }
         let scene = Scenes.parse_text yaml
         Assert.True(List.contains expected scene.shapes)
+    
+    [<Fact>]
+    let ``Should add cube with pattern to scene``() =
+        let yaml = 
+            "
+            - add: cube
+              transform:
+                - [ scale, 0.25, 0.25, 0.25 ]
+                - [ rotate-y, 0.2 ]
+                - [ translate, 0, 3.45001, 0 ]
+              shadow: false
+              material:
+                color: [1, 1, 0.8]
+                ambient: 0
+                diffuse: 0.3
+                specular: 0.9
+                shininess: 300
+                reflective: 0.7
+                transparency: 0.7
+                refractive-index: 1.5
+                pattern:
+                  type: checkers
+                  colors:
+                    - [ 0.00, 0.00, 0.00 ]
+                    - [ 0.75, 0.75, 0.75 ]
+                  transform:
+                    - [ scale, 0.5, 0.5, 0.5 ]
+            "
+        let expectedPattern = 
+            Patterns.checkers (Solid(Color.color 0.0 0.0 0.0)) (Solid(Color.color 0.75 0.75 0.75)) |> Patterns.transform (scaling 0.5 0.5 0.5)
+        let expected = {
+            shape = Cube;
+            material = Some { Material.material.Default with color = color 1.0 1.0 0.8; ambient = 0.0; diffuse = 0.3; specular = 0.9; shininess = 300.0; reflective = 0.7; transparency = 0.7; refractive_index = 1.5; pattern = Some expectedPattern; };
+            shadow = false;
+            transformations = [Scaling(0.25,0.25,0.25);Rotation_Y(0.2);Translation(0.0,3.45001,0.0);]
+        }
+        let scene = Scenes.parse_text yaml
+        Assert.True(List.contains expected scene.shapes)
 
     [<Fact>]
     let ``Should add cube shape template to scene``() =

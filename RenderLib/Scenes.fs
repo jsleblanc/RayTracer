@@ -526,11 +526,19 @@ scan all nodes
         File.ReadAllText(file) |> parse_text
         
     let private shape_definition_to_shape s =
+        let textureOpt material shape = 
+            match material with
+            | Some m -> shape |> Shapes.texture m
+            | None -> shape
         let sf = 
             match s.shape with 
             | Cube -> ShapeCube.build
+            | Plane -> ShapePlane.build
         let transforms = combine s.transformations
-        sf |> Shapes.transform transforms |> Shapes.shadow s.shadow
+        sf 
+        |> textureOpt s.material
+        |> Shapes.transform transforms 
+        |> Shapes.shadow s.shadow
 
     let scene_to_world (s:scene_t) =
         let vt = view_transform s.camera.from_point s.camera.to_point s.camera.up
