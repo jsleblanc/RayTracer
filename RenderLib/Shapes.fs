@@ -53,6 +53,7 @@ module Shapes =
     | Cube
     | Cylinder of Minimum:float * Maximum:float * Closed:bool
     | Cone of Minimum:float * Maximum:float * Closed:bool
+    | Torus of MajorRadius:float * MinorRadius:float
     | Triangle of tri_data
     | Group of Children:shape list
     | Union of shape * shape * csg_rule_fn

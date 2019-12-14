@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +22,7 @@
     <Compile Include="ShapeCube.fs" />
     <Compile Include="ShapeConic.fs" />
     <Compile Include="ShapeCylinder.fs" />
+    <Compile Include="ShapeTorus.fs" />
     <Compile Include="ShapeCone.fs" />
     <Compile Include="ShapeTriangle.fs" />
     <Compile Include="ShapeGroup.fs" />
