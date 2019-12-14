@@ -571,7 +571,7 @@ scan all nodes
 
     let scene_to_world (s:scene_t) =
         let vt = view_transform s.camera.from_point s.camera.to_point s.camera.up
-        let camera = create_camera s.camera.height s.camera.width s.camera.field_of_view
+        let camera = create_camera s.camera.width s.camera.height s.camera.field_of_view
         let camera = { camera with transform = vt; }
         let light = s.lights.[0]
         let shapes = s.shapes |> List.map shape_definition_to_shape
