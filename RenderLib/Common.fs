@@ -1,6 +1,7 @@
 ﻿namespace RenderLib
 
 open System
+open System.Numerics
 
 module Common = 
 
@@ -23,7 +24,11 @@ module Common =
 
     let compareFloat (a:float) (b:float) = 
         if areEqualFloat a b then 0
-        else if a < b then -1 else 1
+        else if a < b then -1 else 1    
+
+    let areEqualComplex (a:Complex) (b:Complex) = 
+        areEqualFloat a.Real b.Real &&
+        areEqualFloat a.Imaginary b.Imaginary
 
     let isEven x = (x % 2) = 0
 
