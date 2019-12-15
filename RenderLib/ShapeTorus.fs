@@ -30,14 +30,14 @@ module ShapeTorus =
         new Complex(rho * Math.Cos(theta), rho * Math.Sin(theta))
 
     let solveQuadratic a b c =
-        if a = Complex.Zero then
-            if b = Complex.Zero then
+        if areEqualComplex a Complex.Zero then
+            if areEqualComplex b Complex.Zero then
                 []
             else
                 [-c / b]
         else
             let radicand = b*b - cpx4*a*c
-            if radicand = Complex.Zero then
+            if areEqualComplex radicand Complex.Zero then
                 [-b / (cpx2 * a)]
             else
                 let r = Complex.Sqrt(radicand)
@@ -60,16 +60,16 @@ module ShapeTorus =
             let E = S*S*S + (d - S*c)/cpx2
             let Froot = Complex.Sqrt(E*E + D*D*D)
             let mutable F = -Froot - E
-            if F = Complex.Zero then
+            if areEqualComplex F Complex.Zero then
                 F <- Froot - E
             let func i =
                 let G = cbrt F i
                 G - D/G - S
-            [0..3]
+            [0..2]
             |> List.map func
 
     let solveQuartic a b c d e =
-        if a = Complex.Zero then
+        if areEqualComplex a Complex.Zero then
             solveCubic b c d e
         else
             let b = b / a
@@ -84,8 +84,8 @@ module ShapeTorus =
             let gamma = (-cpx3/cpx256)*b4 + b2*c/cpx16 - b*d/cpx4 + e
             let alpha2 = alpha * alpha
             let t = -b / cpx4
-            if beta = Complex.Zero then
-                let rad = Complex.Sqrt(alpha2 - cpx4/gamma)
+            if areEqualComplex beta Complex.Zero then
+                let rad = Complex.Sqrt(alpha2 - cpx4*gamma)
                 let r1 = Complex.Sqrt((-alpha + rad) / cpx2)
                 let r2 = Complex.Sqrt((-alpha - rad) / cpx2)
                 [
@@ -101,7 +101,7 @@ module ShapeTorus =
                 let R = -Q/cpx2 + Complex.Sqrt(Q*Q/cpx4 + P*P*P/cpx27)
                 let U = cbrt R 0
                 let mutable y = (-cpx5/cpx6)*alpha + U
-                if U = Complex.Zero then
+                if areEqualComplex U Complex.Zero then
                     y <- y - cbrt Q 0
                 else
                     y <- y - P/(cpx3 * U)
