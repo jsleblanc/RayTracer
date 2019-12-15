@@ -11,7 +11,13 @@ open Shapes
 
 module ShapeTorus = 
 
-    let solveQuadratic (a:Complex) (b:Complex) (c:Complex) =
+    let cbrt a n = 
+        let twopi = 2.0 * Math.PI
+        let rho = Math.Pow(Complex.Abs(a), 1.0/3.0)
+        let theta = ((twopi * float n) + a.Phase) / 3.0
+        new Complex(rho * Math.Cos(theta), rho * Math.Sin(theta))
+
+    let solveQuadratic a b c =
         if a = Complex.Zero then
             if b = Complex.Zero then
                 []
@@ -31,9 +37,28 @@ module ShapeTorus =
                     (-b - r) / d;
                 ]
 
-    //let solveCubic (a:Complex) (b:Complex) (c:Complex) (d:Complex) =
-        
+    let solveCubic a b c d =
+        if a = Complex.Zero then
+            solveQuadratic a b c
+        else
+            let c2 = new Complex(2.0,0.0)
+            let c3 = new Complex(3.0,0.0)
+            let b = b / a
+            let c = c / a
+            let d = d / a
 
+            let S = b / c3
+            let D = c / c3 - S*S
+            let E = S*S*S + (d - S*c)/c2
+            let Froot = Complex.Sqrt(E*E + D*D*D)
+            let mutable F = -Froot - E
+            if F = Complex.Zero then
+                F <- Froot - E
+            let func i =
+                let G = cbrt F i
+                G - D/G - S
+            [0..3]
+            |> List.map func
 
     let private solve2 (coefficients:float list) = 
         let p = coefficients.[1] / (2.0 * coefficients.[2])
