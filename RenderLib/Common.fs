@@ -5,7 +5,7 @@ open System
 module Common = 
 
     [<Literal>] 
-    let epsilon = 0.000000001
+    let epsilon = 1.0e-9
 
     let private floatEquality (a:float) (b:float) (e:float) =
         let MinNormal = 2.2250738585072014E-308
