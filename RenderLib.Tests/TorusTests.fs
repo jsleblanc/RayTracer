@@ -29,7 +29,10 @@ module TorusTests =
 
     [<Fact>]
     let ``a torus``() =
-        Assert.True(false)
+        let a = new Complex(-2.5,0.0)
+        let b = new Complex(-2.500000000000039, 1.481838361948336E-15)
+        let r1 = areEqualComplex a b
+        Assert.True(r1)
 
     [<Fact>]
     let ``Test known quadratic roots``() =
@@ -38,8 +41,8 @@ module TorusTests =
            let b = -M*(K+L);
            let c = M*K*L;
            let poly = [|c;b;a;|]
-           //Assert.True(validatePolynomials 3 poly K)
-           //Assert.True(validatePolynomials 3 poly L)
+           Assert.True(validatePolynomials 3 poly K)
+           Assert.True(validatePolynomials 3 poly L)
            let rootsFound = ShapeTorus.solveQuadratic a b c
            let expectedRootsFound = if K-L = Complex.Zero then 1 else 2
            Assert.Equal(expectedRootsFound, List.length rootsFound)
@@ -56,9 +59,9 @@ module TorusTests =
             let c = M*(K*L + N*K + N*L);
             let d = -M*K*L*N;
             let poly = [|d;c;b;a|]
-            //Assert.True(validatePolynomials 4 poly K)
-            //Assert.True(validatePolynomials 4 poly L)
-            //Assert.True(validatePolynomials 4 poly N)
+            Assert.True(validatePolynomials 4 poly K)
+            Assert.True(validatePolynomials 4 poly L)
+            Assert.True(validatePolynomials 4 poly N)
             let rootsFound = ShapeTorus.solveCubic a b c d
             let expectedRootsFound = 3
             Assert.Equal(expectedRootsFound, List.length rootsFound)
@@ -76,10 +79,10 @@ module TorusTests =
             let D = -m*(c*d*(a + b) + a*b*(c + d))
             let E = m*a*b*c*d
             let poly = [|E;D;C;B;A;|]
-            //Assert.True(validatePolynomials 5 poly a)
-            //Assert.True(validatePolynomials 5 poly b)
-            //Assert.True(validatePolynomials 5 poly c)
-            //Assert.True(validatePolynomials 5 poly d)
+            Assert.True(validatePolynomials 5 poly a)
+            Assert.True(validatePolynomials 5 poly b)
+            Assert.True(validatePolynomials 5 poly c)
+            Assert.True(validatePolynomials 5 poly d)
             let rootsFound = ShapeTorus.solveQuartic A B C D E
             let expectedRootsFound = 4
             Assert.Equal(expectedRootsFound, List.length rootsFound)

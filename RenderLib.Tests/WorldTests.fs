@@ -322,7 +322,7 @@ module WorldTests =
         ]
         let comps = prepare (Seq.item(2) xs) r xs
         let c = refracted_color w comps 5
-        Assert.Equal(color 0.0 0.9988846828 0.04721642191, c)
+        Assert.Equal(color 0.0 0.9988846727 0.04721642416, c)
 
     [<Fact>]
     let ``shade_hit() with a transparent material``() =

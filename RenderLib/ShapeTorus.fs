@@ -130,13 +130,12 @@ module ShapeTorus =
             (vector (a*pt.x) (a*pt.y) pt.z).normalize()
         let local_intersect shape trail ray = 
             let T = 4.0 * rmajor * rmajor
-            let J = ray.direction.magnitude()
-            let K = 2.0 * ray.origin.dotProduct ray.direction
-            let L = ray.origin.magnitude() + rmajor*rmajor - rminor*rminor
             let G = T * (ray.direction.x**2.0 + ray.direction.y**2.0)
             let H = 2.0 * T * (ray.origin.x*ray.direction.x + ray.origin.y*ray.direction.y)
             let I = T * (ray.origin.x**2.0 + ray.origin.y**2.0)
-
+            let J = ray.direction.magnitude()**2.0
+            let K = 2.0 * ray.origin.dotProduct ray.direction
+            let L = ray.origin.magnitude()**2.0 + rmajor*rmajor - rminor*rminor
             let a = new Complex(J*J,0.0)
             let b = new Complex(2.0*J*K, 0.0)
             let c = new Complex(2.0*J*L + K*K - G, 0.0)

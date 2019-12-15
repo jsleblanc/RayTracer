@@ -6,7 +6,7 @@ open System.Numerics
 module Common = 
 
     [<Literal>] 
-    let epsilon = 1.0e-9
+    let epsilon = 1.0e-8
 
     let private floatEquality (a:float) (b:float) (e:float) =
         let MinNormal = 2.2250738585072014E-308
@@ -27,8 +27,8 @@ module Common =
         else if a < b then -1 else 1    
 
     let areEqualComplex (a:Complex) (b:Complex) = 
-        areEqualFloat a.Real b.Real &&
-        areEqualFloat a.Imaginary b.Imaginary
+        Math.Abs(a.Real - b.Real) < epsilon &&
+        Math.Abs(a.Imaginary - b.Imaginary) < epsilon
 
     let isEven x = (x % 2) = 0
 
