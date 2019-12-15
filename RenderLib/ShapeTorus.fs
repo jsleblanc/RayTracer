@@ -13,7 +13,7 @@ module ShapeTorus =
 
     let twopi = 2.0 * Math.PI
     let cpx2 = new Complex(2.0,0.0)
-    let cpx3 = new Complex(2.0,0.0)
+    let cpx3 = new Complex(3.0,0.0)
     let cpx4 = new Complex(4.0,0.0)
     let cpx5 = new Complex(5.0,0.0)
     let cpx6 = new Complex(6.0,0.0)
@@ -117,7 +117,7 @@ module ShapeTorus =
 
     let filterRealNumbers values tolerance = 
         let func (i:Complex) = 
-            if Math.Abs(i.Imaginary) < tolerance then
+            if areEqualFloat i.Imaginary 0.0 then
                 Some i.Real
             else None
         values
