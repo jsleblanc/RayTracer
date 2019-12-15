@@ -1,6 +1,7 @@
 ﻿namespace RenderLib
 
 open System
+open System.Numerics
 open Common
 open Tuple
 open Matrix
@@ -9,6 +10,30 @@ open Material
 open Shapes
 
 module ShapeTorus = 
+
+    let solveQuadratic (a:Complex) (b:Complex) (c:Complex) =
+        if a = Complex.Zero then
+            if b = Complex.Zero then
+                []
+            else
+                [-c / b]
+        else
+            let c2 = new Complex(2.0,0.0)
+            let c4 = new Complex(4.0,0.0)
+            let radicand = b*b - c4*a*c
+            if radicand = Complex.Zero then
+                [-b / (c2 * a)]
+            else
+                let r = Complex.Sqrt(radicand)
+                let d = c2 * a
+                [
+                    (-b + r) / d;
+                    (-b - r) / d;
+                ]
+
+    //let solveCubic (a:Complex) (b:Complex) (c:Complex) (d:Complex) =
+        
+
 
     let private solve2 (coefficients:float list) = 
         let p = coefficients.[1] / (2.0 * coefficients.[2])
