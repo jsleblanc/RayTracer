@@ -10,8 +10,8 @@ module Matrix =
 
     type matrix(size:int) =
         let m:float[,] = Array2D.zeroCreate size size
-        member _.Size = size
-        member _.Item 
+        member this.Size = size
+        member this.Item 
             with get(row,col) = m.[col,row] 
             and set (row,col) value = m.[col,row] <- value
         member this.Transpose =
@@ -28,7 +28,7 @@ module Matrix =
                     let s = sprintf "%s.[%d,%d] <- %.18f" name row col this.[row,col]
                     sb.AppendLine s |> ignore
             sb.ToString()
-        override _.GetHashCode() = 0
+        override this.GetHashCode() = 0
         override this.Equals(other) =
             match other with
             | :? matrix as other -> 

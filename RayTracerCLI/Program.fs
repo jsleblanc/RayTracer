@@ -176,7 +176,7 @@ let main argv =
     canvas_to_jpg "output.jpg" canvas
     *)
 
-    let file = @"C:\Users\josep\Source\Repos\RayTracer\RayTracerCLI\Scenes\table.yml"
+    let file = @"/Users/josephleblanc/Documents/Code/RayTracer/RayTracerCLI/Scenes/table.yml"
     let scene = Scenes.parse_file file
     let (camera,world) = Scenes.scene_to_world scene
     let canvas = render camera world

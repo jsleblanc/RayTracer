@@ -14,7 +14,7 @@ module ShapeCube =
         let local_normal_at hit shape pt =
             let ax = Math.Abs(pt.x)
             let ay = Math.Abs(pt.y)
-            let maxc = seq { ax; ay; Math.Abs(pt.z); } |> Seq.max
+            let maxc = [| ax; ay; Math.Abs(pt.z); |] |> Seq.max
             if maxc = ax then
                 vector pt.x 0.0 0.0
             else
@@ -38,8 +38,8 @@ module ShapeCube =
             let (xtmin, xtmax) = check_axis ray.origin.x ray.direction.x -1.0 1.0
             let (ytmin, ytmax) = check_axis ray.origin.y ray.direction.y -1.0 1.0
             let (ztmin, ztmax) = check_axis ray.origin.z ray.direction.z -1.0 1.0
-            let tmin = seq { xtmin; ytmin; ztmin; } |> Seq.max
-            let tmax = seq { xtmax; ytmax; ztmax; } |> Seq.min
+            let tmin = [| xtmin; ytmin; ztmin; |] |> Seq.max
+            let tmax = [| xtmax; ytmax; ztmax; |] |> Seq.min
             if tmin > tmax then
                 []
             else

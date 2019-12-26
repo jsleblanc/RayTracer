@@ -9,9 +9,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/RayTracerCLI/bin/Debug/netcoreapp3.0/RayTracerCLI.exe",
+            "program": "${workspaceFolder}/RayTracerCLI/bin/Debug/netcoreapp3.0/RayTracerCLI",
             "args": [],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/RayTracerCLI/bin/Debug/netcoreapp3.0",
             "stopAtEntry": false,
             "console": "internalConsole"
         },
