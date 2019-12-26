@@ -24,7 +24,7 @@ module ShapeCSG =
         (lhit && inr) || (not lhit && inl)
 
     let private intersection_allowed_difference lhit inl inr =
-        (lhit && not inr) || (not lhit & inl)
+        (lhit && not inr) || (not lhit && inl)
 
     let filter_intersections shape xs =
         let (left,right,rule) =

@@ -107,5 +107,6 @@ module Translations =
                 | Rotation_Y(r) -> rotation_y r
                 | Rotation_Z(r) -> rotation_z r
                 | Shearing(xy,xz,yx,yz,zx,zy) -> shearing xy xz yx yz zx zy
+                | View(f,t,up) -> view_transform f t up
             m * tf
         List.foldBack func transformations (identity_matrix())

@@ -95,4 +95,3 @@ module PatternsTests =
         Assert.Equal(white_pattern(), p.fn (point 0.0 0.0 0.0))
         Assert.Equal(white_pattern(), p.fn (point 0.0 0.0 0.99))
         Assert.Equal(black_pattern(), p.fn (point 0.0 0.0 1.01))
-
