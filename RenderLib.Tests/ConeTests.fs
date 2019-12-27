@@ -20,7 +20,7 @@ module ConeTests =
             }
             let xs = c.local_intersect c [] r
             Assert.Equal(2, List.length xs)
-            ((List.item(0) xs).t = t0) && ((List.item(1) xs).t = t1)
+            (areEqualFloat (List.item(0) xs).t t0) && (areEqualFloat (List.item(1) xs).t t1)
         Assert.True(ray_strikes (point 0.0 0.0 -5.0) (vector 0.0 0.0 1.0) 5.0 5.0)
         Assert.True(ray_strikes (point 0.0 0.0 -5.0) (vector 1.0 1.0 1.0) 8.6602540378443855 8.6602540378443855)
         Assert.True(ray_strikes (point 1.0 1.0 -5.0) (vector -0.5 -1.0 1.0) 4.5500556793563494 49.449944320643645)

@@ -89,7 +89,7 @@ module TorusTests =
 
     [<Fact>]
     let ``A ray misses a torus``() =
-        let t = ShapeTorus.build 4.0 1.0
+        let t = ShapeTorus.build 2.0 1.0
         let ray = {
             origin = point -2.5 -3.0 0.0;
             direction = vector 1.0 0.0 0.0;
@@ -99,7 +99,7 @@ module TorusTests =
 
     [<Fact>]
     let ``A ray intersects a torus once``() =
-        let t = ShapeTorus.build 4.0 1.0
+        let t = ShapeTorus.build 2.0 1.0
         let ray = {
             origin = point -2.5 -2.0 0.0;
             direction = vector 1.0 0.0 0.0;
@@ -110,7 +110,7 @@ module TorusTests =
 
     [<Fact>]
     let ``A ray intersects a torus twice``() =
-        let t = ShapeTorus.build 4.0 1.0
+        let t = ShapeTorus.build 2.0 1.0
         let ray = {
             origin = point -2.5 -1.5 0.0;
             direction = vector 1.0 0.0 0.0;
@@ -122,7 +122,7 @@ module TorusTests =
 
     [<Fact>]
     let ``A ray intersects a torus three times``() =
-        let t = ShapeTorus.build 4.0 1.0
+        let t = ShapeTorus.build 2.0 1.0
         let ray = {
             origin = point -2.5 -1.0 0.0;
             direction = vector 1.0 0.0 0.0;
@@ -135,7 +135,7 @@ module TorusTests =
 
     [<Fact>]
     let ``A ray intersects a torus four times``() =
-        let t = ShapeTorus.build 4.0 1.0
+        let t = ShapeTorus.build 2.0 1.0
         let ray = {
             origin = point -2.5 0.0 0.0;
             direction = vector 1.0 0.0 0.0;
