@@ -153,5 +153,6 @@ module ShapeTorus =
                 |> List.map (fun t -> Shapes.build_intersection t shape trail)
                 |> sort_intersection
         let bounds_of shape = BoundingBoxes.build_default
-        build (Torus(rmajor,rminor)) local_intersect local_normal_at bounds_of
+        let divide shape = shape
+        build (Torus(rmajor,rminor)) local_intersect local_normal_at bounds_of divide
 
