@@ -1,4 +1,4 @@
-﻿namespace RenderLib.Tests
+namespace RenderLib.Tests
 
 open Xunit
 open System
@@ -111,12 +111,22 @@ module GroupTests =
         let s2 = ShapeSphere.build |> Shapes.transform (translation 2.0 0.0 0.0)
         let s3 = ShapeSphere.build 
         let g = ShapeGroup.build [s1;s2;s3;]
+<<<<<<< HEAD
         let g_d = ShapeGroup.divide g
         let g_d_children = ShapeGroup.get_children g_d
         Assert.Equal(2, g_d_children |> List.filter isGroup |> List.length)
         Assert.True(List.contains s3 g_d_children, "Divided group should contain s3")
         Assert.True(g_d_children |> List.exists (groupContains s1), "Child group should contain s1")
         Assert.True(g_d_children |> List.exists (groupContains s2), "Child group should contain s2")
+=======
+        let g_d = g.divide g
+        let g_s1 = ShapeGroup.build [s1;]
+        let g_s2 = ShapeGroup.build [s2;]
+        let children = ShapeGroup.get_children g_d
+        Assert.True(List.contains s3 children)
+        Assert.True(List.contains g_s1 children)
+        Assert.True(List.contains g_s2 children)
+>>>>>>> d058d28... added divide function to each shape type
 
     [<Fact>]
     let ``Subdividing a group partitions its children``() =
@@ -124,9 +134,19 @@ module GroupTests =
         let s2 = ShapeSphere.build |> Shapes.transform (translation 2.0 2.0 0.0)
         let s3 = ShapeSphere.build |> Shapes.transform (scaling 4.0 4.0 4.0)
         let g = ShapeGroup.build [s1;s2;s3;]
+<<<<<<< HEAD
         let g_d = ShapeGroup.divide g
         let g_d_children = ShapeGroup.get_children g_d
         Assert.True(List.contains s3 g_d_children)
         Assert.Equal(2, g_d_children |> List.filter isGroup |> List.length)
         Assert.True(g_d_children |> List.exists (groupContains s1), "Child group should contain s1")
         Assert.True(g_d_children |> List.exists (groupContains s2), "Child group should contain s2")
+=======
+        let g_d = g.divide g
+        let g_s1 = ShapeGroup.build [s1;]
+        let g_s2 = ShapeGroup.build [s2;]
+        let children = ShapeGroup.get_children g_d
+        Assert.True(List.contains s3 children)
+        Assert.True(List.contains g_s1 children)
+        Assert.True(List.contains g_s2 children)
+>>>>>>> d058d28... added divide function to each shape type

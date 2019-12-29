@@ -71,11 +71,13 @@ module ShapeCSG =
             get_children shape |> List.fold func BoundingBoxes.build_default
         build operation local_intersect local_normal_at bounds_of
 
+    let private divide shape = shape
+
     let union left right = 
-        build (Union(left,right,intersection_allowed_union))
+        build (Union(left,right,intersection_allowed_union)) divide
 
     let intersect left right = 
-        build (Intersect(left,right,intersection_allowed_intersect))
+        build (Intersect(left,right,intersection_allowed_intersect)) divide
 
     let difference left right =
-        build (Difference(left,right,intersection_allowed_difference))
+        build (Difference(left,right,intersection_allowed_difference)) divide

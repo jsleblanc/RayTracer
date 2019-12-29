@@ -39,6 +39,7 @@ module Shapes =
         local_normal_at:normal_t;
         bounds_of:bounds_of_t;
         bounding_box:boundingBox_t;
+        divide:divide_t;
         shadow: bool;
     } with 
         override this.Equals(other) = 
@@ -70,8 +71,9 @@ module Shapes =
     and intersect_t = shape -> shape list -> ray -> intersection list
     and normal_t = intersection option -> shape -> tuple -> tuple
     and bounds_of_t = shape -> boundingBox_t
+    and divide_t = shape -> shape
 
-    let build (shape:shape_t) (isect:intersect_t) (normal:normal_t) (bounds_of:bounds_of_t) = 
+    let build (shape:shape_t) (isect:intersect_t) (normal:normal_t) (bounds_of:bounds_of_t) (divide:divide_t) = 
         let shape = {
             id = Guid.NewGuid();
             shape = shape;
@@ -83,6 +85,7 @@ module Shapes =
             local_normal_at = normal;
             bounds_of = bounds_of;
             bounding_box = BoundingBoxes.build_default;
+            divide = divide;
             shadow = true;
         }
         { shape with bounding_box = shape.bounds_of shape; }

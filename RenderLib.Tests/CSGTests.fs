@@ -171,5 +171,5 @@ module CSGTests =
         let s4 = ShapeSphere.build |> Shapes.transform (translation 0.0 0.0 1.5)
         let right = ShapeGroup.build [s3;s4;]
         let shape = ShapeCSG.difference left right
-        let shape_d = ShapeGroup.divide shape
+        let shape_d = shape.divide shape
         Assert.True(false)

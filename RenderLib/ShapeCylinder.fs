@@ -17,7 +17,8 @@ module ShapeCylinder =
             let nfn point = vector point.x 0.0 point.z
             ShapeConic.normal_at shape pt nfn
         let bounds_of shape = BoundingBoxes.build (point -1.0 minimum -1.0) (point 1.0 maximum 1.0)
-        build (Cylinder(minimum,maximum,closed)) local_intersect local_normal_at bounds_of
+        let divide shape = shape
+        build (Cylinder(minimum,maximum,closed)) local_intersect local_normal_at bounds_of divide
 
     let build_default =
         build Double.NegativeInfinity Double.PositiveInfinity false

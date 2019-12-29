@@ -26,7 +26,8 @@ module ShapeTests =
             vector pt.x pt.y pt.z
         let bounds_of shape = 
             BoundingBoxes.build (point -1.0 -1.0 -1.0) (point 1.0 1.0 1.0)
-        Shapes.build (TestShape({ ray = None; })) local_intersect normal_at bounds_of
+        let divide shape = shape
+        Shapes.build (TestShape({ ray = None; })) local_intersect normal_at bounds_of divide
 
     [<Fact>]
     let ``Transforming a shape generates a new shape id``() =

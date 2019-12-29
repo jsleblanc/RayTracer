@@ -41,7 +41,7 @@ module ShapeGroup =
         let groups = [left_group;right_group;] |> List.choose id
         build_fn (groups @ other_shapes)
 
-    let build children = 
+    let rec build children = 
         let local_intersect shape trail ray =
             if BoundingBoxes.intersects shape.bounding_box ray then
                 let rec loop xs children =
@@ -56,7 +56,5 @@ module ShapeGroup =
         let bounds_of shape = 
             let func box shape = BoundingBoxes.add_boxes box (parent_space_bounds_of shape)
             get_children shape |> List.fold func BoundingBoxes.build_default
-        build (Group(children)) local_intersect local_normal_at bounds_of        
-
-    let divide shape =
-        divide_internal 1 shape build
+        let divide shape = divide_internal 1 shape build
+        Shapes.build (Group(children)) local_intersect local_normal_at bounds_of divide

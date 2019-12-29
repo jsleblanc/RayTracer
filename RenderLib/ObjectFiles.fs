@@ -142,7 +142,8 @@ module ObjectFiles =
         | g -> ShapeGroup.build ([default_group_children] @ g) //TODO add testing for unnecessary nesting
 
     let parse_file fileName  =
-        File.ReadAllLines fileName 
-        |> parse_lines 
-        |> result_to_group 
-        |> ShapeGroup.divide
+        let g = 
+            File.ReadAllLines fileName 
+            |> parse_lines 
+            |> result_to_group 
+        g.divide g

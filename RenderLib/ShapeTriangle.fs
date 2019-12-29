@@ -50,6 +50,7 @@ module ShapeTriangle =
             |> BoundingBoxes.add_point p1
             |> BoundingBoxes.add_point p2
             |> BoundingBoxes.add_point p3
+        let divide shape = shape
         let data = {
             p1 = p1;
             p2 = p2; 
@@ -62,7 +63,7 @@ module ShapeTriangle =
             normal = normal;
             smooth = false;
         }
-        Shapes.build (Triangle(data)) local_intersect local_normal_at bounds_of
+        Shapes.build (Triangle(data)) local_intersect local_normal_at bounds_of divide
 
     let build_smooth p1 p2 p3 n1 n2 n3 =
         let (e1, e2, normal) = precompute p1 p2 p3
@@ -81,6 +82,7 @@ module ShapeTriangle =
             |> BoundingBoxes.add_point p1
             |> BoundingBoxes.add_point p2
             |> BoundingBoxes.add_point p3
+        let divide shape = shape
         let data = {
             p1 = p1;
             p2 = p2; 
@@ -93,4 +95,4 @@ module ShapeTriangle =
             normal = normal;
             smooth = true;
         }
-        Shapes.build (Triangle(data)) local_intersect local_normal_at bounds_of
+        Shapes.build (Triangle(data)) local_intersect local_normal_at bounds_of divide

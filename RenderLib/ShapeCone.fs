@@ -27,7 +27,8 @@ module ShapeCone =
             let b = Math.Abs(maximum)
             let limit = Math.Max(a,b)
             BoundingBoxes.build (point -limit minimum -limit) (point limit maximum limit)
-        build (Cone(minimum,maximum,closed)) local_intersect local_normal_at bounds_of
+        let divide shape = shape
+        build (Cone(minimum,maximum,closed)) local_intersect local_normal_at bounds_of divide
 
     let build_default =
         build Double.NegativeInfinity Double.PositiveInfinity false
