@@ -1,6 +1,7 @@
 ﻿// Learn more about F# at http://fsharp.org
 
 open System
+open System.IO
 open RenderLib
 open RenderLib.Tuple
 open RenderLib.Color
@@ -13,8 +14,10 @@ open RenderLib.Worlds
 open RenderLib.Camera
 open RenderLib.Ray
 open SixLabors.ImageSharp
+open SixLabors.ImageSharp.ColorSpaces.Conversion
 open SixLabors.ImageSharp.PixelFormats
 open SixLabors.ImageSharp.Formats.Jpeg
+open SixLabors.ImageSharp.Formats.Png
 open System.Diagnostics
 open RenderLib.Matrix
 
@@ -29,6 +32,8 @@ let main argv =
     printfn "Calculating..."
     let sw = Stopwatch.StartNew()   
 
+    let inline (!>) (x:^a) : ^b = ((^a or ^b) : (static member op_Implicit : ^a -> ^b) x) 
+
     let canvas_to_jpg (fileName:string) (c:Canvas.canvas) =
         let encoder = new JpegEncoder()
         encoder.Quality <- new Nullable<int>(100)
@@ -41,9 +46,39 @@ let main argv =
                 let b = single c.blue
                 let pixel = new Argb32(r,g,b,0.0f)
                 image.[x,y] <- pixel
-        image.Save(fileName, encoder)
+        let outputFileName = Path.ChangeExtension(fileName, "jpg")
+        image.Save(outputFileName, encoder)
 
-
+    let canvas_to_png (fileName:string) (c:Canvas.canvas) =
+        let conv = new ColorSpaceConverter()
+        let encoder = new PngEncoder()
+        encoder.ColorType <- new Nullable<PngColorType>(PngColorType.Rgb)
+        encoder.BitDepth <- new Nullable<PngBitDepth>(PngBitDepth.Bit8)
+        //encoder.Gamma <- new Nullable<float32>(2.2f)
+        let width = c.GetLength(0)
+        let height = c.GetLength(1)
+        let canvasToCieXyzSeq = seq {
+            for y in 0 .. c.GetLength(1) - 1 do
+                for x in 0 .. c.GetLength(0) - 1 do
+                    let c = c.[x,y]
+                    let r = single c.red
+                    let g = single c.green
+                    let b = single c.blue
+                    yield new ColorSpaces.CieXyz(r, g, b)
+            }
+        let span = new ReadOnlySpan<ColorSpaces.CieXyz>(canvasToCieXyzSeq |> Seq.toArray)
+        let dst = new Span<ColorSpaces.Rgb>(Array.zeroCreate span.Length)
+        conv.Convert(span, dst)
+        let rgb24 = 
+            let a = Array.zeroCreate dst.Length
+            let f (x:ColorSpaces.Rgb) : Rgb24 = !> x
+            for x in 0 .. dst.Length - 1 do
+                a.[x] <- f dst.[x]
+            a
+        let image = Image.LoadPixelData<Rgb24>(rgb24, width, height)    
+        let outputFileName = Path.ChangeExtension(fileName, "png")
+        image.Save(outputFileName, encoder)
+        
 
     //let p = Solid(red)// blue
     
@@ -176,11 +211,12 @@ let main argv =
     canvas_to_jpg "output.jpg" canvas
     *)
 
-    let file = @"/Users/josephleblanc/Documents/Code/RayTracer/RayTracerCLI/Scenes/table.yml"
+    let file = @"/Users/josephleblanc/Documents/Code/RayTracer/RayTracerCLI/Scenes/reflect-refract.yml"
     let scene = Scenes.parse_file file
     let (camera,world) = Scenes.scene_to_world scene
     let canvas = render camera world
-    canvas_to_jpg "output.jpg" canvas
+    canvas_to_jpg "output1" canvas
+    canvas_to_png "output2" canvas
 
     printfn "Calculations completed in %s" (sw.Elapsed.ToString())
     0 // return an integer exit code
