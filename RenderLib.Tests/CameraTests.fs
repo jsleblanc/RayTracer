@@ -9,8 +9,6 @@ open RenderLib.Matrix
 open RenderLib.Color
 open RenderLib.Translations
 open RenderLib.Material
-open RenderLib.Shapes
-open RenderLib.Worlds
 open RenderLib.Camera
 
 module CameraTests = 
@@ -73,4 +71,4 @@ module CameraTests =
         let up = vector 0.0 1.0 0.0
         let c = { create_default_camera 11 11 with transform = view_transform from_point to_point up; }
         let image = render c w
-        Assert.Equal(color 0.38066119308103435 0.47582649135129296 0.28549589481077575, image.[5,5])
+        Assert.Equal(color 0.38066119308103435 0.47582649135129296 0.28549589481077575, image.canvas.[5,5])

@@ -65,7 +65,7 @@ module Camera =
         }
 
     let render camera world =
-        let image = create_canvas camera.hsize camera.vsize
+        let image = build_canvas camera.hsize camera.vsize
         let coords = seq {
             for y in 0 .. camera.vsize - 1 do
                 for x in 0 .. camera.hsize - 1 do
