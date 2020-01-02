@@ -14,14 +14,10 @@ open RenderLib.Camera
 open RenderLib.Ray
 open System.Diagnostics
 open RenderLib.Matrix
+open RenderLib.FunShapes
 
 [<EntryPoint>]
 let main argv =
-
-    let red = color 1.0 0.0 0.0
-    let blue = color 0.0 0.0 1.0
-    let green = color 0.0 1.0 0.0
-    let yellow = color 1.0 1.0 0.0
 
     printfn "Calculating..."
     let sw = Stopwatch.StartNew()           
@@ -112,20 +108,6 @@ let main argv =
     canvas_to_jpg "output.jpg" canvas
     *)
     (*
-    //sphere inside a sphere 
-    let pt = Patterns.checkers (solid_c blue) (solid_c white) |> Patterns.transform (translation 0.0 0.1 0.0)
-    let plane = ShapePlane.build |> Shapes.texture { Material.material.Default with pattern = Some pt; } |> Shapes.transform (translation 0.0 -10.1 0.0)
-    let s1 = ShapeSphere.build |> Shapes.texture { glass with diffuse = 0.1; shininess = 300.0; reflective = 1.0; } |> Shapes.transform (scaling 1.25 1.25 1.25)
-    let s2 = ShapeSphere.build |> Shapes.texture { glass with diffuse = 0.1; shininess = 300.0; reflective = 1.0; refractive_index = 1.0;} |> Shapes.transform (scaling 0.75 0.75 0.75)
-    let g = ShapeGroup.build [s1;s2;]
-    let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
-    let vt = view_transform (point 0.0 2.5 0.0) (point 0.0 0.0 0.0) (vector 1.0 0.0 0.0)
-    let camera = { create_default_camera 3840 2160 with field_of_view = Math.PI / 3.0; transform = vt; }
-    let world = Worlds.build [plane;g;] light
-    let canvas = render camera world
-    canvas_to_jpg "output.jpg" canvas
-    *)
-    (*
     printfn "Generating Hexagon Rotations..."
     let radians = Math.PI / 180.0
     let mutable r = 1.0 * radians
@@ -157,12 +139,27 @@ let main argv =
     canvas_to_jpg "output.jpg" canvas
     *)
 
+    let printResults scene =
+        printfn "Scene rendered in parallel with %d chunks" (List.length scene.chunkRenderTimes)
+        printfn "Slowest Chunk took %s" (scene.slowestChunk.ToString())
+        printfn "Fastest Chunk took %s" (scene.fastestChunk.ToString())
+    
+    let funScene = FunShapes.sphere_in_sphere_scene
+    funScene.canvas.save_png "sphere_in_sphere" |> ignore
+    printResults funScene
+    
+    let csgcubeScene = FunShapes.default_world [FunShapes.csg_cube Material.glass]
+    csgcubeScene.canvas.save_png "csg_cube" |> ignore
+    printResults csgcubeScene
+    (*
     let file = @"/Users/josephleblanc/Documents/Code/RayTracer/RayTracerCLI/Scenes/table.yml"
+    printfn "Rendering file %s" file
     let scene = Scenes.parse_file file
     let (camera,world) = Scenes.scene_to_world scene
-    let canvas = render camera world
-    canvas.save_jpg "output1" |> ignore
-    canvas.save_png "output2" |> ignore
-
+    let scene = render camera world
+    scene.canvas.save_jpg "output1" |> ignore
+    scene.canvas.save_png "output2" |> ignore
+    printResults scene
+    *)
     printfn "Calculations completed in %s" (sw.Elapsed.ToString())
     0 // return an integer exit code

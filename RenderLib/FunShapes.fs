@@ -2,13 +2,17 @@
 
 open System
 open Common
+open Color
 open Tuple
 open Matrix
 open Ray
 open Material
 open Shapes
 open Translations
-
+open Lights
+open Patterns
+open Camera
+open RenderLib.Color
 module FunShapes = 
 
     let hexagon t = 
@@ -26,7 +30,7 @@ module FunShapes =
             sides <- side::sides
         ShapeGroup.build sides |> Shapes.transform t
         
-    let csb_cube t =
+    let csg_cube t =
         let plus = 
             let c1 = ShapeCylinder.build -2.0 2.0 true |> Shapes.transform (rotation_z (Common.degrees 90.0) * (scaling 0.5 0.5 0.5)) |> Shapes.texture t 
             let c2 = ShapeCylinder.build -2.0 2.0 true |> Shapes.transform (rotation_y (Common.degrees 90.0) * (scaling 0.5 0.5 0.5)) |> Shapes.texture t 
@@ -57,3 +61,22 @@ module FunShapes =
         let c3 = cube |> Shapes.transform (scaling 0.5 0.5 0.5)
         let c4 = ShapeCube.build |> Shapes.transform (scaling 0.35 0.35 0.35) |> Shapes.texture t
         ShapeGroup.build [c1;c2;c3;c4;]
+        
+    let sphere_in_sphere_scene =
+        let pt = Patterns.checkers (solid_c blue) (solid_c white) |> Patterns.transform (translation 0.0 0.1 0.0)
+        let plane = ShapePlane.build |> Shapes.texture { Material.material.Default with pattern = Some pt; } |> Shapes.transform (translation 0.0 -10.1 0.0)
+        let s1 = ShapeSphere.build |> Shapes.texture { glass with diffuse = 0.1; shininess = 300.0; reflective = 1.0; } |> Shapes.transform (scaling 1.25 1.25 1.25)
+        let s2 = ShapeSphere.build |> Shapes.texture { glass with diffuse = 0.1; shininess = 300.0; reflective = 1.0; refractive_index = 1.0;} |> Shapes.transform (scaling 0.75 0.75 0.75)
+        let g = ShapeGroup.build [s1;s2;] |> ShapeGroup.divide
+        let light = { position = point 20.0 10.0 0.0; intensity = color 0.7 0.7 0.7; }
+        let vt = view_transform (point 0.0 2.5 0.0) (point 0.0 0.0 0.0) (vector 1.0 0.0 0.0)
+        let camera = { create_default_camera 3840 2160 with field_of_view = Math.PI / 3.0; transform = vt; }
+        let world = Worlds.build [plane;g;] light
+        render camera world
+
+    let default_world shapes =
+        let vt = view_transform (point 0.0 1.5 -3.0) (point 0.0 0.0 0.0) (vector 0.0 1.0 0.0)    
+        let camera = { create_default_camera 1024 768 with transform = vt; }
+        let light = { position = point 0.0 10.0 -10.0; intensity = color 1.0 1.0 1.0; }
+        let world = Worlds.build shapes light
+        render camera world

@@ -27,12 +27,12 @@
     <Compile Include="ShapeTriangle.fs" />
     <Compile Include="ShapeGroup.fs" />
     <Compile Include="ShapeCSG.fs" />
-    <Compile Include="FunShapes.fs" />
     <Compile Include="ObjectFiles.fs" />
     <Compile Include="Lights.fs" />
     <Compile Include="Worlds.fs" />
     <Compile Include="Camera.fs" />
     <Compile Include="Scenes.fs" />
+    <Compile Include="FunShapes.fs" />
   </ItemGroup>
 
   <ItemGroup>

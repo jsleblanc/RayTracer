@@ -1,6 +1,7 @@
 ﻿namespace RenderLib
 
 open System
+open System.Diagnostics
 open Canvas
 open Matrix
 open Tuple
@@ -64,24 +65,64 @@ module Camera =
             direction = direction;
         }
 
+    type chunk_t = {
+        size:int;
+        coords:(int*int)[];
+    }
+    
+    type rendered_chunk_t = {
+        size:int;
+        pixels:(Color.color*int*int)[];
+        renderTime:TimeSpan;
+    }
+    
+    type rendered_scene_t = {
+        canvas:canvas_t
+        chunkRenderTimes:TimeSpan list
+        slowestChunk:TimeSpan
+        fastestChunk:TimeSpan
+        averageChunk:TimeSpan;
+    }
+        
     let render camera world =
-        let image = build_canvas camera.hsize camera.vsize
         let coords = seq {
             for y in 0 .. camera.vsize - 1 do
                 for x in 0 .. camera.hsize - 1 do
                     yield (x,y)
             }
-        let calc (x,y) = 
+        let calcPixel (x,y) = 
             let ray = ray_for_pixel camera x y
             let color = color_at world ray 5
             (color, x, y)
         let calc_chunk chunk =
-            chunk |> Array.map calc
-        coords
-        |> Seq.toArray
-        |> Array.chunkBySize 250
-        |> PSeq.map calc_chunk
-        |> Seq.toArray
-        |> Array.collect (fun s -> s)
-        |> Seq.iter (fun (c, x, y) -> write_pixel x y c image |> ignore)
-        image
+            let sw = Stopwatch.StartNew()
+            let pixels = chunk.coords |> Array.map calcPixel
+            sw.Stop()
+            {
+                size = chunk.size
+                pixels = pixels
+                renderTime = sw.Elapsed;
+            }
+        let totalPixels = camera.hsize * camera.vsize
+        let pixelsPerChunk = totalPixels / Environment.ProcessorCount
+        let canvas = build_canvas camera.hsize camera.vsize
+        let renderedChunks = 
+            coords
+            |> Seq.toArray
+            |> Array.chunkBySize pixelsPerChunk
+            |> Array.map (fun c -> {
+                size = Array.length c
+                coords = c;
+            })
+            |> PSeq.map calc_chunk
+            |> Seq.toArray
+        let renderedPixels = renderedChunks |> Array.collect (fun c -> c.pixels)
+        let renderTimes = renderedChunks |> Array.map (fun c -> c.renderTime)
+        renderedPixels |> Seq.iter (fun (c, x, y) -> write_pixel x y c canvas |> ignore)
+        {
+            canvas = canvas
+            chunkRenderTimes = Array.toList renderTimes;
+            slowestChunk = Array.max renderTimes;
+            fastestChunk = Array.min renderTimes
+            averageChunk = TimeSpan.Zero; //Array.average renderTimes;
+        }
