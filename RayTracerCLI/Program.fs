@@ -19,9 +19,6 @@ open RenderLib.FunShapes
 [<EntryPoint>]
 let main argv =
 
-    printfn "Calculating..."
-    let sw = Stopwatch.StartNew()           
-
     //let p = Solid(red)// blue
     
     //let p = Blended(stripe_pattern_default white blue, stripe_pattern (rotation_y(-Math.PI/2.0)) white blue)
@@ -143,15 +140,21 @@ let main argv =
         printfn "Scene rendered in parallel with %d chunks" (List.length scene.chunkRenderTimes)
         printfn "Slowest Chunk took %s" (scene.slowestChunk.ToString())
         printfn "Fastest Chunk took %s" (scene.fastestChunk.ToString())
-    
+        printfn "Total %s" (scene.totalTime.ToString())
+        
+    (*
     let funScene = FunShapes.sphere_in_sphere_scene
     funScene.canvas.save_png "sphere_in_sphere" |> ignore
     printResults funScene
     
-    let csgcubeScene = FunShapes.default_world [FunShapes.csg_cube Material.glass]
+    let csgcubeScene = FunShapes.default_world [
+        FunShapes.csg_cube Material.metal
+        plane |> Shapes.transform (translation 0.0 -10.0 0.0);
+    ]
     csgcubeScene.canvas.save_png "csg_cube" |> ignore
     printResults csgcubeScene
-    (*
+    *)
+    
     let file = @"/Users/josephleblanc/Documents/Code/RayTracer/RayTracerCLI/Scenes/table.yml"
     printfn "Rendering file %s" file
     let scene = Scenes.parse_file file
@@ -160,6 +163,5 @@ let main argv =
     scene.canvas.save_jpg "output1" |> ignore
     scene.canvas.save_png "output2" |> ignore
     printResults scene
-    *)
-    printfn "Calculations completed in %s" (sw.Elapsed.ToString())
+    
     0 // return an integer exit code

@@ -77,11 +77,12 @@ module Camera =
     }
     
     type rendered_scene_t = {
-        canvas:canvas_t
-        chunkRenderTimes:TimeSpan list
-        slowestChunk:TimeSpan
-        fastestChunk:TimeSpan
+        canvas:canvas_t;
+        chunkRenderTimes:TimeSpan list;
+        slowestChunk:TimeSpan;
+        fastestChunk:TimeSpan;
         averageChunk:TimeSpan;
+        totalTime:TimeSpan;
     }
         
     let render camera world =
@@ -106,6 +107,7 @@ module Camera =
         let totalPixels = camera.hsize * camera.vsize
         let pixelsPerChunk = totalPixels / Environment.ProcessorCount
         let canvas = build_canvas camera.hsize camera.vsize
+        let sw = Stopwatch.StartNew()
         let renderedChunks = 
             coords
             |> Seq.toArray
@@ -119,10 +121,12 @@ module Camera =
         let renderedPixels = renderedChunks |> Array.collect (fun c -> c.pixels)
         let renderTimes = renderedChunks |> Array.map (fun c -> c.renderTime)
         renderedPixels |> Seq.iter (fun (c, x, y) -> write_pixel x y c canvas |> ignore)
+        sw.Stop()
         {
             canvas = canvas
             chunkRenderTimes = Array.toList renderTimes;
             slowestChunk = Array.max renderTimes;
             fastestChunk = Array.min renderTimes
             averageChunk = TimeSpan.Zero; //Array.average renderTimes;
+            totalTime = sw.Elapsed;
         }
