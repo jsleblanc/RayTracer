@@ -7,6 +7,7 @@ open Matrix
 open Tuple
 open Ray
 open Worlds
+open System.Collections.Generic
 open FSharp.Collections.ParallelSeq
 
 module Camera = 
@@ -85,12 +86,19 @@ module Camera =
         totalTime:TimeSpan;
     }
         
+    type coordinate = int * int
+        
     let render camera world =
-        let coords = seq {
+        let coordsChunkedByProcessors =
+            let cores = Environment.ProcessorCount/2
+            let queues = Array.init cores (fun _ -> Queue<coordinate>())
+            let mutable queueIndex = 0
             for y in 0 .. camera.vsize - 1 do
                 for x in 0 .. camera.hsize - 1 do
-                    yield (x,y)
-            }
+                    queues.[queueIndex].Enqueue (x,y)
+                    queueIndex<-queueIndex+1
+                    if queueIndex = cores then queueIndex <- 0
+            queues |> Array.map (fun q -> q.ToArray())
         let calcPixel (x,y) = 
             let ray = ray_for_pixel camera x y
             let color = color_at world ray 5
@@ -104,14 +112,10 @@ module Camera =
                 pixels = pixels
                 renderTime = sw.Elapsed;
             }
-        let totalPixels = camera.hsize * camera.vsize
-        let pixelsPerChunk = totalPixels / Environment.ProcessorCount
         let canvas = build_canvas camera.hsize camera.vsize
         let sw = Stopwatch.StartNew()
         let renderedChunks = 
-            coords
-            |> Seq.toArray
-            |> Array.chunkBySize pixelsPerChunk
+            coordsChunkedByProcessors
             |> Array.map (fun c -> {
                 size = Array.length c
                 coords = c;
