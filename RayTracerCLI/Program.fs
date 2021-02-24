@@ -146,7 +146,8 @@ let main argv =
     let funScene = FunShapes.sphere_in_sphere_scene
     funScene.canvas.save_png "sphere_in_sphere" |> ignore
     printResults funScene
-    
+    *)
+    (*
     let csgcubeScene = FunShapes.default_world [
         FunShapes.csg_cube Material.metal
         plane |> Shapes.transform (translation 0.0 -10.0 0.0);

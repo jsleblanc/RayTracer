@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,14 +32,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FsCheck" Version="3.0.0-alpha4" />
-    <PackageReference Include="FsCheck.Xunit" Version="3.0.0-alpha4" />
+    <PackageReference Include="FsCheck" Version="2.15.0" />
+    <PackageReference Include="FsCheck.Xunit" Version="2.15.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="FSharp.Core" Version="4.7.0" />
+    <PackageReference Include="FSharp.Core" />
   </ItemGroup>
 
   <ItemGroup>
