@@ -38,12 +38,8 @@
   <ItemGroup>
     <PackageReference Include="FSharp.Collections.ParallelSeq" Version="1.1.4" />
     <PackageReference Include="Legivel" Version="0.4.6" />
-    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="FSharp.Core" Version="5.0.1" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.7.0" />
   </ItemGroup>
 
 </Project>
